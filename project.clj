@@ -9,7 +9,14 @@
                  [ns-tracker "0.3.0"]
                  [compojure "1.5.0"]
                  [yogthos/config "0.8"]
-                 [ring "1.4.0"]]
+                 [ring "1.4.0"]
+
+                 [degree9/firebase-cljs "1.3.0"]
+                 ;; [TODO] I don't know why this next line is needed.  But, without it,
+                 ;; cljsjs/firebase is downloaded ok to ~/.m2, but then I get a warning
+                 ;; "Could not find artifact cljsjs:firebase:jar:3.2.1-0 in central
+                 ;;  (http://repo.maven.apache.org/maven2)"
+                 [cljsjs/firebase "3.2.1-0"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-garden "0.2.8"]]

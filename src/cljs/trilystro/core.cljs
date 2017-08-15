@@ -8,10 +8,10 @@
             [trilystro.views :as views]
             [trilystro.config :as config]))
 
+(enable-console-print!)
 
 (defn dev-setup []
   (when config/debug?
-    (enable-console-print!)
     (enable-re-frisk!)
     (println "dev mode")))
 
