@@ -1,3 +1,6 @@
+;;; Author: David Goldfarb (deg@degel.com)
+;;; Copyright (c) 2017, David Goldfarb
+
 (ns trilystro.routes
   (:require-macros [secretary.core :refer [defroute]])
   (:import goog.History)

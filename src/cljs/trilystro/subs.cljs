@@ -1,3 +1,6 @@
+;;; Author: David Goldfarb (deg@degel.com)
+;;; Copyright (c) 2017, David Goldfarb
+
 (ns trilystro.subs
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame]))
