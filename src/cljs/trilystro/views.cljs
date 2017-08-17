@@ -1,14 +1,23 @@
 (ns trilystro.views
-  (:require [re-frame.core :as re-frame]))
+  (:require
+   [clojure.spec.alpha :as s]
+   [re-frame.core :as re-frame]
+   [sodium.core :as na]
+   [sodium.extensions :as nax]
+   [sodium.re-utils :refer [<sub >evt]]))
 
 
 ;; home
 
 (defn home-panel []
-  (let [name (re-frame/subscribe [:name])]
-    (fn []
-      [:div (str "Hello from " @name ". This is the Home Page.")
-       [:div [:a {:href "#/about"} "go to About Page"]]])))
+  (fn []
+    [na/container {}
+       [nax/app-title [:name]]
+       [na/form {}
+        [na/form-button {:on-click (na/>event [:db-write :button-click])
+                         :content "Write to DB"
+                         :positive? true}]]
+     [:div [:a {:href "#/about"} "go to About Page"]]]))
 
 
 ;; about
@@ -23,7 +32,7 @@
 
 (defn- panels [panel-name]
   (case panel-name
-    :home-panel [home-panel]
+    :home-panel (home-panel)
     :about-panel [about-panel]
     [:div]))
 

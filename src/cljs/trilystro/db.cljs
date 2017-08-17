@@ -1,4 +1,4 @@
 (ns trilystro.db)
 
 (def default-db
-  {:name "re-frame"})
+  {:name "Trilystro client"})
