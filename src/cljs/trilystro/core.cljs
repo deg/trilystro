@@ -5,7 +5,7 @@
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [re-frisk.core :refer [enable-re-frisk!]]
-            [trilystro.events :refer [init-fb]]
+            [trilystro.events]
             [trilystro.subs]
             [trilystro.routes :as routes]
             [trilystro.views :as views]

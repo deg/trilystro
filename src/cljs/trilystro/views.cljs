@@ -5,44 +5,74 @@
   (:require
    [clojure.spec.alpha :as s]
    [re-frame.core :as re-frame]
+   [soda-ash.core :as sa]
    [sodium.core :as na]
    [sodium.extensions :as nax]
-   [sodium.re-utils :refer [<sub >evt]]))
+   [sodium.re-utils :refer [<sub >evt]]
+   [sodium.utils :as utils]
+   [trilystro.routes :as routes]))
 
-
-;; home
 
 (defn home-panel []
-  (fn []
+  (let [toy (<sub [:firebase/on ["toy" "a"] :raw])]
     [na/container {}
-       [nax/app-title [:name]]
-       [na/form {}
-        [na/form-button {:on-click (na/>event [:db-write :button-click])
-                         :content "Write to DB"
-                         :positive? true}]]
-     [:div [:a {:href "#/about"} "go to About Page"]]]))
+     [na/form {}
+      [na/form-button {:on-click (na/>event [:db-write :button-click])
+                       :content (str "Write to DB" toy)
+                       :positive? true}]]]))
 
-
-;; about
 
 (defn about-panel []
-  (fn []
-    [:div "This is the About Page."
-     [:div [:a {:href "#/"} "go to Home Page"]]]))
+  (let [toy (<sub [:firebase/on ["settings"] :user])]
+    [na/container {}
+      [na/form {}
+      [na/form-button {:on-click (na/>event [:db-write :button-click])
+                       :content (str "Write to DB" toy)
+                       :positive? true}]]
+     [:div "This is the About Page."]]))
 
 
-;; main
+(defn wrap-page [page]
+  [na/container {} page])
 
-(defn- panels [panel-name]
-  (case panel-name
-    :home-panel (home-panel)
-    :about-panel [about-panel]
-    [:div]))
+(def tabs [{:id :home    :label "home"   :panel (wrap-page [home-panel])}
+           {:id :about   :label "about"  :panel (wrap-page [about-panel])}])
 
-(defn show-panel [panel-name]
-  [panels panel-name])
+(defn login-logout-control []
+  (let [user (<sub [:firebase/current-user])]
+    [na/menu-item {:active? false
+                   :color "grey"
+                   :position :right
+                   :on-click (na/>event [(if user :sign-out :sign-in)])}
+     (if user
+       [sa/Label {:image true}
+        [sa/Image {:src (:photoURL user)}]
+        (or (:displayName user) (:email user))]
+       "login")]))
+
+
+(defn tabs-row [& {:keys [tabs login-item]}]
+  `[~@[na/menu {:tabular? true}]
+    ~@(map (fn [{:keys [id label]}]
+             (let [active? (= id (or (<sub [:page]) :home))
+                   handler #(routes/goto-page id (<sub [:server]))]
+               [na/menu-item {:name label
+                              :active? active?
+                              :color (if active? "blue" "grey")
+                              :on-click handler}]))
+           tabs)
+    ~login-item])
+
+
+(defn top-bar []
+  [na/container {}
+   [nax/app-title [:name]]
+   [tabs-row :tabs tabs :login-item (login-logout-control)]])
+
 
 (defn main-panel []
-  (let [active-panel (re-frame/subscribe [:active-panel])]
-    (fn []
-      [show-panel @active-panel])))
+  [na/container {}
+   [top-bar]
+   (when-let [panel (<sub [:page])]
+     (:panel (first (filter #(= (:id %) panel)
+                            tabs))))])

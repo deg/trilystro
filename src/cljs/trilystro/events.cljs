@@ -10,7 +10,9 @@
    [clojure.string :as str]
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
-   [trilystro.db :as db]))
+   [sodium.chrome-utils :as chrome]
+   [trilystro.db :as db]
+   [trilystro.firebase :as firebase]))
 
 (s/check-asserts true)
 
@@ -20,9 +22,24 @@
    db/default-db))
 
 (re-frame/reg-event-db
- :set-active-panel
- (fn [db [_ active-panel]]
-   (assoc db :active-panel active-panel)))
+ :page
+ (fn [db [_ page]]
+   (assoc db :page page)))
+
+(re-frame/reg-event-db
+ :firebase/current-user
+ (fn [db [_ user]]
+   (assoc db :firebase/current-user user)))
+
+(re-frame/reg-event-fx
+ :sign-in
+ (fn [_ _]
+   {:firebase/google-sign-in nil}))
+
+(re-frame/reg-event-fx
+ :sign-out
+ (fn [_ _]
+   {:firebase/sign-out nil}))
 
 (def time-format (time-format/formatters :date-time))
 
@@ -35,3 +52,4 @@
      #_
      (fb.database/conj! fb-db (str datum)))
    db))
+
