@@ -10,17 +10,17 @@
             [trilystro.routes :as routes]
             [trilystro.views :as views]
             [trilystro.config :as config]
-            [trilystro.firebase :as firebase]))
+            [com.degel.re-frame-firebase :as firebase]))
 
 (enable-console-print!)
 
 
 ;;; From https://console.firebase.google.com/u/0/project/trilystro/overview - "Add Firebase to your web app"
 (defonce firebase-app-info
-  #js{:apiKey "AIzaSyDlGqaASOVO2nqFGG35GiUjOgFF2vvntyk"
-      :authDomain "trilystro.firebaseapp.com"
-      :databaseURL "https://trilystro.firebaseio.com"
-      :storageBucket "trilystro.appspot.com"})
+  {:apiKey "AIzaSyDlGqaASOVO2nqFGG35GiUjOgFF2vvntyk"
+   :authDomain "trilystro.firebaseapp.com"
+   :databaseURL "https://trilystro.firebaseio.com"
+   :storageBucket "trilystro.appspot.com"})
 
 
 (defn dev-setup []
@@ -39,5 +39,29 @@
   (routes/app-routes)
   (re-frame/dispatch-sync [:initialize-db])
   (dev-setup)
-  (firebase/init-fb firebase-app-info)
+  (firebase/init :firebase-app-info firebase-app-info
+                 :get-user-sub           [:user]
+                 :set-user-event         [:set-user]
+                 :default-error-handler  [:firebase-error])
   (mount-root))
+
+
+;;; This project assumes the following Firebase auth rules:
+;;; {
+;;;   "rules": {
+;;;     "public": {".read": true, ".write": true},
+;;;     "shared": {
+;;;       ".read": true,
+;;;       "$uid": {
+;;;         ".write": "$uid === auth.uid"
+;;;       }
+;;;     },
+;;;     "private": {
+;;;       "$uid": {
+;;;         ".read": "$uid === auth.uid",
+;;;         ".write": "$uid === auth.uid"
+;;;       }
+;;;     }
+;;;   }
+;;; }
+

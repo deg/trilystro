@@ -4,49 +4,63 @@
 (ns trilystro.views
   (:require
    [clojure.spec.alpha :as s]
+   [com.degel.re-frame-firebase]
+   [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [soda-ash.core :as sa]
    [sodium.core :as na]
    [sodium.extensions :as nax]
    [sodium.re-utils :refer [<sub >evt]]
    [sodium.utils :as utils]
+   [trilystro.events :as events]
    [trilystro.routes :as routes]))
 
 
 (defn home-panel []
-  (let [toy (<sub [:firebase/on ["toy" "a"] :raw])]
+  (let [text (reagent/atom "")
+        new-key (reagent/atom "")]
+    (fn []
+      (let [all-keys (vals (<sub [:firebase/on-value {:path [:public :keywords]}]))
+            guff (<sub [:firebase/on-value {:path [:public]}])]
+        [na/container {}
+         [:div (str "Got keys:" all-keys)]
+         [na/form {}
+          [na/input {:type :text
+                     :on-change (na/>atom new-key)}]
+          [na/text-area {:rows 3
+                         :placeholder "the text"
+                         :value @text
+                         :on-change (na/>atom text)}]
+          [na/form-button {:on-click (na/>event [:commit-lystro] {:text @text :keys [@new-key]})
+                           :content "Save"
+                           :positive? true}]]]))))
+
+(defn about-panel []
+  (let []
     [na/container {}
      [na/form {}
       [na/form-button {:on-click (na/>event [:db-write :button-click])
-                       :content (str "Write to DB" toy)
-                       :positive? true}]]]))
-
-
-(defn about-panel []
-  (let [toy (<sub [:firebase/on ["settings"] :user])]
-    [na/container {}
-      [na/form {}
-      [na/form-button {:on-click (na/>event [:db-write :button-click])
-                       :content (str "Write to DB" toy)
+                       :content "Write to DB"
                        :positive? true}]]
      [:div "This is the About Page."]]))
 
 
 (defn wrap-page [page]
-  [na/container {} page])
+  [na/container {}
+   page])
 
-(def tabs [{:id :home    :label "home"   :panel (wrap-page [home-panel])}
-           {:id :about   :label "about"  :panel (wrap-page [about-panel])}])
+(def tabs [{:id :home    :label "home"   :panel [wrap-page [home-panel]]}
+           {:id :about   :label "about"  :panel [wrap-page [about-panel]]}])
 
 (defn login-logout-control []
-  (let [user (<sub [:firebase/current-user])]
+  (let [user (<sub [:user])]
     [na/menu-item {:active? false
                    :color "grey"
                    :position :right
                    :on-click (na/>event [(if user :sign-out :sign-in)])}
      (if user
-       [sa/Label {:image true}
-        [sa/Image {:src (:photoURL user)}]
+       [na/label {:image true :circular? true}
+        [na/image {:src (:photo-url user)}]
         (or (:displayName user) (:email user))]
        "login")]))
 
@@ -71,8 +85,9 @@
 
 
 (defn main-panel []
-  [na/container {}
-   [top-bar]
-   (when-let [panel (<sub [:page])]
-     (:panel (first (filter #(= (:id %) panel)
-                            tabs))))])
+  (let [all-keys (vals (<sub [:firebase/on-value {:path [:public :keywords]}]))]
+    [na/container {}
+     [top-bar]
+     (when-let [panel (<sub [:page])]
+       (:panel (first (filter #(= (:id %) panel)
+                              tabs))))]))

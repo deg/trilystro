@@ -17,18 +17,22 @@
                  [compojure "1.6.0"]
                  [yogthos/config "0.9"]
                  [ring "1.6.2"]
-                 [com.andrewmcveigh/cljs-time "0.5.1"]
+
+
                  [cljs-ajax "0.6.0"]
-                 [day8.re-frame/http-fx "0.1.4"]
+                 [com.andrewmcveigh/cljs-time "0.5.1"]
+                 [com.degel/re-frame-firebase "0.1.0-SNAPSHOT"]
                  [com.degel/re-frame-storage-fx "0.1.0-SNAPSHOT"]
-                 [com.degel/sodium "0.2.0-SNAPSHOT"]]
+                 [com.degel/sodium "0.2.0-SNAPSHOT"]
+                 [day8.re-frame/http-fx "0.1.4"]
+                 [day8.re-frame/trace "0.1.3"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-garden "0.2.8"]]
 
   :min-lein-version "2.5.3"
 
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
                                     "test/js"
@@ -49,7 +53,8 @@
   {:dev
    {:dependencies [[binaryage/devtools "0.9.4"]
                    [figwheel-sidecar "0.5.13"]
-                   [com.cemerick/piggieback "0.2.2"]]
+                   [com.cemerick/piggieback "0.2.2"]
+                   [day8.re-frame/trace "0.1.3"]]
 
     :plugins      [[lein-figwheel "0.5.9"]
                    [lein-doo "0.1.7"]]
@@ -58,14 +63,15 @@
   :cljsbuild
   {:builds
    [{:id           "dev"
-     :source-paths ["src/cljs"]
+     :source-paths ["src/cljs" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
      :figwheel     {:on-jsload "trilystro.core/mount-root"}
      :compiler     {:main                 trilystro.core
                     :output-to            "resources/public/js/compiled/app.js"
                     :output-dir           "resources/public/js/compiled/out"
                     :asset-path           "js/compiled/out"
                     :source-map-timestamp true
-                    :preloads             [devtools.preload]
+                    :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                    :preloads             [devtools.preload day8.re-frame.trace.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
                     }}
 

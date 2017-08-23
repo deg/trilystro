@@ -21,6 +21,13 @@
    (:server db)))
 
 (re-frame/reg-sub
- :firebase/current-user
+ :user
  (fn [db _]
-   (:firebase/current-user db)))
+   (:user db)))
+
+(re-frame/reg-sub
+ :uid
+ (fn [db _]
+   (get-in db [:user :uid])))
+
+
