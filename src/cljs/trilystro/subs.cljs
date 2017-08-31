@@ -5,29 +5,21 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :as re-frame]))
 
-(re-frame/reg-sub
- :name
- (fn [db]
-   (:name db)))
+(defn sub2
+  "Shorthand for simple 'layer 2` usage of re-sub"
+  [key db-path]
+  (re-frame/reg-sub
+   key
+   (fn [db _] (get-in db db-path))))
+
+(sub2 :name     [:name])
+(sub2 :page     [:page])
+(sub2 :server   [:server])
+(sub2 :user     [:user])
+(sub2 :uid      [:user :uid])
+(sub2 :new-keys [:new-keys])
 
 (re-frame/reg-sub
- :page
- (fn [db _]
-   (:page db)))
-
-(re-frame/reg-sub
- :server
- (fn [db _]
-   (:server db)))
-
-(re-frame/reg-sub
- :user
- (fn [db _]
-   (:user db)))
-
-(re-frame/reg-sub
- :uid
- (fn [db _]
-   (get-in db [:user :uid])))
-
-
+ :form-state
+ (fn [db [_ form form-component]]
+   (get-in db `[:forms ~form ~@form-component])))

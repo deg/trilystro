@@ -41,6 +41,11 @@
  (fn [db [_ page]]
    (assoc db :page page)))
 
+(re-frame/reg-event-db
+ :form-state
+ (fn [db [_ form form-component value]]
+   (assoc-in db `[:forms ~form ~@form-component] value)))
+
 (re-frame/reg-event-fx
  :set-user
  (fn [{db :db} [_ user]]
@@ -103,23 +108,39 @@
 
 (re-frame/reg-event-fx
  :commit-lystro
- (fn [{db :db} [_ {:keys [text keys]}]]
-   {:firebase/multi (into (mapv #(fb-event :for-multi? true
-                                              :effect-type :firebase/push
-                                              :db db
-                                              :public? true
-                                              :path [:keywords]
-                                              :value %)
-                                (new-keys keys))
-                          [(fb-event :for-multi? true
-                                     :effect-type :firebase/push
-                                     :db db
-                                     :path [:items]
-                                     :value {:text text :keys keys})])}))
+ (fn [{db :db} [_ form-key]]
+   (let [form-path [:forms form-key]
+         {:keys [selected-keys url text]} (get-in db form-path)]
+     {:firebase/multi (into (mapv #(fb-event :for-multi? true
+                                             :effect-type :firebase/push
+                                             :db db
+                                             :public? true
+                                             :path [:keywords]
+                                             :value %)
+                                  (new-keys selected-keys))
+                            [(fb-event :for-multi? true
+                                       :effect-type :firebase/push
+                                       :db db
+                                       :path [:items]
+                                       :value {:keys selected-keys :url url :text text})])
+      :db (assoc-in db form-path nil)})))
+
+
+(defn set-conj [set new]
+  (conj (or set #{}) new))
+
+(re-frame/reg-event-db
+ :add-new-key
+ (fn [db [_ form-key]]
+   (let [form-path [:forms form-key]
+         new-key (get-in db (conj form-path :new-key))]
+     (-> db
+         (update    :new-keys                       set-conj new-key)
+         (update-in (conj form-path :selected-keys) set-conj new-key)
+         (assoc-in  (conj form-path :new-key)       "")))))
 
 
 
-(def time-format (time-format/formatters :date-time))
 
 (comment
   (re-frame/reg-event-fx

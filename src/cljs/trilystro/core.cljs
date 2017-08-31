@@ -46,22 +46,5 @@
   (mount-root))
 
 
-;;; This project assumes the following Firebase auth rules:
-;;; {
-;;;   "rules": {
-;;;     "public": {".read": true, ".write": true},
-;;;     "shared": {
-;;;       ".read": true,
-;;;       "$uid": {
-;;;         ".write": "$uid === auth.uid"
-;;;       }
-;;;     },
-;;;     "private": {
-;;;       "$uid": {
-;;;         ".read": "$uid === auth.uid",
-;;;         ".write": "$uid === auth.uid"
-;;;       }
-;;;     }
-;;;   }
-;;; }
-
+;;; This project assumes corresponding Firebase auth rules:
+;;; See firebase-rules.json in the root of this project.

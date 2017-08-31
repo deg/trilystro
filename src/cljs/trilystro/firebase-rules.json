@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "public": {
+      ".read": true,
+      "keywords": {
+        "$keyword_entry": {
+          ".write": " !data.exists()"
+        }
+      }
+    },
+    "shared": {
+      ".read": true,
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "private": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}
+
