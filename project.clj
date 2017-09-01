@@ -3,7 +3,7 @@
 
 (defproject trilystro "0.1.0-SNAPSHOT"
   :description "A toy app to explore Firebase"
-  :url "https://github.com/deg/sodium"
+  :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
@@ -17,15 +17,12 @@
                  [compojure "1.6.0"]
                  [yogthos/config "0.9"]
                  [ring "1.6.2"]
-
-
-                 [cljs-ajax "0.6.0"]
+                 [cljs-ajax "0.7.2"]
                  [com.andrewmcveigh/cljs-time "0.5.1"]
                  [com.degel/re-frame-firebase "0.1.0-SNAPSHOT"]
                  [com.degel/re-frame-storage-fx "0.1.0-SNAPSHOT"]
                  [com.degel/sodium "0.2.0-SNAPSHOT"]
-                 [day8.re-frame/http-fx "0.1.4"]
-                 [day8.re-frame/trace "0.1.3"]]
+                 [day8.re-frame/http-fx "0.1.4"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-garden "0.2.8"]]
