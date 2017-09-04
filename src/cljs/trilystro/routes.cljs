@@ -28,6 +28,9 @@
   (defroute "/entry" []
     (>evt [:page :entry]))
 
+  (defroute "/search" []
+    (>evt [:page :search]))
+
   (defroute "/about" []
     (>evt [:page :about]))
 

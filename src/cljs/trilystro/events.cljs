@@ -17,19 +17,17 @@
 
 (s/check-asserts true)
 
-(defn private-fb-path [uid-or-db path]
-  (let [uid (if (string? uid-or-db)
-              uid-or-db
-              (get-in uid-or-db [:user :uid]))]
-    (when uid
-      (into [:private uid] path))))
+(defn private-fb-path
+  ([path]
+   (private-fb-path path nil))
+  ([path for-uid]
+   (if-let [uid (or for-uid
+                    (<sub [:uid]))]
+     (into [:private uid] path))))
 
-(defn public-fb-path [uid-or-db path]
-  (let [uid (if (string? uid-or-db)
-              uid-or-db
-              (get-in uid-or-db [:user :uid]))]
-    (when uid
-      (into [:public] path))))
+(defn public-fb-path [path]
+  (if-let [uid (<sub [:uid])]
+    (into [:public] path)))
 
 (re-frame/reg-event-db
  :initialize-db
@@ -51,7 +49,7 @@
  (fn [{db :db} [_ user]]
    (into {:db (assoc db :user user)}
          (when user
-           {:firebase/write {:path       (private-fb-path (:uid user) [:user-details])
+           {:firebase/write {:path       (private-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
                              :on-success #(js/console.log "Logged in:" (:display-name user))
                              :on-failure #(js/console.error "Failure: " %)}}))))
@@ -73,7 +71,7 @@
 (re-frame/reg-event-fx
  :db-write-public
  (fn [{db :db} [_ {:keys [path value on-success on-failure] :as args}]]
-   (if-let [path (public-fb-path db path)]
+   (if-let [path (public-fb-path path)]
      {:firebase/write (assoc args :path path)}
 
      ;; [TODO] Need to use pending Sodium generalization of :dispatch that takes a fn too.
@@ -88,7 +86,7 @@
 (defn fb-event [& {:keys [db path value on-success on-failure public? effect-type for-multi?] :as args}]
   (if (logged-in? db)
     (let [path-fn (if public? public-fb-path private-fb-path)
-          path (path-fn db path)
+          path (path-fn path)
           effect-args (assoc (select-keys args [:value :on-success :on-failure])
                              :path path)]
       (if for-multi?
