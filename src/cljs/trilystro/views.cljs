@@ -4,6 +4,7 @@
 (ns trilystro.views
   (:require
    [clojure.spec.alpha :as s]
+   [clojure.set :as set]
    [clojure.string :as str]
    [com.degel.re-frame-firebase]
    [reagent.core :as reagent]
@@ -86,7 +87,7 @@
     candidates
     (filter (fn [{:keys [keys]}]
               (-> (set keys)
-                  (clojure.set/intersection match-set)
+                  (set/intersection match-set)
                   empty?
                   not))
             candidates)))
@@ -178,6 +179,7 @@
   [na/container {}
    (login-logout-control)
    [nax/app-header [:name]]
+   ;; [TODO] Should offer a logged-in event, like events/logged-in, for clarity
    (if-let [uid (<sub [:uid])]
      (let [all-keys (vals (<sub [:firebase/on-value {:path (events/public-fb-path [:keywords])}]))
            all-lystros (vals (<sub [:firebase/on-value {:path (events/private-fb-path [:items])}]))]
