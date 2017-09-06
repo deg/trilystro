@@ -10,6 +10,7 @@
    [clojure.string :as str]
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
+   [re-frame.loggers :refer [console]]
    [sodium.chrome-utils :as chrome]
    [sodium.re-utils :as re-utils :refer [<sub]]
    [trilystro.db :as db]
@@ -51,8 +52,8 @@
          (when user
            {:firebase/write {:path       (private-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
-                             :on-success #(js/console.log "Logged in:" (:display-name user))
-                             :on-failure #(js/console.error "Failure: " %)}}))))
+                             :on-success #(console :log "Logged in:" (:display-name user))
+                             :on-failure #(console :error "Failure: " %)}}))))
 
 (re-frame/reg-event-fx
  :sign-in

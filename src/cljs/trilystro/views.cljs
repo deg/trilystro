@@ -4,8 +4,6 @@
 (ns trilystro.views
   (:require
    [clojure.spec.alpha :as s]
-   [clojure.set :as set]
-   [clojure.string :as str]
    [com.degel.re-frame-firebase]
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
@@ -19,14 +17,15 @@
 
 
 (defn keyword-selector [form {:keys [allow-new?]}]
-  (let [old-keys (-> [:firebase/on-value {:path [:public :keywords]}]
+  (let [old-keys (-> [:firebase/on-value {:path (events/public-fb-path [:keywords])}]
                      <sub vals set)
         new-keys (<sub [:new-keys])]
-    [:span [na/dropdown {:multiple? true
-                         :button? true
-                         :value     (<sub      [:form-state form [:selected-keys]] #{})
-                         :on-change (na/>event [:form-state form [:selected-keys]] #{} set)
-                         :options (na/dropdown-list (into old-keys new-keys) identity identity)}]
+    [:span
+     [na/dropdown {:multiple? true
+                   :button? true
+                   :value     (<sub      [:form-state form [:selected-keys]] #{})
+                   :on-change (na/>event [:form-state form [:selected-keys]] #{} set)
+                   :options (na/dropdown-list (into old-keys new-keys) identity identity)}]
      (when allow-new?
        [:span
         [na/input {:type :text
@@ -75,50 +74,31 @@
        [na/grid-column params1 "Text:"]
        [na/grid-column params2 text]]]]))
 
-(defn lystro [{:keys [keys text url]}]
-  (lystro-grid (into [na/list-na {:horizontal? true}]
-                     (map (fn [key] [na/list-item {} key]) keys))
-               url
-               text))
-
-(defn filter-some-keys [candidates match-set]
-  {:pre [(utils/validate set? match-set)]}
-  (if (empty? match-set)
-    candidates
-    (filter (fn [{:keys [keys]}]
-              (-> (set keys)
-                  (set/intersection match-set)
-                  empty?
-                  not))
-            candidates)))
-
-(defn filter-text [candidates match-text]
-  {:pre [(utils/validate string? match-text)]}
-  (if (empty? match-text)
-    candidates
-    (filter (fn [{:keys [text] :or {text ""}}]
-              (str/includes? text match-text))
-            candidates)))
-
-(defn filter-url [candidates match-url]
-  {:pre [(utils/validate string? match-url)]}
-  (if (empty? match-url)
-    candidates
-    (filter (fn [{:keys [url] :or {url ""}}]
-              (str/includes? url match-url))
-            candidates)))
+(defn lystro-panel [{:keys [keys text url]}]
+  [lystro-grid
+   `[~na/list-na {:horizontal? true}
+                ~@(map (fn [key] [na/list-item {} key]) keys)]
+   url
+   text])
 
 
 (defn search-panel []
   (fn []
     (let [all-keys (vals (<sub [:firebase/on-value {:path (events/public-fb-path [:keywords])}]))
           selected-keys (set (<sub [:form-state :search [:selected-keys]]))
-          selected-url (<sub [:form-state :search [:url]] "")
-          selected-text (<sub [:form-state :search [:text]] "")
-          all-lystros (vals (<sub [:firebase/on-value {:path (events/private-fb-path [:items])}]))]
+          selected-url (<sub [:form-state :search [:url]])
+          selected-text (<sub [:form-state :search [:text]])
+          keys-mode (<sub [:form-state :search [:keys-mode]])
+          lystros (<sub [:lystros {:keys-mode keys-mode :keys selected-keys :url selected-url :text selected-text}])]
       [na/form {:widths "equal"}
        [nax/panel-header "Query"]
-       [lystro-grid [keyword-selector :search {:allow-new? false}]
+       [lystro-grid
+        [na/container {}
+         [na/dropdown {:inline? true
+                       :value     (<sub      [:form-state :search [:keys-mode]] :any-of)
+                       :on-change (na/>event [:form-state :search [:keys-mode]] :any-of keyword)
+                       :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
+         [keyword-selector :search {:allow-new? false}]]
         [na/input {:type "url"
                    :placeholder "Website..."
                    :value     (<sub      [:form-state :search [:url]] "")
@@ -128,12 +108,8 @@
                        :value     (<sub      [:form-state :search [:text]] "")
                        :on-change (na/>event [:form-state :search [:text]])}]]
        [nax/panel-header "Results"]
-       (into [na/container {}]
-             (map lystro
-                  (-> all-lystros
-                      (filter-some-keys selected-keys)
-                      (filter-url selected-url)
-                      (filter-text selected-text))))])))
+       `[~na/container {}
+         ~@(mapv lystro-panel lystros)]])))
 
 
 (defn about-panel []
@@ -145,9 +121,9 @@
 (defn wrap-page [page]
   [na/container {} page])
 
-(def tabs [{:id :entry    :label "New Lystro" :panel [wrap-page [entry-panel]]}
-           {:id :search   :label "Search"     :panel [wrap-page [search-panel]]}
-           {:id :about    :label "about"      :panel [wrap-page [about-panel]]}])
+(def tabs [{:id :entry    :label "New Lystro" :panel (wrap-page [entry-panel])}
+           {:id :search   :label "Search"     :panel (wrap-page [search-panel])}
+           {:id :about    :label "about"      :panel (wrap-page [about-panel])}])
 
 (defn tabs-row [& {:keys [tabs login-item]}]
   `[~@[na/menu {:tabular? true}]
@@ -174,18 +150,31 @@
          (or (:display-name user) (:email user))]
         "login...")]]))
 
+(defn top-bar []
+  [na/container {}
+   [login-logout-control]
+   [nax/app-header [:name]]])
+
+
+;;; We want to keep the Firebase ":on" subscriptions active, so need to mount them in the
+;;; main panel. But, we don't want anything to show. We could use an invisible div, but
+;;; this head-fake is more elegant, if it works. The problem is that the optimizing
+;;; compiler may optimize and inline this away.
+;;; [TODO] Need to test soon if the ^:export is sufficient to keep this alive.
+;;; See discussion in Slack #clojurescript channel Sept 6-7 2017.
+(defn ^:export null-op [x] "[x]")
 
 (defn main-panel []
-  [na/container {}
-   (login-logout-control)
-   [nax/app-header [:name]]
-   ;; [TODO] Should offer a logged-in event, like events/logged-in, for clarity
-   (if-let [uid (<sub [:uid])]
-     (let [all-keys (vals (<sub [:firebase/on-value {:path (events/public-fb-path [:keywords])}]))
-           all-lystros (vals (<sub [:firebase/on-value {:path (events/private-fb-path [:items])}]))]
-       [na/container {}
-        [tabs-row :tabs tabs]
-        (when-let [panel (<sub [:page])]
-          (:panel (first (filter #(= (:id %) panel)
-                                 tabs))))])
-     "Not logged in")])
+  (if-let [uid (<sub [:uid])]
+    (let [all-keys (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:keywords])}])
+          all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]
+      [na/container {}
+       (str (null-op @all-lystros) (null-op @all-keys))
+       [top-bar]
+       [tabs-row :tabs tabs]
+       (when-let [panel (<sub [:page])]
+         (:panel (first (filter #(= (:id %) panel)
+                                tabs))))])
+    [na/container {}
+     [top-bar]
+     "Not logged in"]))

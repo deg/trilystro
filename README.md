@@ -53,6 +53,7 @@ The above command assumes that you have [phantomjs](https://www.npmjs.com/packag
 ```
 lein clean
 lein uberjar
+java -jar target/trilystro.jar
 ```
 
 That should compile the clojurescript code first, and then create the standalone jar.

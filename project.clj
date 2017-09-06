@@ -10,7 +10,7 @@
                  [org.clojure/clojurescript "1.9.908"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.1"]
-                 [re-frisk "0.4.5"]
+                 [re-frisk "0.5.0"]
                  [secretary "1.2.3"]
                  [garden "1.3.2"]
                  [ns-tracker "0.3.1"]
