@@ -59,7 +59,6 @@
 
 
 (defn filter-lystros [lystros {:keys [keys-mode keys url text]}]
-;;  (console :log "mode" keys-mode)
   (transduce (comp (if (= keys-mode :all-of)
                      (filter-all-keys keys)
                      (filter-some-keys keys))

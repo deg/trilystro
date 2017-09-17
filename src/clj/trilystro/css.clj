@@ -5,6 +5,10 @@
   (:require [garden.def :refer [defstyles]]))
 
 (defstyles screen
-  [:errmsg {:color "red"}]
-  [:body {:color "black"}]
+  [:body
+   {:color "black"}]
+  [:.hidden
+   {:display "none"}]
+  [:.errmsg
+   {:color "red"}]
 )

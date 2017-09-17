@@ -6,7 +6,7 @@
   :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
+  :dependencies [[org.clojure/clojure "1.9.0-beta1"]
                  [org.clojure/clojurescript "1.9.908"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.1"]
@@ -51,7 +51,7 @@
    {:dependencies [[binaryage/devtools "0.9.4"]
                    [figwheel-sidecar "0.5.13"]
                    [com.cemerick/piggieback "0.2.2"]
-                   [day8.re-frame/trace "0.1.3"]]
+                   [day8.re-frame/trace "0.1.6"]]
 
     :plugins      [[lein-figwheel "0.5.9"]
                    [lein-doo "0.1.7"]]

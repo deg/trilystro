@@ -157,19 +157,17 @@
 
 
 ;;; We want to keep the Firebase ":on" subscriptions active, so need to mount them in the
-;;; main panel. But, we don't want anything to show. We could use an invisible div, but
-;;; this head-fake is more elegant, if it works. The problem is that the optimizing
-;;; compiler may optimize and inline this away.
-;;; [TODO] Need to test soon if the ^:export is sufficient to keep this alive.
+;;; main panel. But, we don't want anything to show. We could use a display:none div, but
+;;; this head-fake is more elegant, and seems to work works.
 ;;; See discussion in Slack #clojurescript channel Sept 6-7 2017.
-(defn ^:export null-op [x] "[x]")
+(defn ^:export null-op [x] "")
 
 (defn main-panel []
   (if-let [uid (<sub [:uid])]
     (let [all-keys (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:keywords])}])
           all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]
       [na/container {}
-       (str (null-op @all-lystros) (null-op @all-keys))
+       (list (null-op @all-lystros) (null-op @all-keys))
        [top-bar]
        [tabs-row :tabs tabs]
        (when-let [panel (<sub [:page])]
