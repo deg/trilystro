@@ -32,7 +32,10 @@
 
 
 
-(defn filter-some-keys [match-set]
+(defn filter-some-keys
+  "Filter function that selects lystros whose keywords include at least
+  one of the match-set"
+  [match-set]
   {:pre [(utils/validate (s/nilable set?) match-set)]}
   (filter (fn [{:keys [keys]}]
             (let [keys (set keys)
@@ -41,7 +44,10 @@
                                  (set/intersection keys match-set))]
               (not (empty? intersection))))))
 
-(defn filter-all-keys [match-set]
+(defn filter-all-keys
+  "Filter function that selects lystros whose keywords include all
+  of the match-set"
+  [match-set]
   {:pre [(utils/validate (s/nilable set?) match-set)]}
   (filter (fn [{:keys [keys]}]
             (if (empty? match-set)
@@ -49,7 +55,11 @@
               (= (set/intersection match-set (set keys))
                  match-set)))))
 
-(defn filter-text-field [field match-text]
+(defn filter-text-field
+  "Filter function that selects lystros whose text or url field
+  includes match-text."
+  ;; [TODO] Should be case-insensitive
+  [field match-text]
   {:pre [(utils/validate (s/nilable string?) match-text)]}
   (filter (fn [lystro]
             (let [text (or (field lystro) "")]
@@ -58,7 +68,7 @@
                 (str/includes? text match-text))))))
 
 
-(defn filter-lystros [lystros {:keys [keys-mode keys url text]}]
+(defn filter-lystros [lystros {:keys [keys-mode keys url text] :as options}]
   (transduce (comp (if (= keys-mode :all-of)
                      (filter-all-keys keys)
                      (filter-some-keys keys))
@@ -67,9 +77,22 @@
              conj
              lystros))
 
+(defn map->vec-of-val+key
+  "Convert a map of maps into a vector of maps that include the original key as a value
+  e.g.:
+  (map->vec-of-val+key {:x1 {:a 1} :x2 {:a 2} :x3 {:a 3}} :id)
+  => [{:a 1 :id :x1} {:a 2 :id :x2} {:a 3 :id :x3}]
+  "
+  [vals-map key-key]
+  (reduce-kv
+   (fn [coll k v]
+     (conj coll (assoc v key-key k)))
+   []
+   vals-map))
+
 (re-frame/reg-sub
  :lystros
  (fn [_ _]
    (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}]))
  (fn [all-lystros [_ {:keys [keys-mode keys url text] :as options}] _]
-   (filter-lystros (vals all-lystros) options)))
+   (filter-lystros (map->vec-of-val+key all-lystros :firebase-id) options)))

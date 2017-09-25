@@ -42,8 +42,10 @@
 
 (re-frame/reg-event-db
  :form-state
- (fn [db [_ form form-component value]]
-   (assoc-in db `[:forms ~form ~@form-component] value)))
+ (fn [db [_ form-name form-component value]]
+   (if form-component
+     (assoc-in db `[:forms ~form-name ~@form-component] value)
+     (assoc-in db `[:forms ~form-name] value))))
 
 (re-frame/reg-event-fx
  :set-user
@@ -57,7 +59,7 @@
 
 (re-frame/reg-event-fx
  :sign-in
- (fn [_ _] {:firebase/google-sign-in nil}))
+ (fn [_ _] {:firebase/google-sign-in {:sign-in-method :popup}}))
 
 (re-frame/reg-event-fx
  :sign-out
@@ -84,10 +86,9 @@
   (some? (get-in db [:user :uid])))
 
 
-(defn fb-event [& {:keys [db path value on-success on-failure public? effect-type for-multi?] :as args}]
+(defn fb-event [{:keys [db path value on-success on-failure public? effect-type for-multi?] :as args}]
   (if (logged-in? db)
-    (let [path-fn (if public? public-fb-path private-fb-path)
-          path (path-fn path)
+    (let [path ((if public? public-fb-path private-fb-path) path)
           effect-args (assoc (select-keys args [:value :on-success :on-failure])
                              :path path)]
       (if for-multi?
@@ -109,20 +110,37 @@
  :commit-lystro
  (fn [{db :db} [_ form-key]]
    (let [form-path [:forms form-key]
-         {:keys [selected-keys url text]} (get-in db form-path)]
-     {:firebase/multi (into (mapv #(fb-event :for-multi? true
-                                             :effect-type :firebase/push
-                                             :db db
-                                             :public? true
-                                             :path [:keywords]
-                                             :value %)
-                                  (new-keys selected-keys))
-                            [(fb-event :for-multi? true
-                                       :effect-type :firebase/push
-                                       :db db
-                                       :path [:items]
-                                       :value {:keys selected-keys :url url :text text})])
+         form-vals (get-in db form-path)
+         {:keys [keys url text]} form-vals]
+     {:firebase/multi (conj (mapv #(fb-event {:for-multi? true
+                                              :effect-type :firebase/push
+                                              :db db
+                                              :public? true
+                                              :path [:keywords]
+                                              :value %})
+                                  (new-keys keys))
+                            (let [options {:for-multi? true
+                                           :db db
+                                           :public? false
+                                           :value {:keys keys :url url :text text}} ]
+                              (if-let [old-id (:firebase-id form-vals)]
+                                (fb-event (assoc options
+                                                 :effect-type :firebase/write
+                                                 :path [:items old-id]))
+                                (fb-event (assoc options
+                                                 :effect-type :firebase/push
+                                                 :path [:items])))))
       :db (assoc-in db form-path nil)})))
+
+(re-frame/reg-event-fx
+ :clear-lystro
+ (fn [{db :db} [_ id]]
+   (fb-event {:for-multi? false
+              :effect-type :firebase/write
+              :db db
+              :public? false
+              :path [:items id]
+              :value nil})))
 
 
 (defn set-conj [set new]
@@ -134,9 +152,9 @@
    (let [form-path [:forms form-key]
          new-key (get-in db (conj form-path :new-key))]
      (-> db
-         (update    :new-keys                       set-conj new-key)
-         (update-in (conj form-path :selected-keys) set-conj new-key)
-         (assoc-in  (conj form-path :new-key)       "")))))
+         (update    :new-keys                  set-conj new-key)
+         (update-in (conj form-path :keys)     set-conj new-key)
+         (assoc-in  (conj form-path :new-key)  "")))))
 
 
 
