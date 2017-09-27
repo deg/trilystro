@@ -4,10 +4,11 @@
 (ns trilystro.views
   (:require
    [clojure.spec.alpha :as s]
+   [clojure.string :as str]
    [com.degel.re-frame-firebase]
-   [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
+   [reagent.core :as reagent]
    [soda-ash.core :as sa]
    [sodium.core :as na]
    [sodium.extensions :as nax]
@@ -60,6 +61,16 @@
                     :content "Save"
                     :positive? true}]])
 
+;;; [TODO] Move to sodium.utils once this matures a bit
+;;; [TODO] The URL is tainted text. Is there any risk here?
+(defn link-to
+  "Create an HTTP link. Use some smarts re user intention"
+  [url-string]
+  (let [url (if (str/includes? url-string "/")
+              url-string
+              (str "http://" url-string))]
+    [:a {:href url} url-string]))
+
 (defn lystro-grid [keys url text]
   (let [params1 {:width 3 :text-align "right"}
         params2 {:width 13}]
@@ -70,7 +81,7 @@
        [na/grid-column params2 keys]]
       [na/grid-row {}
        [na/grid-column params1 "URL:"]
-       [na/grid-column params2 [:a {:href url} url]]]
+       [na/grid-column params2 (link-to url)]]
       [na/grid-row {}
        [na/grid-column params1 "Text:"]
        [na/grid-column params2 text]]]]))

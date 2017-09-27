@@ -65,7 +65,7 @@
             (let [text (or (field lystro) "")]
               (if (empty? match-text)
                 text
-                (str/includes? text match-text))))))
+                (re-find (js/RegExp. match-text "i") text))))))
 
 
 (defn filter-lystros [lystros {:keys [keys-mode keys url text] :as options}]
