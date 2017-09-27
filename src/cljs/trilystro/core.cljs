@@ -31,7 +31,7 @@
 
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent/render [views/main-panel]
+  (reagent/render [views/app-view]
                   (.getElementById js/document "app")))
 
 

@@ -93,23 +93,17 @@
       ~@(map (fn [key] [na/list-item {} key]) keys)]
     url
     text]
-   [na/modal {:open? (and (<sub [:form-state :entry [:editing]])
-                          (= (:firebase-id lystro)
-                             (<sub [:form-state :entry [:firebase-id]])))
-              :dimmer "blurring"
-              :close-icon true
-              :on-close (na/>event [:form-state :entry [:editing] false])}
-    [na/modal-header {} "Editing"]
-    [na/modal-content {} [entry-panel]]]
    [na/button {:content "edit"
-               :positive? true
+               :color "teal"
+               :size "tiny"
                :on-click (na/>event [:form-state :entry nil (assoc lystro :editing true)])}]
    [na/button {:content "delete"
-               :negative? true
+               :color "red"
+               :size "tiny"
                :on-click (na/>event [:clear-lystro (:firebase-id lystro)])}]])
 
 
-(defn search-panel []
+(defn main-panel []
   (fn []
     (let [selected-keys (set (<sub [:form-state :search [:keys]]))
           selected-url (<sub [:form-state :search [:url]])
@@ -117,7 +111,18 @@
           keys-mode (<sub [:form-state :search [:keys-mode]])
           lystros (<sub [:lystros {:keys-mode keys-mode :keys selected-keys :url selected-url :text selected-text}])]
       [na/form {:widths "equal"}
-       [nax/panel-header "Query"]
+       [na/modal {:open? (<sub [:form-state :entry [:editing]])
+                  :dimmer "blurring"
+                  :close-icon true
+                  :on-close (na/>event [:form-state :entry [:editing] false])}
+        [na/modal-header {} "Editing"]
+        [na/modal-content {} [entry-panel]]]
+       [nax/panel-header "Add Lystro"]
+       [na/button {:content "New Lystro"
+                   :color "teal"
+                   :size "tiny"
+                   :on-click (na/>event [:form-state :entry [:editing] true])}]
+       [nax/panel-header "Search Lystros"]
        [lystro-grid
         [na/container {}
          [na/dropdown {:inline? true
@@ -133,7 +138,7 @@
                        :placeholder "Description..."
                        :value     (<sub      [:form-state :search [:text]] "")
                        :on-change (na/>event [:form-state :search [:text]])}]]
-       [nax/panel-header "Results"]
+       [nax/panel-subheader "Results"]
        `[~na/container {}
          ~@(mapv lystro-panel lystros)]])))
 
@@ -143,7 +148,7 @@
              :dimmer "blurring"
              :close-icon true
              :close-on-dimmer-click? false
-             :on-close #(routes/goto-page :search nil)}
+             :on-close #(routes/goto-page :main nil)}
    [na/modal-header {}
     (str "About " (<sub [:name]))]
    [na/modal-content {}
@@ -154,9 +159,8 @@
 (defn wrap-page [page]
   [na/container {} page])
 
-(def tabs [{:id :entry    :label "New Lystro" :panel (wrap-page [entry-panel])}
-           {:id :search   :label "Search"     :panel (wrap-page [search-panel])}
-           {:id :about    :label "about"      :panel (wrap-page [about-panel])}])
+(def tabs [{:id :main  :label "Main"  :panel (wrap-page [main-panel])}
+           {:id :about :label "about" :panel (wrap-page [about-panel])}])
 
 (defn tabs-row [& {:keys [tabs login-item]}]
   `[~@[na/menu {:tabular? true}]
@@ -195,7 +199,7 @@
 ;;; See discussion in Slack #clojurescript channel Sept 6-7 2017.
 (defn ^:export null-op [x] "")
 
-(defn main-panel []
+(defn app-view []
   (if-let [uid (<sub [:uid])]
     (let [all-keys (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:keywords])}])
           all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]

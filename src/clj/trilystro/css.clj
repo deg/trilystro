@@ -6,7 +6,8 @@
 
 (defstyles screen
   [:body
-   {:color "black"}]
+   {:background-color "PapayaWhip"
+    :color "black"}]
   [:.hidden
    {:display "none"}]
   [:.errmsg

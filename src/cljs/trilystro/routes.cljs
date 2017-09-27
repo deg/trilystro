@@ -23,13 +23,10 @@
   (secretary/set-config! :prefix "#")
 
   (defroute "/" []
-    (>evt [:page :entry]))
+    (>evt [:page :main]))
 
-  (defroute "/entry" []
-    (>evt [:page :entry]))
-
-  (defroute "/search" []
-    (>evt [:page :search]))
+  (defroute "/main" []
+    (>evt [:page :main]))
 
   (defroute "/about" []
     (>evt [:page :about]))
