@@ -59,7 +59,7 @@
 
 (re-frame/reg-event-fx
  :sign-in
- (fn [_ _] {:firebase/google-sign-in {:sign-in-method :popup}}))
+ (fn [_ _] {:firebase/google-sign-in nil}))
 
 (re-frame/reg-event-fx
  :sign-out
