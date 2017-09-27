@@ -36,11 +36,6 @@
    db/default-db))
 
 (re-frame/reg-event-db
- :page
- (fn [db [_ page]]
-   (assoc db :page page)))
-
-(re-frame/reg-event-db
  :form-state
  (fn [db [_ form-name form-component value]]
    (if form-component

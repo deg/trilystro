@@ -14,8 +14,7 @@
    [sodium.extensions :as nax]
    [sodium.re-utils :refer [<sub >evt]]
    [sodium.utils :as utils]
-   [trilystro.events :as events]
-   [trilystro.routes :as routes]))
+   [trilystro.events :as events]))
 
 
 (defn keyword-selector [form {:keys [allow-new?]}]
@@ -60,6 +59,15 @@
    [na/form-button {:on-click (na/>event [:commit-lystro :entry])
                     :content "Save"
                     :positive? true}]])
+
+(defn modal-entry-panel []
+  [na/modal {:open? (<sub [:form-state :entry [:editing]])
+             :dimmer "blurring"
+             :close-icon true
+             :on-close (na/>event [:form-state :entry [:editing] false])}
+   [na/modal-header {} "Lystro"]
+   [na/modal-content {} [entry-panel]]])
+
 
 ;;; [TODO] Move to sodium.utils once this matures a bit
 ;;; [TODO] The URL is tainted text. Is there any risk here?
@@ -112,17 +120,6 @@
           lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
       ;; (console :log "LYSTROS: " lystros)
       [na/form {:widths "equal"}
-       [na/modal {:open? (<sub [:form-state :entry [:editing]])
-                  :dimmer "blurring"
-                  :close-icon true
-                  :on-close (na/>event [:form-state :entry [:editing] false])}
-        [na/modal-header {} "Editing"]
-        [na/modal-content {} [entry-panel]]]
-       [nax/panel-header "Add Lystro"]
-       [na/button {:content "New Lystro"
-                   :color "teal"
-                   :size "tiny"
-                   :on-click (na/>event [:form-state :entry [:editing] true])}]
        [nax/panel-header "Search Lystros"]
        [lystro-grid {:color "purple"}
         [na/container {}
@@ -145,72 +142,62 @@
 
 
 (defn about-panel []
-  [na/modal {:open? true
+  [na/container {}
+   [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
+   [:div "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]])
+
+(defn modal-about-panel []
+  [na/modal {:open? (<sub [:form-state :main [:abouting]])
              :dimmer "blurring"
              :close-icon true
              :close-on-dimmer-click? false
-             :on-close #(routes/goto-page :main nil)}
+             :on-close (na/>event [:form-state :main [:abouting] false])}
    [na/modal-header {}
     (str "About " (<sub [:name]))]
    [na/modal-content {}
-    [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
-    [:div "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]]])
-
-
-(defn wrap-page [page]
-  [na/container {} page])
-
-(def tabs [{:id :main  :label "Main"  :panel (wrap-page [main-panel])}
-           {:id :about :label "about" :panel (wrap-page [about-panel])}])
-
-(defn tabs-row [& {:keys [tabs login-item]}]
-  `[~@[na/menu {:tabular? true}]
-    ~@(map (fn [{:keys [id label]}]
-             (let [active? (= id (or (<sub [:page]) :entry))
-                   handler #(routes/goto-page id (<sub [:server]))]
-               [na/menu-item {:name label
-                              :active? active?
-                              :color (if active? "blue" "grey")
-                              :on-click handler}]))
-           tabs)
-    ~login-item])
+    [about-panel]]])
 
 
 (defn login-logout-control []
   (let [user (<sub [:user])]
-    [na/menu {:vertical? true
-              :secondary? true
-              :fixed "right"}
+    [sa/MenuMenu {:position "right"}
      [na/menu-item {:on-click (na/>event [(if user :sign-out :sign-in)])}
       (if user
         [na/label {:image true :circular? true}
          [na/image {:src (:photo-url user)}]
          (or (:display-name user) (:email user))]
-        "login...")]]))
+        "login...")]] ))
 
 (defn top-bar []
-  [na/container {}
-   [login-logout-control]
-   [nax/app-header [:name]]])
+  [na/menu {:fixed "top"}
+   [na/menu-item {:header? true
+                  :on-click (na/>event [:form-state :main [:abouting] true])}
+    [sa/Icon {:name "eye" :size "big"}]
+    (<sub [:name])]
+   [na/menu-item {:name "Add"
+                  :disabled? (not (<sub [:uid]))
+                  :on-click (na/>event [:form-state :entry [:editing] true])}]
+   [na/menu-item {:name "About"
+                  :on-click (na/>event [:form-state :main [:abouting] true])}]
+   [login-logout-control]])
 
 
 ;;; We want to keep the Firebase ":on" subscriptions active, so need to mount them in the
 ;;; main panel. But, we don't want anything to show. We could use a display:none div, but
 ;;; this head-fake is more elegant, and seems to work works.
-;;; See discussion in Slack #clojurescript channel Sept 6-7 2017.
+;;; [TODO] ^:export is probably not needed, but I've not tested removing it. See
+;;;        discussion in Slack #clojurescript channel Sept 6-7 2017.
 (defn ^:export null-op [x] "")
 
 (defn app-view []
-  (if-let [uid (<sub [:uid])]
-    (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:tags])}])
-          all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]
-      [na/container {}
-       (list (null-op @all-lystros) (null-op @all-tags))
-       [top-bar]
-       [tabs-row :tabs tabs]
-       (when-let [panel (<sub [:page])]
-         (:panel (first (filter #(= (:id %) panel)
-                                tabs))))])
-    [na/container {}
-     [top-bar]
-     "Not logged in"]))
+  [na/container {}
+   [modal-about-panel]
+   [top-bar]
+   (when-let [uid (<sub [:uid])]
+     (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:tags])}])
+           all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]
+       ;; [TODO] Move to na in Sodium 0.4.0
+       [sa/Container {:style {:margin-top "5em"}}
+        [modal-entry-panel]
+        (list (null-op @all-lystros) (null-op @all-tags))
+        [main-panel]]))] )

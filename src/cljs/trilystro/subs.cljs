@@ -19,8 +19,6 @@
    (fn [db _] (get-in db db-path))))
 
 (sub2 :name     [:name])
-(sub2 :page     [:page])
-(sub2 :server   [:server])
 (sub2 :user     [:user])
 (sub2 :uid      [:user :uid])
 (sub2 :new-tags [:new-tags])

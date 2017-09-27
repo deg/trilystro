@@ -7,7 +7,6 @@
             [re-frisk.core :refer [enable-re-frisk!]]
             [trilystro.events]
             [trilystro.subs]
-            [trilystro.routes :as routes]
             [trilystro.views :as views]
             [trilystro.config :as config]
             [com.degel.re-frame-firebase :as firebase]))
@@ -36,7 +35,6 @@
 
 
 (defn ^:export init []
-  (routes/app-routes)
   (re-frame/dispatch-sync [:initialize-db])
   (dev-setup)
   (firebase/init :firebase-app-info firebase-app-info
