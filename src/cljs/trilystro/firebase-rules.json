@@ -2,8 +2,8 @@
   "rules": {
     "public": {
       ".read": true,
-      "keywords": {
-        "$keyword_entry": {
+      "tags": {
+        "$tag_entry": {
           ".write": " !data.exists()"
         }
       }

@@ -102,27 +102,27 @@
      (str "Can't write to Firebase, because not logged in:/n " path ": " value))))
 
 
-(defn new-keys [keys]
-  (let [old-keys (vals (<sub [:firebase/on-value {:path [:public :keywords]}]))]
-    (into [] (clojure.set/difference (set keys) (set old-keys)))))
+(defn new-tags [tags]
+  (let [old-tags (vals (<sub [:firebase/on-value {:path [:public :tags]}]))]
+    (into [] (clojure.set/difference (set tags) (set old-tags)))))
 
 (re-frame/reg-event-fx
  :commit-lystro
  (fn [{db :db} [_ form-key]]
    (let [form-path [:forms form-key]
          form-vals (get-in db form-path)
-         {:keys [keys url text]} form-vals]
+         {:keys [tags url text]} form-vals]
      {:firebase/multi (conj (mapv #(fb-event {:for-multi? true
                                               :effect-type :firebase/push
                                               :db db
                                               :public? true
-                                              :path [:keywords]
+                                              :path [:tags]
                                               :value %})
-                                  (new-keys keys))
+                                  (new-tags tags))
                             (let [options {:for-multi? true
                                            :db db
                                            :public? false
-                                           :value {:keys keys :url url :text text}} ]
+                                           :value {:tags tags :url url :text text}} ]
                               (if-let [old-id (:firebase-id form-vals)]
                                 (fb-event (assoc options
                                                  :effect-type :firebase/write
@@ -147,14 +147,14 @@
   (conj (or set #{}) new))
 
 (re-frame/reg-event-db
- :add-new-key
+ :add-new-tag
  (fn [db [_ form-key]]
    (let [form-path [:forms form-key]
-         new-key (get-in db (conj form-path :new-key))]
+         new-tag (get-in db (conj form-path :new-tag))]
      (-> db
-         (update    :new-keys                  set-conj new-key)
-         (update-in (conj form-path :keys)     set-conj new-key)
-         (assoc-in  (conj form-path :new-key)  "")))))
+         (update    :new-tags                  set-conj new-tag)
+         (update-in (conj form-path :tags)     set-conj new-tag)
+         (assoc-in  (conj form-path :new-tag)  "")))))
 
 
 

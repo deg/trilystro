@@ -23,7 +23,7 @@
 (sub2 :server   [:server])
 (sub2 :user     [:user])
 (sub2 :uid      [:user :uid])
-(sub2 :new-keys [:new-keys])
+(sub2 :new-tags [:new-tags])
 
 (re-frame/reg-sub
  :form-state
@@ -32,33 +32,32 @@
 
 
 
-(defn filter-some-keys
-  "Filter function that selects lystros whose keywords include at least
+(defn filter-some-tags
+  "Filter function that selects lystros whose tags include at least
   one of the match-set"
   [match-set]
   {:pre [(utils/validate (s/nilable set?) match-set)]}
-  (filter (fn [{:keys [keys]}]
-            (let [keys (set keys)
+  (filter (fn [{:keys [tags]}]
+            (let [tags (set tags)
                   intersection (if (empty? match-set)
-                                 keys
-                                 (set/intersection keys match-set))]
+                                 tags
+                                 (set/intersection tags match-set))]
               (not (empty? intersection))))))
 
-(defn filter-all-keys
-  "Filter function that selects lystros whose keywords include all
+(defn filter-all-tags
+  "Filter function that selects lystros whose tags include all
   of the match-set"
   [match-set]
   {:pre [(utils/validate (s/nilable set?) match-set)]}
-  (filter (fn [{:keys [keys]}]
+  (filter (fn [{:keys [tags]}]
             (if (empty? match-set)
-              (boolean keys)
-              (= (set/intersection match-set (set keys))
+              (boolean tags)
+              (= (set/intersection match-set (set tags))
                  match-set)))))
 
 (defn filter-text-field
   "Filter function that selects lystros whose text or url field
   includes match-text."
-  ;; [TODO] Should be case-insensitive
   [field match-text]
   {:pre [(utils/validate (s/nilable string?) match-text)]}
   (filter (fn [lystro]
@@ -68,10 +67,10 @@
                 (re-find (js/RegExp. match-text "i") text))))))
 
 
-(defn filter-lystros [lystros {:keys [keys-mode keys url text] :as options}]
-  (transduce (comp (if (= keys-mode :all-of)
-                     (filter-all-keys keys)
-                     (filter-some-keys keys))
+(defn filter-lystros [lystros {:keys [tags-mode tags url text] :as options}]
+  (transduce (comp (if (= tags-mode :all-of)
+                     (filter-all-tags tags)
+                     (filter-some-tags tags))
                    (filter-text-field :url url)
                    (filter-text-field :text text))
              conj
@@ -94,5 +93,5 @@
  :lystros
  (fn [_ _]
    (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}]))
- (fn [all-lystros [_ {:keys [keys-mode keys url text] :as options}] _]
+ (fn [all-lystros [_ {:keys [tags-mode tags url text] :as options}] _]
    (filter-lystros (map->vec-of-val+key all-lystros :firebase-id) options)))

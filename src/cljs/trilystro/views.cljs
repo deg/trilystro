@@ -19,29 +19,29 @@
 
 
 (defn keyword-selector [form {:keys [allow-new?]}]
-  (let [old-keys (-> [:firebase/on-value {:path (events/public-fb-path [:keywords])}]
+  (let [old-tags (-> [:firebase/on-value {:path (events/public-fb-path [:tags])}]
                      <sub vals set)
-        new-keys (<sub [:new-keys])]
+        new-tags (<sub [:new-tags])]
     [:span
      [na/dropdown {:multiple? true
                    :button? true
-                   :value     (<sub      [:form-state form [:keys]] #{})
-                   :on-change (na/>event [:form-state form [:keys]] #{} set)
-                   :options (na/dropdown-list (into old-keys new-keys) identity identity)}]
+                   :value     (<sub      [:form-state form [:tags]] #{})
+                   :on-change (na/>event [:form-state form [:tags]] #{} set)
+                   :options (na/dropdown-list (into old-tags new-tags) identity identity)}]
      (when allow-new?
        [:span
         [na/input {:type :text
-                   :placeholder "add key"
-                   :value     (<sub      [:form-state form [:new-key]] "")
-                   :on-change (na/>event [:form-state form [:new-key]])}]
+                   :placeholder "add tag"
+                   :value     (<sub      [:form-state form [:new-tag]] "")
+                   :on-change (na/>event [:form-state form [:new-tag]])}]
         [na/button {:content "Add"
-                    :on-click (na/>event [:add-new-key form])}]])]))
+                    :on-click (na/>event [:add-new-tag form])}]])]))
 
 
 (defn entry-panel []
   [na/form {:widths "equal"}
    [nax/labelled-field
-    :label "keywords:"
+    :label "Tags:"
     :inline? true
     :content [keyword-selector :entry {:allow-new? true}]]
    [nax/labelled-field
@@ -71,26 +71,26 @@
               (str "http://" url-string))]
     [:a {:href url} url-string]))
 
-(defn lystro-grid [keys url text]
-  (let [params1 {:width 3 :text-align "right"}
-        params2 {:width 13}]
-    [na/container {}
-     [na/grid {:celled? true}
-      [na/grid-row {}
-       [na/grid-column params1 "Keywords:"]
-       [na/grid-column params2 keys]]
-      [na/grid-row {}
-       [na/grid-column params1 "URL:"]
-       [na/grid-column params2 (link-to url)]]
-      [na/grid-row {}
-       [na/grid-column params1 "Text:"]
-       [na/grid-column params2 text]]]]))
+(defn lystro-grid [params tags url text]
+  (let [row-params {:color (or (:color params) "grey")}
+        label-params {:width 3 :text-align "right"}
+        value-params {:width 13}]
+    [na/grid {:celled? true}
+     [na/grid-row row-params
+       [na/grid-column label-params "Tags:"]
+       [na/grid-column value-params tags]]
+      [na/grid-row row-params
+       [na/grid-column label-params "URL:"]
+       [na/grid-column value-params (if (string? url) (link-to url) url)]]
+      [na/grid-row row-params
+       [na/grid-column label-params "Text:"]
+       [na/grid-column value-params text]]] ))
 
-(defn lystro-panel [{:keys [keys text url] :as lystro}]
-  [na/container {}
-   [lystro-grid
+(defn lystro-panel [{:keys [tags text url] :as lystro}]
+  [:div
+   [lystro-grid {:color "black"}
     `[~na/list-na {:horizontal? true}
-      ~@(map (fn [key] [na/list-item {} key]) keys)]
+      ~@(map (fn [tag] [na/list-item {} tag]) tags)]
     url
     text]
    [na/button {:content "edit"
@@ -105,11 +105,12 @@
 
 (defn main-panel []
   (fn []
-    (let [selected-keys (set (<sub [:form-state :search [:keys]]))
+    (let [selected-tags (set (<sub [:form-state :search [:tags]]))
           selected-url (<sub [:form-state :search [:url]])
           selected-text (<sub [:form-state :search [:text]])
-          keys-mode (<sub [:form-state :search [:keys-mode]])
-          lystros (<sub [:lystros {:keys-mode keys-mode :keys selected-keys :url selected-url :text selected-text}])]
+          tags-mode (<sub [:form-state :search [:tags-mode]])
+          lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
+      ;; (console :log "LYSTROS: " lystros)
       [na/form {:widths "equal"}
        [na/modal {:open? (<sub [:form-state :entry [:editing]])
                   :dimmer "blurring"
@@ -123,11 +124,11 @@
                    :size "tiny"
                    :on-click (na/>event [:form-state :entry [:editing] true])}]
        [nax/panel-header "Search Lystros"]
-       [lystro-grid
+       [lystro-grid {:color "purple"}
         [na/container {}
          [na/dropdown {:inline? true
-                       :value     (<sub      [:form-state :search [:keys-mode]] :any-of)
-                       :on-change (na/>event [:form-state :search [:keys-mode]] :any-of keyword)
+                       :value     (<sub      [:form-state :search [:tags-mode]] :any-of)
+                       :on-change (na/>event [:form-state :search [:tags-mode]] :any-of keyword)
                        :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
          [keyword-selector :search {:allow-new? false}]]
         [na/input {:type "url"
@@ -139,7 +140,7 @@
                        :value     (<sub      [:form-state :search [:text]] "")
                        :on-change (na/>event [:form-state :search [:text]])}]]
        [nax/panel-subheader "Results"]
-       `[~na/container {}
+       `[:div {}
          ~@(mapv lystro-panel lystros)]])))
 
 
@@ -201,10 +202,10 @@
 
 (defn app-view []
   (if-let [uid (<sub [:uid])]
-    (let [all-keys (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:keywords])}])
+    (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:tags])}])
           all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]
       [na/container {}
-       (list (null-op @all-lystros) (null-op @all-keys))
+       (list (null-op @all-lystros) (null-op @all-tags))
        [top-bar]
        [tabs-row :tabs tabs]
        (when-let [panel (<sub [:page])]
