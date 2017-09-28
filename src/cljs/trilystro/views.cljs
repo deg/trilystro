@@ -64,13 +64,16 @@
                     :positive? true}]])
 
 (defn modal-entry-panel []
-  [na/modal {:open? (or (<sub [:in-page :modal-new-lystro])
-                        (<sub [:in-page :modal-edit-lystro]))
-             :dimmer "blurring"
-             :close-icon true
-             :on-close (na/>event [:page :quit])}
-   [na/modal-header {} "Lystro"]
-   [na/modal-content {} [entry-panel]]])
+  (let [new?  (<sub [:in-page :modal-new-lystro])
+        edit? (<sub [:in-page :modal-edit-lystro])]
+    [na/modal {:open? (or new? edit?)
+               :dimmer "blurring"
+               :close-icon true
+               :on-close (na/>event [:page :quit])}
+     [na/modal-header {} (cond new? "Add Lystro"
+                               edit? "Edit Lystro"
+                               :default "???")]
+     [na/modal-content {} [entry-panel]]]))
 
 
 ;;; [TODO] Move to sodium.utils once this matures a bit
@@ -82,6 +85,7 @@
               url-string
               (str "http://" url-string))]
     [:a {:href url} url-string]))
+
 
 (defn lystro-grid [params tags url text]
   (let [row-params {:color (or (:color params) "grey")}
@@ -181,7 +185,8 @@
     (<sub [:name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [:in-page :logged-in]))
-                  :on-click (na/>event [:page :modal-new-lystro])}]
+                  :on-click (na/>events [[[:form-state :entry nil nil]]
+                                         [[:page :modal-new-lystro]]])}]
    [na/menu-item {:name "About"
                   :on-click (na/>event [:page :modal-about])}]
    [login-logout-control]])
