@@ -12,4 +12,16 @@
    {:display "none"}]
   [:.errmsg
    {:color "red"}]
-)
+  [:.lystro-result
+   [:.url
+    {:margin "0 0 0.5rem 0"}]
+   [:.text
+    {:margin "0.5rem 0px 0.5rem 0"}]]
+  [:.tag
+   {:background-color "tan"
+    :color "black"
+    :padding "0.1rem 0.5rem 0.1rem 0.5rem"
+    :margin "0 0.1rem 0 0.1rem"
+    :text-align "center"
+    :border-radius "100px"
+    }])

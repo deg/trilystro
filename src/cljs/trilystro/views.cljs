@@ -81,10 +81,11 @@
 (defn link-to
   "Create an HTTP link. Use some smarts re user intention"
   [url-string]
-  (let [url (if (str/includes? url-string "/")
-              url-string
-              (str "http://" url-string))]
-    [:a {:href url} url-string]))
+  (when url-string
+    (let [url (if (str/includes? url-string "/")
+                url-string
+                (str "http://" url-string))]
+      [:a {:href url} url-string])))
 
 
 (defn lystro-grid [params tags url text]
@@ -102,21 +103,23 @@
        [na/grid-column label-params "Text:"]
        [na/grid-column value-params text]]] ))
 
-(defn lystro-panel [{:keys [tags text url] :as lystro}]
-  [:div
-   [lystro-grid {:color "black"}
-    `[~na/list-na {:horizontal? true}
-      ~@(map (fn [tag] [na/list-item {} tag]) tags)]
-    url
-    text]
+(defn lystro-results-panel [{:keys [tags text url] :as lystro}]
+  [sa/Segment {:class "lystro-result"}
+   [:div {:class "url"}
+    (link-to url)]
+   [:div {:class "tags"}
+    (map (fn [tag]
+           [:span {:class "tag" :key tag} tag])
+         tags)]
+   [:div {:class "text"} text]
    [na/button {:content "edit"
-               :color "teal"
-               :size "tiny"
+               :color "brown"
+               :size "mini"
                :on-click (na/>events [[[:form-state :entry nil lystro]]
                                       [[:page :modal-edit-lystro]]])}]
    [na/button {:content "delete"
-               :color "red"
-               :size "tiny"
+               :color "brown"
+               :size "mini"
                :on-click (na/>event [:clear-lystro (:firebase-id lystro)])}]])
 
 
@@ -129,7 +132,7 @@
           lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
       [na/form {:widths "equal"}
        [nax/panel-header "Search Lystros"]
-       [lystro-grid {:color "purple"}
+       [lystro-grid {:color "brown"}
         [na/container {}
          [na/dropdown {:inline? true
                        :value     (<sub      [:form-state :search [:tags-mode]] :any-of)
@@ -146,7 +149,7 @@
                        :on-change (na/>event [:form-state :search [:text]])}]]
        [nax/panel-subheader "Results"]
        `[:div {}
-         ~@(mapv lystro-panel lystros)]])))
+         ~@(mapv lystro-results-panel lystros)]])))
 
 
 (defn about-panel []
