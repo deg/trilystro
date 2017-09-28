@@ -22,11 +22,11 @@
 (defn keyword-selector [form {:keys [allow-new?]}]
   (let [old-tags (-> [:firebase/on-value {:path (fb/public-fb-path [:tags])}]
                      <sub vals set)
-        new-tags (<sub [:new-tags])]
+        new-tags (<sub [:form-state form [:tags]] #{})]
     [:span
      [na/dropdown {:multiple? true
                    :button? true
-                   :value     (<sub      [:form-state form [:tags]] #{})
+                   :value new-tags
                    :on-change (na/>event [:form-state form [:tags]] #{} set)
                    :options (na/dropdown-list (into old-tags new-tags) identity identity)}]
      (when allow-new?

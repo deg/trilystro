@@ -100,8 +100,9 @@
  (fn [db [_ form-key]]
    (let [form-path [:forms form-key]
          new-tag (get-in db (conj form-path :new-tag))]
-     (-> db
-         (update    :new-tags                  set-conj new-tag)
-         (update-in (conj form-path :tags)     set-conj new-tag)
-         (assoc-in  (conj form-path :new-tag)  "")))))
+     (if (empty? new-tag)
+       db
+       (-> db
+           (update-in (conj form-path :tags)    set-conj new-tag)
+           (assoc-in  (conj form-path :new-tag) ""))))))
 
