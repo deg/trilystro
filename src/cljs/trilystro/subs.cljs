@@ -9,7 +9,9 @@
                [re-frame.core :as re-frame]
                [re-frame.loggers :refer [console]]
                [sodium.utils :as utils]
-               [trilystro.events :as events]))
+               [trilystro.events :as events]
+               [trilystro.firebase :as fb]
+               [trilystro.fsm :as fsm]))
 
 (defn sub2
   "Shorthand for simple 'layer 2` usage of re-sub"
@@ -18,10 +20,16 @@
    key
    (fn [db _] (get-in db db-path))))
 
-(sub2 :name     [:name])
-(sub2 :user     [:user])
-(sub2 :uid      [:user :uid])
-(sub2 :new-tags [:new-tags])
+(sub2 :name       [:name])
+(sub2 :page-state [:page-state])
+(sub2 :user       [:user])
+(sub2 :uid        [:user :uid])
+(sub2 :new-tags   [:new-tags])
+
+(re-frame/reg-sub
+ :in-page
+ (fn [db [_ page]]
+   (fsm/in-state? (:page-state db) page)))
 
 (re-frame/reg-sub
  :form-state
@@ -90,6 +98,6 @@
 (re-frame/reg-sub
  :lystros
  (fn [_ _]
-   (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}]))
+   (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}]))
  (fn [all-lystros [_ {:keys [tags-mode tags url text] :as options}] _]
    (filter-lystros (map->vec-of-val+key all-lystros :firebase-id) options)))

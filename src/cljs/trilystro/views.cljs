@@ -14,11 +14,13 @@
    [sodium.extensions :as nax]
    [sodium.re-utils :refer [<sub >evt]]
    [sodium.utils :as utils]
-   [trilystro.events :as events]))
+   [trilystro.events :as events]
+   [trilystro.firebase :as fb]
+   [trilystro.fsm :as fsm]))
 
 
 (defn keyword-selector [form {:keys [allow-new?]}]
-  (let [old-tags (-> [:firebase/on-value {:path (events/public-fb-path [:tags])}]
+  (let [old-tags (-> [:firebase/on-value {:path (fb/public-fb-path [:tags])}]
                      <sub vals set)
         new-tags (<sub [:new-tags])]
     [:span
@@ -56,15 +58,17 @@
                             :placeholder "Description..."
                             :default-value (<sub [:form-state :entry [:text]] "")
                             :on-change (na/>event [:form-state :entry [:text]])}]]
-   [na/form-button {:on-click (na/>event [:commit-lystro :entry])
+   [na/form-button {:on-click (na/>events [[[:commit-lystro :entry]]
+                                           [[:page :quit]]])
                     :content "Save"
                     :positive? true}]])
 
 (defn modal-entry-panel []
-  [na/modal {:open? (<sub [:form-state :entry [:editing]])
+  [na/modal {:open? (or (<sub [:in-page :modal-new-lystro])
+                        (<sub [:in-page :modal-edit-lystro]))
              :dimmer "blurring"
              :close-icon true
-             :on-close (na/>event [:form-state :entry [:editing] false])}
+             :on-close (na/>event [:page :quit])}
    [na/modal-header {} "Lystro"]
    [na/modal-content {} [entry-panel]]])
 
@@ -104,7 +108,8 @@
    [na/button {:content "edit"
                :color "teal"
                :size "tiny"
-               :on-click (na/>event [:form-state :entry nil (assoc lystro :editing true)])}]
+               :on-click (na/>events [[[:form-state :entry nil lystro]]
+                                      [[:page :modal-edit-lystro]]])}]
    [na/button {:content "delete"
                :color "red"
                :size "tiny"
@@ -118,7 +123,6 @@
           selected-text (<sub [:form-state :search [:text]])
           tags-mode (<sub [:form-state :search [:tags-mode]])
           lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
-      ;; (console :log "LYSTROS: " lystros)
       [na/form {:widths "equal"}
        [nax/panel-header "Search Lystros"]
        [lystro-grid {:color "purple"}
@@ -144,14 +148,15 @@
 (defn about-panel []
   [na/container {}
    [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
-   [:div "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]])
+   [:div "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
+   (fsm/render-graph fsm/page-states)])
 
 (defn modal-about-panel []
-  [na/modal {:open? (<sub [:form-state :main [:abouting]])
+  [na/modal {:open? (<sub [:in-page :modal-about])
              :dimmer "blurring"
              :close-icon true
              :close-on-dimmer-click? false
-             :on-close (na/>event [:form-state :main [:abouting] false])}
+             :on-close (na/>event [:page :quit])}
    [na/modal-header {}
     (str "About " (<sub [:name]))]
    [na/modal-content {}
@@ -171,14 +176,14 @@
 (defn top-bar []
   [na/menu {:fixed "top"}
    [na/menu-item {:header? true
-                  :on-click (na/>event [:form-state :main [:abouting] true])}
+                  :on-click (na/>event [:page :modal-about])}
     [sa/Icon {:name "eye" :size "big"}]
     (<sub [:name])]
    [na/menu-item {:name "Add"
-                  :disabled? (not (<sub [:uid]))
-                  :on-click (na/>event [:form-state :entry [:editing] true])}]
+                  :disabled? (not (<sub [:in-page :logged-in]))
+                  :on-click (na/>event [:page :modal-new-lystro])}]
    [na/menu-item {:name "About"
-                  :on-click (na/>event [:form-state :main [:abouting] true])}]
+                  :on-click (na/>event [:page :modal-about])}]
    [login-logout-control]])
 
 
@@ -193,9 +198,9 @@
   [na/container {}
    [modal-about-panel]
    [top-bar]
-   (when-let [uid (<sub [:uid])]
-     (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (events/public-fb-path [:tags])}])
-           all-lystros (re-frame/subscribe [:firebase/on-value {:path (events/private-fb-path [:items])}])]
+   (when (<sub [:in-page :logged-in])
+     (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
+           all-lystros (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])]
        ;; [TODO] Move to na in Sodium 0.4.0
        [sa/Container {:style {:margin-top "5em"}}
         [modal-entry-panel]

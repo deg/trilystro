@@ -9,17 +9,9 @@
             [trilystro.subs]
             [trilystro.views :as views]
             [trilystro.config :as config]
-            [com.degel.re-frame-firebase :as firebase]))
+            [trilystro.firebase :as fb]))
 
 (enable-console-print!)
-
-
-;;; From https://console.firebase.google.com/u/0/project/trilystro/overview - "Add Firebase to your web app"
-(defonce firebase-app-info
-  {:apiKey "AIzaSyDlGqaASOVO2nqFGG35GiUjOgFF2vvntyk"
-   :authDomain "trilystro.firebaseapp.com"
-   :databaseURL "https://trilystro.firebaseio.com"
-   :storageBucket "trilystro.appspot.com"})
 
 
 (defn dev-setup []
@@ -37,10 +29,7 @@
 (defn ^:export init []
   (re-frame/dispatch-sync [:initialize-db])
   (dev-setup)
-  (firebase/init :firebase-app-info firebase-app-info
-                 :get-user-sub           [:user]
-                 :set-user-event         [:set-user]
-                 :default-error-handler  [:firebase-error])
+  (fb/init)
   (mount-root))
 
 

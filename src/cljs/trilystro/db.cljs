@@ -4,4 +4,5 @@
 (ns trilystro.db)
 
 (def default-db
-  {:name "Trilystro"})
+  {:name "Trilystro"
+   :page-state [:start]})

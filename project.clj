@@ -12,6 +12,7 @@
                  [com.andrewmcveigh/cljs-time "0.5.1"]
                  [compojure "1.6.0"]
                  [day8.re-frame/http-fx "0.1.4"]
+                 [fsmviz "0.1.2"]
                  [garden "1.3.3"]
                  [ns-tracker "0.3.1"]
                  [re-frame "0.10.1"]
