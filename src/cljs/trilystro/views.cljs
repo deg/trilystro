@@ -201,8 +201,7 @@
    (when (<sub [:in-page :logged-in])
      (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
            all-lystros (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])]
-       ;; [TODO] Move to na in Sodium 0.4.0
-       [sa/Container {:style {:margin-top "5em"}}
+       [na/container {:style {:margin-top "5em"}}
         [modal-entry-panel]
         (list (null-op @all-lystros) (null-op @all-tags))
         [main-panel]]))] )
