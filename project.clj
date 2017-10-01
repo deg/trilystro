@@ -80,6 +80,7 @@
                     :output-to       "resources/public/js/compiled/app.js"
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
+                    :externs         ["externs.js"]
                     :pretty-print    false}}
 
     {:id           "test"

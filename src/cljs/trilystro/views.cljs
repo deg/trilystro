@@ -195,6 +195,22 @@
    [login-logout-control]])
 
 
+(defn google-ad [& {:keys [unit ad-client ad-slot]}]
+  (reagent/create-class
+   {:component-did-mount
+    #(when js.window.adsbygoogle
+       (. js.window.adsbygoogle push {}))
+    :reagent-render
+    (fn [& {:keys [unit ad-client ad-slot]}]
+      [sa/Advertisement {:unit unit}
+       [:ins {:class-name "adsbygoogle"
+              :style {:display "block"}
+              :data-ad-format "auto"
+              :data-ad-client ad-client
+              :data-ad-slot ad-slot}]])}))
+
+
+
 ;;; We want to keep the Firebase ":on" subscriptions active, so need to mount them in the
 ;;; main panel. But, we don't want anything to show. We could use a display:none div, but
 ;;; this head-fake is more elegant, and seems to work works.
@@ -210,6 +226,11 @@
      (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
            all-lystros (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])]
        [na/container {:style {:margin-top "5em"}}
+        [google-ad
+         :unit "half banner"
+         :ad-client "ca-pub-7080962590442738"
+         :ad-slot "5313065038"]
+        [sa/Divider]
         [modal-entry-panel]
         (list (null-op @all-lystros) (null-op @all-tags))
         [main-panel]]))] )
