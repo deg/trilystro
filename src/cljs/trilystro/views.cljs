@@ -14,6 +14,7 @@
    [sodium.extensions :as nax]
    [sodium.re-utils :refer [<sub >evt]]
    [sodium.utils :as utils]
+   [trilystro.config :as config]
    [trilystro.events :as events]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]))
@@ -132,7 +133,7 @@
           tags-mode (<sub [:form-state :search [:tags-mode]])
           lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
       [na/form {:widths "equal"}
-       [nax/panel-header "Search Lystros"]
+        [na/divider {:horizontal? true :section? true} "Search Lystros"]
        [lystro-grid {:color "brown"}
         [na/container {}
          [na/dropdown {:inline? true
@@ -148,7 +149,7 @@
                        :placeholder "Description..."
                        :value     (<sub      [:form-state :search [:text]] "")
                        :on-change (na/>event [:form-state :search [:text]])}]]
-       [nax/panel-subheader "Results"]
+       [na/divider {:horizontal? true :section? true} "Results"]
        `[:div {}
          ~@(mapv lystro-results-panel lystros)]])))
 
@@ -196,7 +197,7 @@
    [login-logout-control]])
 
 
-(defn google-ad [& {:keys [unit ad-client ad-slot]}]
+(defn google-ad [& {:keys [unit ad-client ad-slot test]}]
   (reagent/create-class
    {:display-name "google-ad"
     :component-did-mount
@@ -204,7 +205,7 @@
        (. js.window.adsbygoogle push {}))
     :reagent-render
     (fn [& {:keys [unit ad-client ad-slot]}]
-      [na/advertisement {:unit unit :centered? true}
+      [na/advertisement {:unit unit :centered? true :test test}
        [:ins {:class-name "adsbygoogle"
               :style {:display "block"}
               :data-ad-format "auto"
@@ -228,11 +229,11 @@
      (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
            all-lystros (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])]
        [na/container {:style {:margin-top "5em"}}
+        (list (null-op @all-lystros) (null-op @all-tags))
         [google-ad
          :unit "half banner"
          :ad-client "ca-pub-7080962590442738"
-         :ad-slot "5313065038"]
-        [na/divider]
+         :ad-slot "5313065038"
+         :test (when config/debug? "... ADVERT  HERE ...")]
         [modal-entry-panel]
-        (list (null-op @all-lystros) (null-op @all-tags))
         [main-panel]]))] )
