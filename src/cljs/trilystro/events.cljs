@@ -49,10 +49,10 @@
            {:firebase/write {:path       (fb/private-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
                              :on-success #(console :log "Logged in:" (:display-name user))
-                             :on-failure #(console :error "Failure: " %)}}))))
+                             :on-failure #(console :error "Login failure: " %)}}))))
 
 (defn new-tags [tags]
-  (let [old-tags (vals (<sub [:firebase/on-value {:path [:public :tags]}]))]
+  (let [old-tags (<sub [:all-tags])]
     (into [] (clojure.set/difference (set tags) (set old-tags)))))
 
 (re-frame/reg-event-fx
@@ -62,16 +62,17 @@
          form-vals (get-in db form-path)
          {:keys [tags url text]} form-vals]
      {:firebase/multi (conj (mapv #(fb/fb-event {:for-multi? true
-                                                 :effect-type :firebase/push
+                                                 :effect-type :firebase/write
                                                  :db db
                                                  :public? true
-                                                 :path [:tags]
-                                                 :value %})
+                                                 :path [:tags %]
+                                                 :value true
+                                                 :on-failure (fn [x] (console :log "Collision? " % " already tagged"))})
                                   (new-tags tags))
                             (let [options {:for-multi? true
                                            :db db
                                            :public? false
-                                           :value {:tags tags :url url :text text}} ]
+                                           :value {:tags tags :url url :text text}}]
                               (if-let [old-id (:firebase-id form-vals)]
                                 (fb/fb-event (assoc options
                                                     :effect-type :firebase/write

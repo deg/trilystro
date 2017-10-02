@@ -101,3 +101,11 @@
    (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}]))
  (fn [all-lystros [_ {:keys [tags-mode tags url text] :as options}] _]
    (filter-lystros (map->vec-of-val+key all-lystros :firebase-id) options)))
+
+
+(re-frame/reg-sub
+ :all-tags
+ (fn [_ _]
+   (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}]))
+ (fn [tag-map _]
+   (map name (keys tag-map))))
