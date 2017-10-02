@@ -104,14 +104,16 @@
        [na/grid-column value-params text]]] ))
 
 (defn lystro-results-panel [{:keys [tags text url] :as lystro}]
-  [sa/Segment {:class "lystro-result"}
+  [na/segment {:class-name "lystro-result" :compact? true}
+   [na/list-na {:class-name "tags"
+               :horizontal? true}
+    (map (fn [tag]
+           [na/list-item { :key tag}
+            [:span {:class "tag"} tag]])
+         (sort-by str/upper-case tags))]
+   [:div {:class "text"} text]
    [:div {:class "url"}
     (link-to url)]
-   [:div {:class "tags"}
-    (map (fn [tag]
-           [:span {:class "tag" :key tag} tag])
-         tags)]
-   [:div {:class "text"} text]
    [na/button {:content "edit"
                :color "brown"
                :size "mini"
@@ -172,7 +174,7 @@
 
 (defn login-logout-control []
   (let [user (<sub [:user])]
-    [sa/MenuMenu {:position "right"}
+    [na/menu-menu {:position "right"}
      [na/menu-item {:on-click (na/>event [(if user :sign-out :sign-in)])}
       (if user
         [na/label {:image true :circular? true}
@@ -184,7 +186,7 @@
   [na/menu {:fixed "top"}
    [na/menu-item {:header? true
                   :on-click (na/>event [:page :modal-about])}
-    [sa/Icon {:name "eye" :size "big"}]
+    [na/icon {:name "eye" :size "big"}]
     (<sub [:name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [:in-page :logged-in]))
@@ -197,12 +199,13 @@
 
 (defn google-ad [& {:keys [unit ad-client ad-slot]}]
   (reagent/create-class
-   {:component-did-mount
+   {:display-name "google-ad"
+    :component-did-mount
     #(when js.window.adsbygoogle
        (. js.window.adsbygoogle push {}))
     :reagent-render
     (fn [& {:keys [unit ad-client ad-slot]}]
-      [sa/Advertisement {:unit unit}
+      [na/advertisement {:unit unit :centered? true}
        [:ins {:class-name "adsbygoogle"
               :style {:display "block"}
               :data-ad-format "auto"
@@ -230,7 +233,7 @@
          :unit "half banner"
          :ad-client "ca-pub-7080962590442738"
          :ad-slot "5313065038"]
-        [sa/Divider]
+        [na/divider]
         [modal-entry-panel]
         (list (null-op @all-lystros) (null-op @all-tags))
         [main-panel]]))] )
