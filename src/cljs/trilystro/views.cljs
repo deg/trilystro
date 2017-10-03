@@ -58,8 +58,7 @@
                             :placeholder "Description..."
                             :default-value (<sub [:form-state :entry [:text]] "")
                             :on-change (na/>event [:form-state :entry [:text]])}]]
-   [na/form-button {:on-click (na/>events [[[:commit-lystro :entry]]
-                                           [[:page :quit]]])
+   [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro :entry]])
                     :content "Save"
                     :positive? true}]])
 
@@ -69,7 +68,7 @@
     [na/modal {:open? (or new? edit?)
                :dimmer "blurring"
                :close-icon true
-               :on-close (na/>event [:page :quit])}
+               :on-close (na/>event [:page :quit-modal [:form-state :entry nil nil]])}
      [na/modal-header {} (cond new? "Add Lystro"
                                edit? "Edit Lystro"
                                :default "???")]
@@ -117,8 +116,7 @@
    [na/button {:content "edit"
                :color "brown"
                :size "mini"
-               :on-click (na/>events [[[:form-state :entry nil lystro]]
-                                      [[:page :modal-edit-lystro]]])}]
+               :on-click (na/>event [:page :modal-edit-lystro [:form-state :entry nil lystro]])}]
    [na/button {:content "delete"
                :color "brown"
                :size "mini"
@@ -165,7 +163,7 @@
              :dimmer "blurring"
              :close-icon true
              :close-on-dimmer-click? false
-             :on-close (na/>event [:page :quit])}
+             :on-close (na/>event [:page :quit-modal])}
    [na/modal-header {}
     (str "About " (<sub [:name]))]
    [na/modal-content {}
@@ -190,27 +188,28 @@
     (<sub [:name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [:in-page :logged-in]))
-                  :on-click (na/>events [[[:form-state :entry nil nil]]
-                                         [[:page :modal-new-lystro]]])}]
+                  :on-click (na/>event [:page :modal-new-lystro [:form-state :entry nil nil]])}]
    [na/menu-item {:name "About"
                   :on-click (na/>event [:page :modal-about])}]
    [login-logout-control]])
 
 
+;; [TODO] Move this to Sodium extensions
 (defn google-ad [& {:keys [unit ad-client ad-slot test]}]
   (reagent/create-class
    {:display-name "google-ad"
     :component-did-mount
-    #(when js.window.adsbygoogle
+    #(when (and js.window.adsbygoogle (not test))
        (. js.window.adsbygoogle push {}))
     :reagent-render
     (fn [& {:keys [unit ad-client ad-slot]}]
       [na/advertisement {:unit unit :centered? true :test test}
-       [:ins {:class-name "adsbygoogle"
-              :style {:display "block"}
-              :data-ad-format "auto"
-              :data-ad-client ad-client
-              :data-ad-slot ad-slot}]])}))
+       (when-not test
+         [:ins {:class-name "adsbygoogle"
+                :style {:display "block"}
+                :data-ad-format "auto"
+                :data-ad-client ad-client
+                :data-ad-slot ad-slot}])])}))
 
 
 

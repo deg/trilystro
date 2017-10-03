@@ -19,19 +19,10 @@
 
 (s/check-asserts true)
 
-(defn- next-page [db transition]
-  (update db :page-state fsm/transit-state transition))
-
-(re-frame/reg-event-db
- :page
- (fn [db [_ transition]]
-   (next-page db transition)))
-
-
 (re-frame/reg-event-db
  :initialize-db
  (fn  [_ _]
-   (next-page db/default-db :initialize-db)))
+   (fsm/page db/default-db :initialize-db nil)))
 
 (re-frame/reg-event-db
  :form-state
@@ -43,8 +34,9 @@
 (re-frame/reg-event-fx
  :set-user
  (fn [{db :db} [_ user]]
-   (into {:db (next-page (assoc db :user user)
-                         (if user :login-confirmed :logout))}
+   (into {:db (fsm/page (assoc db :user user)
+                        (if user :login-confirmed :logout)
+                        nil)}
          (when user
            {:firebase/write {:path       (fb/private-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
