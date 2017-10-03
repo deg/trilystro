@@ -11,7 +11,7 @@
   This module supports:
   - basic state transitions (here called :shift).
   - a stack of states: :push adds a state to the stack. :pop removes the top state from
-    the stack. :shift changes the top state in the stack =. (When the stack has only one
+    the stack. :shift changes the top state in the stack. (When the stack has only one
     element, this is just a basic state transition, of course).
   - Triggers: Cause another re-frame event to occur because of an FSM action. Triggers
     can be supplied in calls to shift, push or pop. They can also be specified in the
