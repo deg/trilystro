@@ -30,13 +30,12 @@
                    :on-change (na/>event [:form-state form [:tags]] #{} set)
                    :options (na/dropdown-list (into old-tags new-tags) identity identity)}]
      (when allow-new?
-       [:span
-        [na/input {:type :text
-                   :placeholder "add tag"
-                   :value     (<sub      [:form-state form [:new-tag]] "")
-                   :on-change (na/>event [:form-state form [:new-tag]])}]
-        [na/button {:content "Add"
-                    :on-click (na/>event [:add-new-tag form])}]])]))
+       [na/input {:type :text
+                  :action {:content "Add"
+                           :on-click (na/>event [:add-new-tag form])}
+                  :placeholder "add tag"
+                  :value     (<sub      [:form-state form [:new-tag]] "")
+                  :on-change (na/>event [:form-state form [:new-tag]])}])]))
 
 
 (defn entry-panel []
