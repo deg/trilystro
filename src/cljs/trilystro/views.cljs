@@ -19,23 +19,60 @@
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]))
 
+;;; [TODO] Move to utils
+(defn compare-ci [s1 s2]
+  (compare (str/upper-case s1) (str/upper-case s2)))
 
-(defn keyword-selector [form {:keys [allow-new?]}]
+;;; [TODO] Move to utils
+(defn sort-ci [l]
+  (sort-by str/upper-case l))
+
+
+(defn draw-tag [form tag]
+  (let [selected-tags (<sub [:form-state form [:tags]] #{})
+        selected? (contains? selected-tags tag)]
+    [na/list-item {:key tag
+                   :on-click #(>evt [:form-state form [:tags]
+                                     ((if selected? disj conj) selected-tags tag)])}
+     [:span {:class (str "tag "
+                         (if selected? "selected-tag" "unselected-tag"))}
+      tag]]))
+
+(defn draw-tags [form tags]
+  [na/list-na {:class-name "tags"
+               :horizontal? true}
+   (let [selected-tags (<sub [:form-state form [:tags]] #{})]
+     (doall (map #(draw-tag form %)
+                 (sort-ci tags))))])
+
+
+(defn keyword-adder [form]
   (let [old-tags (set (<sub [:all-tags]))
-        new-tags (<sub [:form-state form [:tags]] #{})]
-    [:span
-     [na/dropdown {:multiple? true
-                   :button? true
-                   :value new-tags
-                   :on-change (na/>event [:form-state form [:tags]] #{} set)
-                   :options (na/dropdown-list (into old-tags new-tags) identity identity)}]
-     (when allow-new?
-       [na/input {:type :text
-                  :action {:content "Add"
-                           :on-click (na/>event [:add-new-tag form])}
-                  :placeholder "add tag"
-                  :value     (<sub      [:form-state form [:new-tag]] "")
-                  :on-change (na/>event [:form-state form [:new-tag]])}])]))
+        new-tags (<sub [:form-state form [:tags]] #{})
+        all-tags (sort-ci (into old-tags new-tags))]
+    [na/grid {:container? true}
+     [na/grid-row {}
+      [draw-tags form new-tags]]
+     [na/grid-row {}
+      `[:datalist {:id "tags"}
+        ~(map (fn [tag] [:option {:key tag :value tag}])
+              all-tags)]
+      [sa/Input {:type :text
+                 :list "tags"
+                 :action {:icon "add"
+                          :on-click (na/>event [:add-new-tag form])}
+                 :placeholder "add tag"
+                 :value     (<sub      [:form-state form [:new-tag]] "")
+                 :on-change (na/>event [:form-state form [:new-tag]])}]]]))
+
+(defn keyword-selector [form]
+  (let [available-tags (sort-ci (<sub [:all-tags]))
+        chosen-tags (sort-ci (<sub [:form-state form [:tags]] #{}))]
+    [na/dropdown {:multiple? true
+                  :button? true
+                  :value chosen-tags
+                  :on-change (na/>event [:form-state form [:tags]] #{} set)
+                  :options (na/dropdown-list available-tags identity identity)}]))
 
 
 (defn entry-panel []
@@ -43,7 +80,7 @@
    [nax/labelled-field
     :label "Tags:"
     :inline? true
-    :content [keyword-selector :entry {:allow-new? true}]]
+    :content [keyword-adder :entry]]
    [nax/labelled-field
     :label "URL:"
     :inline? true
@@ -58,6 +95,7 @@
                             :default-value (<sub [:form-state :entry [:text]] "")
                             :on-change (na/>event [:form-state :entry [:text]])}]]
    [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro :entry]])
+                    :icon "add"
                     :content "Save"
                     :positive? true}]])
 
@@ -99,27 +137,22 @@
        [na/grid-column value-params (if (string? url) (link-to url) url)]]
       [na/grid-row row-params
        [na/grid-column label-params "Text:"]
-       [na/grid-column value-params text]]] ))
+       [na/grid-column value-params text]]]))
 
-(defn lystro-results-panel [{:keys [tags text url] :as lystro}]
-  [na/segment {:class-name "lystro-result" :compact? true}
-   [na/list-na {:class-name "tags"
-               :horizontal? true}
-    (map (fn [tag]
-           [na/list-item { :key tag}
-            [:span {:class "tag"} tag]])
-         (sort-by str/upper-case tags))]
-   [:div {:class "text"} text]
-   [:div {:class "url"}
-    (link-to url)]
-   [na/button {:content "edit"
-               :color "brown"
-               :size "mini"
-               :on-click (na/>event [:page :modal-edit-lystro [:form-state :entry nil lystro]])}]
-   [na/button {:content "delete"
-               :color "brown"
-               :size "mini"
-               :on-click (na/>event [:clear-lystro (:firebase-id lystro)])}]])
+(defn delete-button [handler]
+  [na/button {:icon "delete"
+              :floated "right"
+              :color "brown"
+              :size "mini"
+              :on-click handler}])
+
+(defn lystro-results-panel [search-form {:keys [tags text url] :as lystro}]
+  [na/segment {:class-name "lystro-result"}
+   (delete-button (na/>event [:clear-lystro (:firebase-id lystro)]))
+   (draw-tags search-form tags)
+   [:div {:on-click #(>evt [:page :modal-edit-lystro [:form-state :entry nil lystro]])
+          :class-name "text"} text]
+   [:div {:class-name "url"} (link-to url)]])
 
 
 (defn main-panel []
@@ -137,7 +170,7 @@
                        :value     (<sub      [:form-state :search [:tags-mode]] :any-of)
                        :on-change (na/>event [:form-state :search [:tags-mode]] :any-of keyword)
                        :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
-         [keyword-selector :search {:allow-new? false}]]
+         [keyword-selector :search]]
         [na/input {:type "url"
                    :placeholder "Website..."
                    :value     (<sub      [:form-state :search [:url]] "")
@@ -146,9 +179,9 @@
                        :placeholder "Description..."
                        :value     (<sub      [:form-state :search [:text]] "")
                        :on-change (na/>event [:form-state :search [:text]])}]]
-       [na/divider {:horizontal? true :section? true} "Results"]
+       [na/divider {:horizontal? true :section? true} (str "Results (" (count lystros) ")")]
        `[:div {}
-         ~@(mapv lystro-results-panel lystros)]])))
+         ~@(mapv (partial lystro-results-panel :search) lystros)]])))
 
 
 (defn about-panel []

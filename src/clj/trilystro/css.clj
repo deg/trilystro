@@ -18,10 +18,14 @@
    [:.text
     {:margin "0.5rem 0px 0.5rem 0"}]]
   [:.tag
-   {:background-color "tan"
-    :color "black"
-    :padding "0.1rem 0.5rem 0.1rem 0.5rem"
+   {:color "black"
+    :padding "0.1rem 0.5rem 0.2rem 0.5rem"
     :margin "0 0.1rem 0 0.1rem"
     :text-align "center"
-    :border-radius "100px"
-    }])
+    :border-radius "100px"}]
+  [:.selected-tag
+   {:background-color "orange"
+    :color "black"}]
+  [:.unselected-tag
+   {:background-color "tan"
+    :color "white"}])
