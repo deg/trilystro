@@ -94,10 +94,17 @@
                             :placeholder "Description..."
                             :default-value (<sub [:form-state :entry [:text]] "")
                             :on-change (na/>event [:form-state :entry [:text]])}]]
+
+   [nax/labelled-field
+    :label "Visibility:"
+    :content [sa/Checkbox (let [public? (<sub [:form-state :entry [:public?]])]
+                            {:label (if public? "Public" "Private")
+                             :checked public?
+                             :on-change (na/>event [:form-state :entry [:public?]] false)})]]
    [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro :entry]])
-                    :icon "add"
-                    :content "Save"
-                    :positive? true}]])
+                     :icon "add"
+                     :content "Save"
+                     :positive? true}]])
 
 (defn modal-entry-panel []
   (let [new?  (<sub [:in-page :modal-new-lystro])
@@ -146,13 +153,25 @@
               :size "mini"
               :on-click handler}])
 
-(defn lystro-results-panel [search-form {:keys [tags text url] :as lystro}]
-  [na/segment {:class-name "lystro-result"}
-   (delete-button (na/>event [:clear-lystro (:firebase-id lystro)]))
-   (draw-tags search-form tags)
-   [:div {:on-click #(>evt [:page :modal-edit-lystro [:form-state :entry nil lystro]])
-          :class-name "text"} text]
-   [:div {:class-name "url"} (link-to url)]])
+(defn lystro-results-panel [search-form {:keys [tags text url owner public?] :as lystro}]
+  (let [mine? (= owner (<sub [:uid]))]
+    [na/segment {:secondary? (not mine?)
+                 :tertiary? (not public?)
+                 :class-name "lystro-result"}
+     (when mine?
+       (delete-button (na/>event [:clear-lystro lystro])))
+     (draw-tags search-form tags)
+     [:div {:on-click #(when mine?
+                         (>evt [:page :modal-edit-lystro [:form-state :entry nil lystro]]))
+            :class-name (str "text "
+                             (if mine? "editable-text" "frozen-text"))}
+      text]
+     [:div {:class-name "url"} (link-to url)]
+     (when (not mine?)
+       (let [user-details (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
+             user ((keyword owner) user-details)]
+         [:div {:class "owner-sig"}
+          (or (:display-name user) (:email user))]))]))
 
 
 (defn main-panel []
@@ -257,10 +276,13 @@
    [modal-about-panel]
    [top-bar]
    (when (<sub [:in-page :logged-in])
-     (let [all-tags (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
-           all-lystros (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])]
+     (let [open-state [(<sub [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
+                       (<sub [:firebase/on-value {:path (fb/private-fb-path [:items])}])
+                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:items])}])
+                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
+                       ]]
        [na/container {:style {:margin-top "5em"}}
-        (list (null-op @all-lystros) (null-op @all-tags))
+        (null-op open-state)
         [google-ad
          :unit "half banner"
          :ad-client "ca-pub-7080962590442738"

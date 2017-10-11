@@ -38,7 +38,7 @@
                         (if user :login-confirmed :logout)
                         nil)}
          (when user
-           {:firebase/write {:path       (fb/private-fb-path [:user-details] (:uid user))
+           {:firebase/write {:path       (fb/my-shared-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
                              :on-success #(console :log "Logged in:" (:display-name user))
                              :on-failure #(console :error "Login failure: " %)}}))))
@@ -52,19 +52,23 @@
  (fn [{db :db} [_ form-key]]
    (let [form-path [:forms form-key]
          form-vals (get-in db form-path)
-         {:keys [tags url text]} form-vals]
+         {:keys [tags url text public?]} form-vals]
      {:firebase/multi (conj (mapv #(fb/fb-event {:for-multi? true
                                                  :effect-type :firebase/write
                                                  :db db
-                                                 :public? true
+                                                 :access :public
                                                  :path [:tags %]
                                                  :value true
                                                  :on-failure (fn [x] (console :log "Collision? " % " already tagged"))})
                                   (new-tags tags))
                             (let [options {:for-multi? true
                                            :db db
-                                           :public? false
-                                           :value {:tags tags :url url :text text}}]
+                                           :access (if public? :shared :private)
+                                           :value {:tags tags
+                                                   :url url
+                                                   :text text
+                                                   :owner (<sub [:uid])
+                                                   :public? public?}}]
                               (if-let [old-id (:firebase-id form-vals)]
                                 (fb/fb-event (assoc options
                                                     :effect-type :firebase/write
@@ -76,13 +80,15 @@
 
 (re-frame/reg-event-fx
  :clear-lystro
- (fn [{db :db} [_ id]]
-   (fb/fb-event {:for-multi? false
-                 :effect-type :firebase/write
-                 :db db
-                 :public? false
-                 :path [:items id]
-                 :value nil})))
+ (fn [{db :db} [_ {:keys [firebase-id owner public?]} :as lystro]]
+   (let [mine? (= owner (<sub [:uid]))]
+     (when mine?
+       (fb/fb-event {:for-multi? false
+                     :effect-type :firebase/write
+                     :db db
+                     :access (if public? :shared :private)
+                     :path [:items firebase-id]
+                     :value nil})))))
 
 
 (defn set-conj [set new]

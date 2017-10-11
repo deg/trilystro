@@ -10,9 +10,8 @@
     },
     "shared": {
       ".read": true,
-      "$uid": {
-        ".write": "$uid === auth.uid"
-      }
+      "items":        { "$uid": { ".write": "$uid === auth.uid" } },
+      "user-details": { "$uid": { ".write": "$uid === auth.uid" } }
     },
     "private": {
       "$uid": {
@@ -22,4 +21,3 @@
     }
   }
 }
-

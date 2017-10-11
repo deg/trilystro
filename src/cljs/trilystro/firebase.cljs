@@ -27,11 +27,22 @@
 
 (defn private-fb-path
   ([path]
-   (private-fb-path path nil))
-  ([path for-uid]
-   (if-let [uid (or for-uid
-                    (<sub [:uid]))]
+   (private-fb-path path (<sub [:uid])))
+  ([path uid]
+   (when uid
      (into [:private uid] path))))
+
+(defn all-shared-fb-path
+  [path]
+  (into [:shared] path))
+
+
+(defn my-shared-fb-path
+  ([path]
+   (my-shared-fb-path path (<sub [:uid])))
+  ([path uid]
+   (when uid
+     (into [:shared (first path) uid] (rest path)))))
 
 (defn public-fb-path [path]
   (if-let [uid (<sub [:uid])]
@@ -64,9 +75,13 @@
 (defn logged-in? [db]
   (some? (get-in db [:user :uid])))
 
-(defn fb-event [{:keys [db path value on-success on-failure public? effect-type for-multi?] :as args}]
+(defn fb-event [{:keys [db path value on-success on-failure access effect-type for-multi?] :as args}]
   (if (logged-in? db)
-    (let [path ((if public? public-fb-path private-fb-path) path)
+    (let [path ((case access
+                  :public public-fb-path
+                  :shared my-shared-fb-path
+                  :private private-fb-path
+                  identity) path)
           effect-args (assoc (select-keys args [:value :on-success :on-failure])
                              :path path)]
       (if for-multi?

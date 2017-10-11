@@ -96,12 +96,19 @@
    []
    vals-map))
 
+(defn lystros-with-id [lystros-tree]
+  (map->vec-of-val+key lystros-tree :firebase-id))
+
+
 (re-frame/reg-sub
  :lystros
  (fn [_ _]
-   (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}]))
- (fn [all-lystros [_ {:keys [tags-mode tags url text] :as options}] _]
-   (filter-lystros (map->vec-of-val+key all-lystros :firebase-id) options)))
+   [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])
+    (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:items])}])])
+ (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text] :as options}] _]
+   (into (filter-lystros (lystros-with-id private-lystros) options)
+         (mapcat #(filter-lystros (lystros-with-id %) options)
+                 (vals shared-lystros)))))
 
 
 (re-frame/reg-sub
