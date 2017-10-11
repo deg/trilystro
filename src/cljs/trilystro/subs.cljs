@@ -48,7 +48,8 @@
                   intersection (if (empty? match-set)
                                  tags
                                  (set/intersection tags match-set))]
-              (not (empty? intersection))))))
+              (or (empty? match-set)
+                  (not (empty? intersection)))))))
 
 (defn filter-all-tags
   "Filter function that selects lystros whose tags include all
@@ -57,7 +58,7 @@
   {:pre [(utils/validate (s/nilable set?) match-set)]}
   (filter (fn [{:keys [tags]}]
             (if (empty? match-set)
-              (boolean tags)
+              true
               (= (set/intersection match-set (set tags))
                  match-set)))))
 
