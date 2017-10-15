@@ -35,6 +35,9 @@ lein clean
 lein figwheel dev
 ```
 
+Or, from Emacs with Cider, open one of the `.cljs` files and invoke `C-c M-J`
+(`cider-jack-in-clojurescript`).
+
 Figwheel will automatically push cljs changes to the browser.
 
 Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).

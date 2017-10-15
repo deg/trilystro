@@ -54,7 +54,7 @@
                    [com.cemerick/piggieback "0.2.2"]
                    [day8.re-frame/trace "0.1.7"]]
 
-    :plugins      [[lein-figwheel "0.5.9"]
+    :plugins      [[lein-figwheel "0.5.14"]
                    [lein-doo "0.1.7"]]
     }}
 
