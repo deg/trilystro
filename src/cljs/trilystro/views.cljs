@@ -99,7 +99,7 @@
     :label "Visibility:"
     :content [sa/Checkbox (let [public? (<sub [:form-state :entry [:public?]])]
                             {:label (if public? "Public" "Private")
-                             :checked public?
+                             :default-checked public?
                              :on-change (na/>event [:form-state :entry [:public?]] false)})]]
    [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro :entry]])
                      :icon "add"
