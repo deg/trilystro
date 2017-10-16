@@ -23,7 +23,7 @@
                  [yogthos/config "0.9"]
                  [com.degel/re-frame-firebase "0.2.0"]
                  [com.degel/re-frame-storage-fx "0.1.0"]
-                 [com.degel/sodium "0.5.0"]]
+                 [com.degel/sodium "0.6.1"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-garden "0.2.8"]]
