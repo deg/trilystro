@@ -20,6 +20,7 @@ It shows off:
 - A Firebase backend, wrapped by re-frame-firebase
 - Google-based authentication, powered by Firebase
 - Google ads, wrapped by Semantic-UI and Sodium
+- Using augmented finite state machines (FSMs) to manage state
 
 A copy of Trilystro is usually running at http://trilystro.vuagain.com (It is hosted on
 Heroku's free tier, which shuts it down upon idle, so please give about 30 seconds for
