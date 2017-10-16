@@ -101,10 +101,17 @@
 
 
 (re-frame/reg-sub
+ :user-settings
+ (fn [_ _]
+   (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}]))
+ (fn [settings _]
+   settings))
+
+(re-frame/reg-sub
  :lystros
  (fn [_ _]
-   [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:items])}])
-    (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:items])}])])
+   [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
+    (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])])
  (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text] :as options}] _]
    (into (filter-lystros (lystros-with-id private-lystros) options)
          (mapcat #(filter-lystros (lystros-with-id %) options)

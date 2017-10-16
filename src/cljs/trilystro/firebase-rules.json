@@ -10,7 +10,7 @@
     },
     "shared": {
       ".read": true,
-      "items":        { "$uid": { ".write": "$uid === auth.uid" } },
+      "lystros":      { "$uid": { ".write": "$uid === auth.uid" } },
       "user-details": { "$uid": { ".write": "$uid === auth.uid" } }
     },
     "private": {

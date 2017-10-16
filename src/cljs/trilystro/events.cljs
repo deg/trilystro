@@ -49,33 +49,35 @@
 
 (re-frame/reg-event-fx
  :commit-lystro
- (fn [{db :db} [_ form-key]]
+ (fn [{db :db} [_ {:keys [firebase-id tags url text public?]} form-key]]
    (let [form-path [:forms form-key]
-         form-vals (get-in db form-path)
-         {:keys [tags url text public?]} form-vals]
-     {:firebase/multi (conj (mapv #(fb/fb-event {:for-multi? true
-                                                 :effect-type :firebase/write
-                                                 :db db
-                                                 :access :public
-                                                 :path [:tags %]
-                                                 :value true
-                                                 :on-failure (fn [x] (console :log "Collision? " % " already tagged"))})
-                                  (new-tags tags))
-                            (let [options {:for-multi? true
-                                           :db db
-                                           :access (if public? :shared :private)
-                                           :value {:tags tags
-                                                   :url url
-                                                   :text text
-                                                   :owner (<sub [:uid])
-                                                   :public? public?}}]
-                              (if-let [old-id (:firebase-id form-vals)]
-                                (fb/fb-event (assoc options
-                                                    :effect-type :firebase/write
-                                                    :path [:items old-id]))
-                                (fb/fb-event (assoc options
-                                                    :effect-type :firebase/push
-                                                    :path [:items])))))
+         base-options {:db db
+                       :for-multi? true
+                       :effect-type :firebase/write}]
+     {:firebase/multi `[~@(mapv #(fb/fb-event (into base-options
+                                                    {:access :public
+                                                     :path [:tags %]
+                                                     :value true
+                                                     :on-failure (fn [_] (console :log "Collision? " % " already tagged"))}))
+                                (new-tags tags))
+                        ~(fb/fb-event (into base-options
+                                            {:access :private
+                                             :path [:user-settings :default-public?]
+                                             :value public?}))
+                        ~(let [lystro-value {:tags tags
+                                             :url url
+                                             :text text
+                                             :owner (<sub [:uid])
+                                             :public? public?}
+                               lystro-options (into base-options
+                                                    {:access (if public? :shared :private)
+                                                     :value lystro-value})]
+                           (if-let [old-id firebase-id]
+                             (fb/fb-event (assoc lystro-options
+                                                 :path [:lystros old-id]))
+                             (fb/fb-event (assoc lystro-options
+                                                 :effect-type :firebase/push
+                                                 :path [:lystros]))))]
       :db (assoc-in db form-path nil)})))
 
 (re-frame/reg-event-fx
@@ -87,7 +89,7 @@
                      :effect-type :firebase/write
                      :db db
                      :access (if public? :shared :private)
-                     :path [:items firebase-id]
+                     :path [:lystros firebase-id]
                      :value nil})))))
 
 

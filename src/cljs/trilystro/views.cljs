@@ -76,35 +76,42 @@
 
 
 (defn entry-panel []
-  [na/form {:widths "equal"}
-   [nax/labelled-field
-    :label "Tags:"
-    :inline? true
-    :content [keyword-adder :entry]]
-   [nax/labelled-field
-    :label "URL:"
-    :inline? true
-    :content [na/input {:type "url"
-                        :placeholder "Website..."
-                        :default-value (<sub [:form-state :entry [:url]] "")
-                        :on-change (na/>event [:form-state :entry [:url]])}]]
-   [nax/labelled-field
-    :label "Text:"
-    :content [na/text-area {:rows 3
-                            :placeholder "Description..."
-                            :default-value (<sub [:form-state :entry [:text]] "")
-                            :on-change (na/>event [:form-state :entry [:text]])}]]
-
-   [nax/labelled-field
-    :label "Visibility:"
-    :content [sa/Checkbox (let [public? (<sub [:form-state :entry [:public?]])]
-                            {:label (if public? "Public" "Private")
+  (let [pub? (<sub [:form-state :entry [:public?]])
+        public? (if-not (nil? pub?)
+                  pub?
+                  (or (get-in (<sub [:user-settings]) [:default-public?])
+                      false))]
+    [na/form {:widths "equal"}
+     [nax/labelled-field
+      :label "Tags:"
+      :inline? true
+      :content [keyword-adder :entry]]
+     [nax/labelled-field
+      :label "URL:"
+      :inline? true
+      :content [na/input {:type "url"
+                          :placeholder "Website..."
+                          :default-value (<sub [:form-state :entry [:url]] "")
+                          :on-change (na/>event [:form-state :entry [:url]])}]]
+     [nax/labelled-field
+      :label "Text:"
+      :content [na/text-area {:rows 3
+                              :placeholder "Description..."
+                              :default-value (<sub [:form-state :entry [:text]] "")
+                              :on-change (na/>event [:form-state :entry [:text]])}]]
+     [nax/labelled-field
+      :label "Visibility:"
+      :content [sa/Checkbox {:label "Public"
                              :default-checked public?
-                             :on-change (na/>event [:form-state :entry [:public?]] false)})]]
-   [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro :entry]])
-                     :icon "add"
-                     :content "Save"
-                     :positive? true}]])
+                             :on-change (na/>event [:form-state :entry [:public?]] false)}]]
+     [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro
+                                                               (assoc (<sub [:form-state :entry])
+                                                                      :public? public?)
+                                                               :entry]])
+                      :icon "add"
+                      :content (str "Save " (if public? "public" "private"))
+                      :positive? true}]]))
+
 
 (defn modal-entry-panel []
   (let [new?  (<sub [:in-page :modal-new-lystro])
@@ -277,10 +284,10 @@
    [top-bar]
    (when (<sub [:in-page :logged-in])
      (let [open-state [(<sub [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
-                       (<sub [:firebase/on-value {:path (fb/private-fb-path [:items])}])
-                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:items])}])
-                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
-                       ]]
+                       (<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
+                       (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
+                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
+                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])]]
        [na/container {:style {:margin-top "5em"}}
         (null-op open-state)
         [google-ad

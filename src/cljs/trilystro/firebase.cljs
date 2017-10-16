@@ -70,7 +70,7 @@
 
      ;; [TODO] Need to use pending Sodium generalization of :dispatch that takes a fn too.
      ((if on-failure (re-utils/event->fn on-failure) js/alert)
-      (str "Can't write to Firebase, because not logged in:/n " path ": " value)))))
+      (str "Can't write to Firebase, because not logged in:\n " path ": " value)))))
 
 (defn logged-in? [db]
   (some? (get-in db [:user :uid])))
@@ -92,7 +92,7 @@
     ((if on-failure
        (re-utils/event->fn on-failure)
        js/alert)
-     (str "Can't write to Firebase, because not logged in:/n " path ": " value))))
+     (str "Can't write to Firebase, because not logged in:\n " path ": " value))))
 
 (comment
   (re-frame/reg-event-fx
