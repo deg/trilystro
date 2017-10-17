@@ -49,14 +49,14 @@
 (defn keyword-adder [form]
   (let [old-tags (set (<sub [:all-tags]))
         new-tags (<sub [:form-state form [:tags]] #{})
-        all-tags (sort-ci (into old-tags new-tags))]
+        available-tags (sort-ci (clojure.set/difference old-tags new-tags))]
     [na/grid {:container? true}
      [na/grid-row {}
       [draw-tags form new-tags]]
      [na/grid-row {}
       `[:datalist {:id "tags"}
         ~(map (fn [tag] [:option {:key tag :value tag}])
-              all-tags)]
+              available-tags)]
       [sa/Input {:type :text
                  :list "tags"
                  :action {:icon "add"
