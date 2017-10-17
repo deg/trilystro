@@ -96,10 +96,6 @@
    []
    vals-map))
 
-(defn lystros-with-id [lystros-tree]
-  (map->vec-of-val+key lystros-tree :firebase-id))
-
-
 (re-frame/reg-sub
  :user-settings
  (fn [_ _]
@@ -107,14 +103,29 @@
  (fn [settings _]
    settings))
 
+(defn- lystros-with-id [lystros-tree]
+  (map->vec-of-val+key lystros-tree :firebase-id))
+
+(defn- setify-tags [lystros]
+  (reduce-kv (fn [m k v]
+               (assoc m k (update v :tags set)))
+             {} lystros))
+
+(defn cleanup-lystros
+  "Convert group of Lystros from internal Firebase format to proper form"
+  [raw-lystros]
+  (-> raw-lystros
+      setify-tags
+      lystros-with-id))
+
 (re-frame/reg-sub
  :lystros
  (fn [_ _]
    [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
     (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])])
  (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text] :as options}] _]
-   (into (filter-lystros (lystros-with-id private-lystros) options)
-         (mapcat #(filter-lystros (lystros-with-id %) options)
+   (into (filter-lystros (cleanup-lystros private-lystros) options)
+         (mapcat #(filter-lystros (cleanup-lystros %) options)
                  (vals shared-lystros)))))
 
 

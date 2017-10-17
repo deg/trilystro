@@ -41,9 +41,8 @@
 (defn draw-tags [form tags]
   [na/list-na {:class-name "tags"
                :horizontal? true}
-   (let [selected-tags (<sub [:form-state form [:tags]] #{})]
-     (doall (map #(draw-tag form %)
-                 (sort-ci tags))))])
+   (doall (map #(draw-tag form %)
+               (sort-ci tags)))])
 
 
 (defn keyword-adder [form]
