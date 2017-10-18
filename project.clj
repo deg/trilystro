@@ -21,7 +21,7 @@
                  [ring "1.6.2"]
                  [secretary "1.2.3"]
                  [yogthos/config "0.9"]
-                 [com.degel/re-frame-firebase "0.2.0"]
+                 [com.degel/re-frame-firebase "0.3.0"]
                  [com.degel/re-frame-storage-fx "0.1.0"]
                  [com.degel/sodium "0.6.1"]]
 

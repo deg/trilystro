@@ -103,13 +103,17 @@
       :content [sa/Checkbox {:label "Public"
                              :default-checked public?
                              :on-change (na/>event [:form-state :entry [:public?]] false)}]]
-     [na/form-button {:on-click (na/>event [:page :quit-modal [:commit-lystro
-                                                               (assoc (<sub [:form-state :entry])
-                                                                      :public? public?)
-                                                               :entry]])
-                      :icon "add"
-                      :content (str "Save " (if public? "public" "private"))
-                      :positive? true}]]))
+     (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
+       [na/form-button {:disabled? (not connected?)
+                        :on-click (na/>event [:page :quit-modal [:commit-lystro
+                                                                 (assoc (<sub [:form-state :entry])
+                                                                        :public? public?)
+                                                                 :entry]])
+                        :icon (if connected? "add" "wait")
+                        :content (if connected?
+                                   (str "Save " (if public? "public" "private"))
+                                   "(offline)")
+                        :positive? true}])]))
 
 
 (defn modal-entry-panel []
@@ -188,7 +192,7 @@
           tags-mode (<sub [:form-state :search [:tags-mode]])
           lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
       [na/form {:widths "equal"}
-        [na/divider {:horizontal? true :section? true} "Search Lystros"]
+       [na/divider {:horizontal? true :section? true} "Search Lystros"]
        [lystro-grid {:color "brown"}
         [na/container {}
          [na/dropdown {:inline? true
@@ -230,6 +234,9 @@
 (defn login-logout-control []
   (let [user (<sub [:user])]
     [na/menu-menu {:position "right"}
+     (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
+       [na/menu-item {:icon (if connected? "signal" "wait")
+                      :content (if connected? "online" "offline")}])
      [na/menu-item {:on-click (na/>event [(if user :sign-out :sign-in)])}
       (if user
         [na/label {:image true :circular? true}
