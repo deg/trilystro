@@ -241,15 +241,15 @@
 (defn login-logout-control []
   (let [user (<sub [:user])]
     [na/menu-menu {:position "right"}
-     (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
-       [na/menu-item {:icon (if connected? "signal" "wait")
-                      :content (if connected? "online" "offline")}])
      [na/menu-item {:on-click (na/>event [(if user :sign-out :sign-in)])}
       (if user
         [na/label {:image true :circular? true}
          [na/image {:src (:photo-url user)}]
          (or (:display-name user) (:email user))]
-        "login...")]] ))
+        "login...")]
+     (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
+       [na/menu-item {:icon (if connected? "signal" "wait")
+                      :content (if connected? "online" "offline")}])] ))
 
 (defn top-bar []
   [na/menu {:fixed "top"}
