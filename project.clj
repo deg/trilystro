@@ -16,6 +16,7 @@
                  [garden "1.3.3"]
                  [ns-tracker "0.3.1"]
                  [re-frame "0.10.2"]
+                 [re-frame-utils "0.1.0"]
                  [re-frisk "0.5.0"]
                  [reagent "0.7.0"]
                  [ring "1.6.2"]

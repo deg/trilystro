@@ -8,6 +8,7 @@
                [clojure.spec.alpha :as s]
                [re-frame.core :as re-frame]
                [re-frame.loggers :refer [console]]
+               [sodium.re-utils :as re-utils :refer [<sub]]
                [sodium.utils :as utils]
                [trilystro.events :as events]
                [trilystro.firebase :as fb]
@@ -135,3 +136,9 @@
    (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}]))
  (fn [tag-map _]
    (map name (keys tag-map))))
+
+(re-frame/reg-sub
+ :new-tags
+ (fn [_ [_ tags]]
+   (let [old-tags (<sub [:all-tags])]
+     (clojure.set/difference (set tags) (set old-tags)))))

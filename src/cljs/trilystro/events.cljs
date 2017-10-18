@@ -11,8 +11,8 @@
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
+   [vimsical.re-frame.cofx.inject :as inject]
    [sodium.chrome-utils :as chrome]
-   [sodium.re-utils :as re-utils :refer [<sub]]
    [trilystro.db :as db]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]))
@@ -43,13 +43,9 @@
                              :on-success #(console :log "Logged in:" (:display-name user))
                              :on-failure #(console :error "Login failure: " %)}}))))
 
-(defn new-tags [tags]
-  (let [old-tags (<sub [:all-tags])]
-    (into [] (clojure.set/difference (set tags) (set old-tags)))))
-
 (re-frame/reg-event-fx
  :commit-lystro
- (fn [{db :db} [_ {:keys [firebase-id tags url text public?]} form-key]]
+ (fn [{db :db} [_ {:keys [firebase-id tags url text owner public? new-tags]} form-key]]
    (let [form-path [:forms form-key]
          base-options {:db db
                        :for-multi? true
@@ -59,7 +55,7 @@
                                                      :path [:tags %]
                                                      :value true
                                                      :on-failure (fn [_] (console :log "Collision? " % " already tagged"))}))
-                                (new-tags tags))
+                                new-tags)
                         ~(fb/fb-event (into base-options
                                             {:access :private
                                              :path [:user-settings :default-public?]
@@ -67,7 +63,7 @@
                         ~(let [lystro-value {:tags tags
                                              :url url
                                              :text text
-                                             :owner (<sub [:uid])
+                                             :owner owner
                                              :public? public?}
                                lystro-options (into base-options
                                                     {:access (if public? :shared :private)
@@ -82,8 +78,9 @@
 
 (re-frame/reg-event-fx
  :clear-lystro
- (fn [{db :db} [_ {:keys [firebase-id owner public?]} :as lystro]]
-   (let [mine? (= owner (<sub [:uid]))]
+ [(re-frame/inject-cofx ::inject/sub [:uid])]
+ (fn [{db :db uid :uid} [_ {:keys [firebase-id owner public?]} :as lystro]]
+   (let [mine? (= owner uid)]
      (when mine?
        (fb/fb-event {:for-multi? false
                      :effect-type :firebase/write

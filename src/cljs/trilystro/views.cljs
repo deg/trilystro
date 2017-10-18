@@ -106,8 +106,12 @@
      (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
        [na/form-button {:disabled? (not connected?)
                         :on-click (na/>event [:page :quit-modal [:commit-lystro
-                                                                 (assoc (<sub [:form-state :entry])
-                                                                        :public? public?)
+                                                                 (let [lystro (<sub [:form-state :entry])]
+                                                                   (assoc lystro
+                                                                          :owner (<sub [:uid])
+                                                                          :public? public?
+                                                                          ;; [TODO] This goes away when tags implicit
+                                                                          :new-tags (<sub [:new-tags (:tags lystro)])))
                                                                  :entry]])
                         :icon (if connected? "add" "wait")
                         :content (if connected?
@@ -179,7 +183,10 @@
      [:div {:class-name "url"} (link-to url)]
      (when (not mine?)
        (let [user-details (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
-             user ((keyword owner) user-details)]
+             user ;; Too many bugs elsewhere have hit this weak spot, so be noisily defensive
+                  (if (str owner)
+                    ((keyword owner) user-details)
+                    {:display-name "Internal error - Unowned Lystro"})]
          [:div {:class "owner-sig"}
           (or (:display-name user) (:email user))]))]))
 
@@ -289,11 +296,12 @@
    [modal-about-panel]
    [top-bar]
    (when (<sub [:in-page :logged-in])
-     (let [open-state [(<sub [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
-                       (<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
-                       (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
-                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
-                       (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])]]
+     (let [open-state ;; Subs that should be held open for efficiency
+           [(<sub [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
+            (<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
+            (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
+            (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
+            (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])]]
        [na/container {:style {:margin-top "5em"}}
         (null-op open-state)
         [google-ad
