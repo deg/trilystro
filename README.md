@@ -123,9 +123,18 @@ heroku create
 
 Then deploy the application:
 
+Either to Heroku:
+
 ```
 git push heroku master
 ```
+
+Or to my github repo:
+
+```
+./deploy.sh
+```
+
 
 To compile clojurescript to javascript:
 
