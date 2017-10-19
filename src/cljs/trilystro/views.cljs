@@ -104,7 +104,8 @@
                              :default-checked public?
                              :on-change (na/>event [:form-state :entry [:public?]] false)}]]
      (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
-       [na/form-button {:disabled? (not connected?)
+       [na/form-button {:disabled? (or (empty? (<sub [:form-state :entry [:text]]))
+                                       (not connected?))
                         :on-click (na/>event [:page :quit-modal [:commit-lystro
                                                                  (let [lystro (<sub [:form-state :entry])]
                                                                    (assoc lystro
@@ -158,8 +159,8 @@
        [na/grid-column label-params "Text:"]
        [na/grid-column value-params text]]]))
 
-(defn delete-button [handler]
-  [na/button {:icon "delete"
+(defn mini-button [icon handler]
+  [na/button {:icon icon
               :floated "right"
               :color "brown"
               :size "mini"
@@ -171,7 +172,9 @@
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
      (when mine?
-       (delete-button (na/>event [:clear-lystro lystro])))
+       (mini-button "delete" (na/>event [:clear-lystro lystro])))
+     (when mine?
+       (mini-button "write" (na/>event [:page :modal-edit-lystro [:form-state :entry nil lystro]])))
      (draw-tags search-form tags)
      [:div {:on-click #(when mine?
                          (>evt [:page :modal-edit-lystro [:form-state :entry nil lystro]]))
