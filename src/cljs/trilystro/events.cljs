@@ -45,35 +45,28 @@
 
 (re-frame/reg-event-fx
  :commit-lystro
- (fn [{db :db} [_ {:keys [firebase-id tags url text owner public? new-tags]} form-key]]
+ (fn [{db :db} [_ {:keys [firebase-id tags url text owner public?]} form-key]]
    (let [form-path [:forms form-key]
          base-options {:db db
                        :for-multi? true
                        :effect-type :firebase/write}]
-     {:firebase/multi `[~@(mapv #(fb/fb-event (into base-options
-                                                    {:access :public
-                                                     :path [:tags %]
-                                                     :value true
-                                                     :on-failure (fn [_] (console :log "Collision? " % " already tagged"))}))
-                                new-tags)
-                        ~(fb/fb-event (into base-options
-                                            {:access :private
-                                             :path [:user-settings :default-public?]
-                                             :value public?}))
-                        ~(let [lystro-value {:tags tags
-                                             :url url
-                                             :text text
-                                             :owner owner
-                                             :public? public?}
-                               lystro-options (into base-options
-                                                    {:access (if public? :shared :private)
-                                                     :value lystro-value})]
-                           (if-let [old-id firebase-id]
-                             (fb/fb-event (assoc lystro-options
-                                                 :path [:lystros old-id]))
-                             (fb/fb-event (assoc lystro-options
-                                                 :effect-type :firebase/push
-                                                 :path [:lystros]))))]
+     {:firebase/multi [(fb/fb-event (into base-options
+                                          {:access :private
+                                           :path [:user-settings :default-public?]
+                                           :value public?}))
+                       (let [lystro-options (into base-options
+                                                  {:access (if public? :shared :private)
+                                                   :value {:tags tags
+                                                           :url url
+                                                           :text text
+                                                           :owner owner
+                                                           :public? public?}})]
+                         (if-let [old-id firebase-id]
+                           (fb/fb-event (assoc lystro-options
+                                               :path [:lystros old-id]))
+                           (fb/fb-event (assoc lystro-options
+                                               :effect-type :firebase/push
+                                               :path [:lystros]))))]
       :db (assoc-in db form-path nil)})))
 
 (re-frame/reg-event-fx
@@ -90,9 +83,6 @@
                      :value nil})))))
 
 
-(defn set-conj [set new]
-  (conj (or set #{}) new))
-
 (re-frame/reg-event-db
  :add-new-tag
  (fn [db [_ form-key]]
@@ -101,6 +91,6 @@
      (if (empty? new-tag)
        db
        (-> db
-           (update-in (conj form-path :tags)    set-conj new-tag)
+           (update-in (conj form-path :tags) (fnil conj #{}) new-tag)
            (assoc-in  (conj form-path :new-tag) ""))))))
 

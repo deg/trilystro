@@ -25,7 +25,6 @@
 (sub2 :page-state [:page-state])
 (sub2 :user       [:user])
 (sub2 :uid        [:user :uid])
-(sub2 :new-tags   [:new-tags])
 
 (re-frame/reg-sub
  :in-page
@@ -129,13 +128,17 @@
          (mapcat #(filter-lystros (cleanup-lystros %) options)
                  (vals shared-lystros)))))
 
-
 (re-frame/reg-sub
  :all-tags
- (fn [_ _]
-   (re-frame/subscribe [:firebase/on-value {:path (fb/public-fb-path [:tags])}]))
- (fn [tag-map _]
-   (map name (keys tag-map))))
+ (fn [_ _] (re-frame/subscribe [:lystros]))
+ (fn [lystros] (into #{} (mapcat :tags lystros))))
+
+
+(re-frame/reg-sub
+ :tag-counts
+ (fn [_ _] (re-frame/subscribe [:lystros]))
+ (fn [lystros] (frequencies (mapcat :tags lystros))))
+
 
 (re-frame/reg-sub
  :new-tags

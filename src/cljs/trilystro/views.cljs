@@ -109,9 +109,7 @@
                                                                  (let [lystro (<sub [:form-state :entry])]
                                                                    (assoc lystro
                                                                           :owner (<sub [:uid])
-                                                                          :public? public?
-                                                                          ;; [TODO] This goes away when tags implicit
-                                                                          :new-tags (<sub [:new-tags (:tags lystro)])))
+                                                                          :public? public?))
                                                                  :entry]])
                         :icon (if connected? "add" "wait")
                         :content (if connected?
@@ -297,8 +295,7 @@
    [top-bar]
    (when (<sub [:in-page :logged-in])
      (let [open-state ;; Subs that should be held open for efficiency
-           [(<sub [:firebase/on-value {:path (fb/public-fb-path [:tags])}])
-            (<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
+           [(<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
             (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])]]
