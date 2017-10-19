@@ -159,7 +159,6 @@
    graph))
 
 
-;; [TODO] Move this into a re-frame sub to cache the results of generate-image
 (defn render-graph
   "generate-image returns the SVG as an XML string with an embedded explicit width
   and height. Here we use an ugly hack to strip this info, and then embed it into

@@ -140,7 +140,7 @@
     (let [url (if (str/includes? url-string "/")
                 url-string
                 (str "http://" url-string))]
-      [:a {:href url} url-string])))
+      [:a {:class "break-long-words" :href url} url-string])))
 
 
 (defn lystro-grid [params tags url text]
@@ -175,7 +175,7 @@
      (draw-tags search-form tags)
      [:div {:on-click #(when mine?
                          (>evt [:page :modal-edit-lystro [:form-state :entry nil lystro]]))
-            :class-name (str "text "
+            :class-name (str "text break-long-words "
                              (if mine? "editable-text" "frozen-text"))}
       text]
      [:div {:class-name "url"} (link-to url)]

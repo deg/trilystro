@@ -23,6 +23,9 @@
   [:.frozen-text
    {:color "dark-grey"}]
 
+  [:.break-long-words
+   {:overflow-wrap "break-word"}]
+
   [:.owner-sig
    {:color "dark-gray"
     :font-style "italic"
