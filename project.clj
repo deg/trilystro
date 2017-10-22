@@ -65,7 +65,6 @@
    [{:id           "dev"
      :source-paths ["src/cljs" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
      :figwheel     {:on-jsload "trilystro.core/mount-root"}
-     :compiler-options {:language-in :ecmascript5}
      :compiler     {:main                 trilystro.core
                     :output-to            "resources/public/js/compiled/app.js"
                     :output-dir           "resources/public/js/compiled/out"
