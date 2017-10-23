@@ -22,7 +22,7 @@
 (re-frame/reg-event-db
  :initialize-db
  (fn  [_ _]
-   (fsm/page db/default-db :initialize-db nil)))
+   (fsm/page db/default-db :initialize-db nil nil)))
 
 (re-frame/reg-event-db
  :form-state
@@ -31,11 +31,29 @@
      (assoc-in db `[:forms ~form-name ~@form-component] value)
      (assoc-in db `[:forms ~form-name] value))))
 
+(defn- update-page-param [db fcn & args]
+  ;; [TODO] This cries out for learning and using Specter (https://github.com/nathanmarz/specter)
+  (let [old-param (-> db :page-state last second)
+        new-param (apply fcn old-param args)
+        new-final-state [(-> db :page-state last first) new-param]]
+    (assoc db :page-state (conj (-> db :page-state pop) new-final-state))))
+
+(re-frame/reg-event-db
+ :update-page-param
+ (fn [db [_ fcn & args]]
+   (apply update-page-param db fcn args)))
+
+(re-frame/reg-event-db
+ :update-page-param-val
+ (fn [db [_ key val]]
+   (update-page-param db #(assoc %1 key %2) val)))
+
 (re-frame/reg-event-fx
  :set-user
  (fn [{db :db} [_ user]]
    (into {:db (fsm/page (assoc db :user user)
                         (if user :login-confirmed :logout)
+                        nil
                         nil)}
          (when user
            {:firebase/write {:path       (fb/my-shared-fb-path [:user-details] (:uid user))
@@ -45,9 +63,8 @@
 
 (re-frame/reg-event-fx
  :commit-lystro
- (fn [{db :db} [_ {:keys [firebase-id tags url text owner public?]} form-key]]
-   (let [form-path [:forms form-key]
-         base-options {:db db
+ (fn [{db :db} [_ {:keys [firebase-id tags url text owner public?]}]]
+   (let [base-options {:db db
                        :for-multi? true
                        :effect-type :firebase/write}]
      {:firebase/multi [(fb/fb-event (into base-options
@@ -66,8 +83,7 @@
                                                :path [:lystros old-id]))
                            (fb/fb-event (assoc lystro-options
                                                :effect-type :firebase/push
-                                               :path [:lystros]))))]
-      :db (assoc-in db form-path nil)})))
+                                               :path [:lystros]))))]})))
 
 (re-frame/reg-event-fx
  :clear-lystro
@@ -85,12 +101,14 @@
 
 (re-frame/reg-event-db
  :add-new-tag
- (fn [db [_ form-key]]
-   (let [form-path [:forms form-key]
-         new-tag (get-in db (conj form-path :new-tag))]
-     (if (empty? new-tag)
-       db
-       (-> db
-           (update-in (conj form-path :tags) (fnil conj #{}) new-tag)
-           (assoc-in  (conj form-path :new-tag) ""))))))
+ (fn [db _]
+   (update-page-param
+    db
+    (fn [page-state]
+      (let [new-tag (:new-tag page-state)]
+        (if (empty? new-tag)
+          page-state
+          (-> page-state
+              (update :tags (fnil conj #{}) new-tag)
+              (assoc :new-tag ""))))))))
 

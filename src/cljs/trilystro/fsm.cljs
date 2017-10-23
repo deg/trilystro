@@ -13,6 +13,8 @@
   - a stack of states: :push adds a state to the stack. :pop removes the top state from
     the stack. :shift changes the top state in the stack. (When the stack has only one
     element, this is just a basic state transition, of course).
+  - Parameters: At runtime, each state has an associated vector of parameters. This is
+    useful particularly for passing parameters in :push transitions.
   - Triggers: Cause another re-frame event to occur because of an FSM action. Triggers
     can be supplied in calls to shift, push or pop. They can also be specified in the
     FSM graph, to occur automatically whenever an action occurs.
@@ -30,16 +32,16 @@
 
 (defn- next-stack
   "Apply an action to a state stack"
-  [stack action new-state]
+  [stack action new-state param]
   (when (and (second stack) (= action :shift))
     ;; [TODO] Decide if we really want to support this.
     (console :log "FSM shift occurred while in a pushed state. This is allowed
                   but violates decades of programming good taste. Are you sure?"))
   (case action
-    :shift (conj (pop stack) new-state)
-    :push  (conj stack new-state)
+    :shift (conj (pop stack) [new-state param])
+    :push  (conj stack [new-state param])
     :pop   (pop stack)
-    [:error]))
+    [[:error "Invalid fsm action" action]]))
 
 (defn- transit-state!
   "This is the FSM manager. Perform an action on the stack, and dispatch any trigger.
@@ -48,57 +50,62 @@
    be passed in explicitly (to occur once). When both vectors are supplied, they are
    concatenated, effectively passing the one-time trigger as a parameter to the graph's
    trigger."
-  [state-graph state-stack transition trigger-params]
-  (let [top-state (peek state-stack)
+  [state-graph state-stack transition one-time-trigger param]
+  (let [top-state-and- (peek state-stack)
+        top-state (if (vector? top-state-and-) (first top-state-and-) top-state-and-)
         [action new-state trigger] (get-in state-graph [top-state transition])
-        new-stack (next-stack state-stack action new-state)
-        full-trigger (when (or trigger trigger-params)
-                       (utils/vconcat trigger trigger-params))]
+        new-stack (next-stack state-stack action new-state param)
+        full-trigger (when (or trigger one-time-trigger)
+                       (utils/vconcat trigger one-time-trigger))]
     ;; (console :log "PAGE TRANSITION: " state-stack transition new-stack)
     (when-not (empty? full-trigger)
       ;; (console :log "-> TRIGGERING: " full-trigger)
       (>evt full-trigger))
     new-stack))
 
+(defn page-param [state-stack]
+  (-> state-stack last second))
+
 
 (defn in-state?
   "Utility predicate to test if a state is active."
   [state-stack state]
-  (-> #{state} (some state-stack) boolean))
+  (-> #{state} (some (map first state-stack)) boolean))
 
 
 ;;; Trilystro app state
 
 (def page-states
   "Trilystro top-level state.  Logged-in vs logged-out and several modal popups."
-  {:start             {:initialize-db       [:shift :logged-out]}
-   :logged-out        {:login-confirmed     [:shift :logged-in]
-                       :logout              [:shift :logged-out]
-                       :try-login           [:shift :logging-in]
-                       :modal-about         [:push :modal-about]}
-   :logging-in        {:firebase-error      [:shift :error]
-                       :login-confirmed     [:shift :logged-in]
-                       :logout              [:shift :logged-out]}
-   :logged-in         {:login-confirmed     [:shift :logged-in]
-                       :logout              [:shift :logged-out]
-                       :modal-edit-lystro   [:push :modal-edit-lystro]
-                       :modal-new-lystro    [:push :modal-new-lystro]
-                       :modal-about         [:push :modal-about]}
-   :modal-edit-lystro {:quit-modal          [:pop]}
-   :modal-new-lystro  {:quit-modal          [:pop]}
-   :modal-about       {:quit-modal          [:pop]}
-   :error             {:error-handled       [:shift :start]}})
+  {:start                {:initialize-db          [:shift :logged-out]}
+   :logged-out           {:login-confirmed        [:shift :logged-in]
+                          :logout                 [:shift :logged-out]
+                          :try-login              [:shift :logging-in]
+                          :modal-about            [:push :modal-about]}
+   :logging-in           {:firebase-error         [:shift :error]
+                          :login-confirmed        [:shift :logged-in]
+                          :logout                 [:shift :logged-out]}
+   :logged-in            {:login-confirmed        [:shift :logged-in]
+                          :logout                 [:shift :logged-out]
+                          :modal-confirm-delete   [:push :modal-confirm-delete]
+                          :modal-edit-lystro      [:push :modal-edit-lystro]
+                          :modal-new-lystro       [:push :modal-new-lystro]
+                          :modal-about            [:push :modal-about]}
+   :modal-edit-lystro    {:quit-modal             [:pop]}
+   :modal-new-lystro     {:quit-modal             [:pop]}
+   :modal-about          {:quit-modal             [:pop]}
+   :modal-confirm-delete {:quit-modal             [:pop]}
+   :error                {:error-handled          [:shift :start]}})
 
-(def transit-page! (partial transit-state! page-states))
-
-;; [TODO] This should be private. Fix callers
-(defn page [db transition trigger-params]
-  (update db :page-state transit-page! transition trigger-params))
+;; [TODO] Get rid of this function after we stop calling it from events.cljs
+(defn page [db transition one-time-trigger param]
+  (update db :page-state (partial transit-state! page-states)
+          transition one-time-trigger param))
 
 (re-frame/reg-event-db
- :page
- (fn [db [_ transition trigger-params]]
-   (page db transition trigger-params)))
+ ::page
+ (fn [db [_ transition one-time-trigger param]]
+   (page db transition one-time-trigger param)))
 
 
 
@@ -109,8 +116,9 @@
   "Return the set of all nodes that push to a node.
   This is an attempt to graph the effects of pop. It is not complete, since it ignores
   potential non-structured usages such as {:push a; :shift b; :pop}. But, to be fair:
-  I never have such usages; they violate 50 years of good taste in structured programming;
-  and it may have been a mistake to even supporth this usage in next-stack."
+  1) I don't have any usages of shift while a state is pushed
+  2) They would violate 50 years of good taste in structured programming
+  3) It may have been a mistake to even support this usage in next-stack."
   [graph node]
   (reduce-kv
    (fn [coll source edge-map]

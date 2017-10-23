@@ -32,6 +32,16 @@
    (fsm/in-state? (:page-state db) page)))
 
 (re-frame/reg-sub
+ :page-param
+ (fn [db _]
+   (fsm/page-param (:page-state db))))
+
+(re-frame/reg-sub
+ :page-param-val
+ (fn [db [_ val-key]]
+   (-> db :page-state fsm/page-param val-key)))
+
+(re-frame/reg-sub
  :form-state
  (fn [db [_ form form-component]]
    (get-in db `[:forms ~form ~@form-component])))

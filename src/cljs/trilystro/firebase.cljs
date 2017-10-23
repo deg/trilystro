@@ -6,7 +6,8 @@
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [sodium.re-utils :as re-utils :refer [<sub]]
-   [com.degel.re-frame-firebase :as firebase]))
+   [com.degel.re-frame-firebase :as firebase]
+   [trilystro.fsm :as fsm]))
 
 
 ;;; From https://console.firebase.google.com/u/0/project/trilystro/overview - "Add Firebase to your web app"
@@ -18,7 +19,7 @@
 
 
 (defn init []
-  (re-frame/dispatch-sync [:page :try-login])
+  (re-frame/dispatch-sync [::fsm/page :try-login])
   (firebase/init :firebase-app-info      firebase-app-info
                  :get-user-sub           [:user]
                  :set-user-event         [:set-user]

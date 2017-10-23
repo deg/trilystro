@@ -5,4 +5,4 @@
 
 (def default-db
   {:name "Trilystro"
-   :page-state [:start]})
+   :page-state [[:start]]})

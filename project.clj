@@ -72,7 +72,7 @@
                     :source-map-timestamp true
                     :language-in :ecmascript5
                     ;:closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
-                    ;:preloads             [devtools.preload day8.re-frame.trace.preload]
+                    :preloads             [devtools.preload #_ day8.re-frame.trace.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
                     }}
 
