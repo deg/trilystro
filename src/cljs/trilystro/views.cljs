@@ -251,14 +251,18 @@
       (str "Really delete Lystro?")]
      [na/modal-content {}
       [na/container {}
-       "Whatever!!"
+       (str "Will delete \""
+            (subs (or (:text lystro) (:url lystro) "") 0 20)
+            "\"...")
        [na/divider {}]
        [na/button {:content "Delete"
                    :negative? true
                    :icon "delete"
+                   :floated "right"
                    :on-click fn-delete}]
        [na/button {:content "Cancel"
                    :icon "dont"
+                   :secondary? true
                    :on-click fn-abort}]]]]))
 
 
