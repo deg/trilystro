@@ -22,7 +22,7 @@
 (re-frame/reg-event-db
  :initialize-db
  (fn  [_ _]
-   (fsm/page db/default-db :initialize-db nil nil)))
+   db/default-db))
 
 (re-frame/reg-event-db
  :form-state
@@ -31,30 +31,11 @@
      (assoc-in db `[:forms ~form-name ~@form-component] value)
      (assoc-in db `[:forms ~form-name] value))))
 
-(defn- update-page-param [db fcn & args]
-  ;; [TODO] This cries out for learning and using Specter (https://github.com/nathanmarz/specter)
-  (let [old-param (-> db :page-state last second)
-        new-param (apply fcn old-param args)
-        new-final-state [(-> db :page-state last first) new-param]]
-    (assoc db :page-state (conj (-> db :page-state pop) new-final-state))))
-
-(re-frame/reg-event-db
- :update-page-param
- (fn [db [_ fcn & args]]
-   (apply update-page-param db fcn args)))
-
-(re-frame/reg-event-db
- :update-page-param-val
- (fn [db [_ key val]]
-   (update-page-param db #(assoc %1 key %2) val)))
-
 (re-frame/reg-event-fx
  :set-user
  (fn [{db :db} [_ user]]
-   (into {:db (fsm/page (assoc db :user user)
-                        (if user :login-confirmed :logout)
-                        nil
-                        nil)}
+   (into {:db (assoc db :user user)
+          :dispatch [::fsm/goto (if user :login-confirmed :logout)]}
          (when user
            {:firebase/write {:path       (fb/my-shared-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
@@ -98,17 +79,4 @@
                      :path [:lystros firebase-id]
                      :value nil})))))
 
-
-(re-frame/reg-event-db
- :add-new-tag
- (fn [db _]
-   (update-page-param
-    db
-    (fn [page-state]
-      (let [new-tag (:new-tag page-state)]
-        (if (empty? new-tag)
-          page-state
-          (-> page-state
-              (update :tags (fnil conj #{}) new-tag)
-              (assoc :new-tag ""))))))))
 

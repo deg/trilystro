@@ -6,7 +6,7 @@
   :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-beta2"]
+  :dependencies [[org.clojure/clojure "1.9.0-beta3"]
                  [org.clojure/clojurescript "1.9.946"]
                  [cljs-ajax "0.7.2"]
                  [com.andrewmcveigh/cljs-time "0.5.1"]
@@ -24,7 +24,7 @@
                  [yogthos/config "0.9"]
                  [com.degel/re-frame-firebase "0.3.0"]
                  [com.degel/re-frame-storage-fx "0.1.0"]
-                 [com.degel/sodium "0.6.1"]]
+                 [com.degel/sodium "0.7.0"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-garden "0.2.8"]]

@@ -9,7 +9,8 @@
             [trilystro.subs]
             [trilystro.views :as views]
             [trilystro.config :as config]
-            [trilystro.firebase :as fb]))
+            [trilystro.firebase :as fb]
+            [trilystro.fsm :as fsm]))
 
 (enable-console-print!)
 
@@ -28,6 +29,7 @@
 
 (defn ^:export init []
   (re-frame/dispatch-sync [:initialize-db])
+  (re-frame/dispatch-sync [::fsm/goto :initialize-db])
   (dev-setup)
   (fb/init)
   (mount-root))

@@ -8,126 +8,16 @@
    [com.degel.re-frame-firebase]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [reagent.core :as reagent]
-   [soda-ash.core :as sa]
    [sodium.core :as na]
    [sodium.extensions :as nax]
    [sodium.re-utils :refer [<sub >evt]]
-   [sodium.utils :as utils]
    [trilystro.config :as config]
    [trilystro.events :as events]
    [trilystro.firebase :as fb]
-   [trilystro.fsm :as fsm]))
-
-;;; [TODO] Move to utils
-(defn compare-ci [s1 s2]
-  (compare (str/upper-case s1) (str/upper-case s2)))
-
-;;; [TODO] Move to utils
-(defn sort-ci [l]
-  (sort-by str/upper-case l))
-
-
-(defn draw-tag [tag]
-  (let [selected-tags (<sub [:page-param-val :tags] #{})
-        selected? (contains? selected-tags tag)]
-    [na/list-item {:key tag
-                   :on-click #(>evt [:update-page-param-val :tags
-                                     ((if selected? disj conj) selected-tags tag)])}
-     [:span {:class (str "tag "
-                         (if selected? "selected-tag" "unselected-tag"))}
-      tag]]))
-
-(defn draw-tags [tags]
-  [na/list-na {:class-name "tags"
-               :horizontal? true}
-   (doall (map draw-tag (sort-ci tags)))])
-
-
-(defn keyword-adder []
-  (let [old-tags (set (<sub [:all-tags]))
-        new-tags (<sub [:page-param-val :tags #{}])
-        available-tags (sort-ci (clojure.set/difference old-tags new-tags))]
-    [na/grid {:container? true}
-     [na/grid-row {}
-      [draw-tags new-tags]]
-     [na/grid-row {}
-      `[:datalist {:id "tags"}
-        ~(map (fn [tag] [:option {:key tag :value tag}])
-              available-tags)]
-      [sa/Input {:type :text
-                 :list "tags"
-                 :action {:icon "add"
-                          :on-click (na/>event [:add-new-tag])}
-                 :placeholder "add tag"
-                 :value     (<sub [:page-param-val :new-tag] "")
-                 :on-change (na/>event [:update-page-param-val :new-tag])}]]]))
-
-(defn keyword-selector []
-  (let [available-tags (sort-ci (<sub [:all-tags]))
-        chosen-tags (sort-ci (<sub [:page-param-val :tags] #{}))]
-    [na/dropdown {:multiple? true
-                  :button? true
-                  :value chosen-tags
-                  :on-change (na/>event [:update-page-param-val :tags] #{} set)
-                  :options (na/dropdown-list available-tags identity identity)}]))
-
-
-(defn entry-panel []
-  (let [lystro (<sub [:page-param])
-        pub? (:public? lystro)
-        public? (if-not (nil? pub?)
-                  pub?
-                  (or (get-in (<sub [:user-settings]) [:default-public?])
-                      false))]
-    [na/form {:widths "equal"}
-     [nax/labelled-field
-      :label "Tags:"
-      :inline? true
-      :content [keyword-adder]]
-     [nax/labelled-field
-      :label "URL:"
-      :inline? true
-      :content [na/input {:type "url"
-                          :placeholder "Website..."
-                          :default-value (:url lystro)
-                          :on-change (na/>event [:update-page-param-val :url])}]]
-     [nax/labelled-field
-      :label "Text:"
-      :content [na/text-area {:rows 3
-                              :placeholder "Description..."
-                              :default-value (:text lystro)
-                              :on-change (na/>event [:update-page-param-val :text])}]]
-     [nax/labelled-field
-      :label "Visibility:"
-      :content [sa/Checkbox {:label "Public"
-                             :default-checked public?
-                             :on-change (na/>event [:update-page-param-val :public?] false)}]]
-     (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
-       [na/form-button {:disabled? (or (empty? (:text lystro))
-                                       (not connected?))
-                        :on-click (na/>event [::fsm/page :quit-modal
-                                              [:commit-lystro (assoc lystro
-                                                                     :owner (<sub [:uid])
-                                                                     :public? public?)]])
-                        :icon (if connected? "add" "wait")
-                        :content (if connected?
-                                   (str "Save " (if public? "public" "private"))
-                                   "(offline)")
-                        :positive? true}])]))
-
-
-(defn modal-entry-panel []
-  (let [new?  (<sub [:in-page :modal-new-lystro])
-        edit? (<sub [:in-page :modal-edit-lystro])]
-    [na/modal {:open? (or new? edit?)
-               :dimmer "blurring"
-               :close-icon true
-               :on-close (na/>event [::fsm/page :quit-modal])}
-     [na/modal-header {} (cond new? "Add Lystro"
-                               edit? "Edit Lystro"
-                               :default "???")]
-     [na/modal-content {} [entry-panel]]]))
+   [trilystro.fsm :as fsm]
+   [trilystro.views-modal-about :as v-about]
+   [trilystro.views-modal-confirm-delete :as v-confirm-delete]
+   [trilystro.views-modal-entry :as v-entry]))
 
 
 ;;; [TODO] Move to sodium.utils once this matures a bit
@@ -142,7 +32,10 @@
       [:a {:class "break-long-words" :href url} url-string])))
 
 
-(defn lystro-grid [params tags url text]
+(defn lystro-search-grid
+  "Grid to show Lystro elements.
+  [TODO] Currently used only for the search box. Cleanup may be due"
+  [params tags url text]
   (let [row-params {:color (or (:color params) "grey")}
         label-params {:width 3 :text-align "right"}
         value-params {:width 13}]
@@ -157,27 +50,53 @@
        [na/grid-column label-params "Text:"]
        [na/grid-column value-params text]]]))
 
-(defn mini-button [icon handler]
+
+(defn search-panel
+  "Component to specify Lystro search terms"
+  []
+  [lystro-search-grid {:color "brown"}
+   [na/container {}
+    [na/dropdown {:inline? true
+                  :value     (<sub      [::fsm/page-param-val :tags-mode] :any-of)
+                  :on-change (na/>event [::fsm/update-page-param-val :tags-mode] :any-of keyword)
+                  :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
+    [nax/tag-selector {:sub-all-tags            [:all-tags]
+                       :sub-selected-tags       [::fsm/page-param-val :tags]
+                       :event-set-selected-tags [::fsm/update-page-param-val :tags]}]]
+   [na/input {:type "url"
+              :placeholder "Website..."
+              :value     (<sub      [::fsm/page-param-val :url] "")
+              :on-change (na/>event [::fsm/update-page-param-val :url])}]
+   [na/text-area {:rows 3
+                  :placeholder "Description..."
+                  :value     (<sub      [::fsm/page-param-val :text] "")
+                  :on-change (na/>event [::fsm/update-page-param-val :text])}]])
+
+
+(defn mini-button
+  "Icon-only button, good for standard actions"
+  [icon handler]
   [na/button {:icon icon
               :floated "right"
               :color "brown"
               :size "mini"
               :on-click handler}])
 
-(defn lystro-results-panel [{:keys [tags text url owner public?] :as lystro}]
+
+(defn lystro-results-panel
+  "Render one Lystro"
+  [{:keys [tags text url owner public?] :as lystro}]
   (let [mine? (= owner (<sub [:uid]))]
     [na/segment {:secondary? (not mine?)
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
-     (when mine? (mini-button
-                  "delete"
-                  (na/>event [::fsm/page :modal-confirm-delete nil lystro])))
-     (when mine? (mini-button
-                  "write"
-                  (na/>event [::fsm/page :modal-edit-lystro nil lystro])))
-     (draw-tags tags)
+     (when mine? (mini-button "delete" (na/>event [::fsm/goto :modal-confirm-delete {:param lystro}])))
+     (when mine? (mini-button "write"  (na/>event [::fsm/goto :modal-edit-lystro    {:param lystro}])))
+     [nax/draw-tags {:sub-selected-tags       [::fsm/page-param-val :tags]
+                     :event-set-selected-tags [::fsm/update-page-param-val :tags]}
+      tags]
      [:div {:on-click #(when mine?
-                         (>evt [::fsm/page :modal-edit-lystro nil lystro]))
+                         (>evt [::fsm/goto :modal-edit-lystro {:param lystro}]))
             :class-name (str "text break-long-words "
                              (if mine? "editable-text" "frozen-text"))}
       text]
@@ -192,78 +111,19 @@
           (or (:display-name user) (:email user))]))]))
 
 
-(defn main-panel []
-  (fn []
-    (let [selected-tags (set (<sub [:page-param-val :tags]))
-          selected-url (<sub [:page-param-val :url])
-          selected-text (<sub [:page-param-val :text])
-          tags-mode (<sub [:page-param-val :tags-mode])
-          lystros (<sub [:lystros {:tags-mode tags-mode :tags selected-tags :url selected-url :text selected-text}])]
-      [na/form {:widths "equal"}
-       [na/divider {:horizontal? true :section? true} "Search Lystros"]
-       [lystro-grid {:color "brown"}
-        [na/container {}
-         [na/dropdown {:inline? true
-                       :value     (<sub      [:page-param-val :tags-mode] :any-of)
-                       :on-change (na/>event [:update-page-param-val :tags-mode] :any-of keyword)
-                       :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
-         [keyword-selector]]
-        [na/input {:type "url"
-                   :placeholder "Website..."
-                   :value     (<sub      [:page-param-val :url] "")
-                   :on-change (na/>event [:update-page-param-val :url])}]
-        [na/text-area {:rows 3
-                       :placeholder "Description..."
-                       :value     (<sub      [:page-param-val :text] "")
-                       :on-change (na/>event [:update-page-param-val :text])}]]
-       [na/divider {:horizontal? true :section? true} (str "Results (" (count lystros) ")")]
-       `[:div {}
-         ~@(mapv lystro-results-panel lystros)]])))
-
-
-(defn about-panel []
-  [na/container {}
-   [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
-   [:div "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
-   (fsm/render-graph fsm/page-states)])
-
-(defn modal-about-panel []
-  [na/modal {:open? (<sub [:in-page :modal-about])
-             :dimmer "blurring"
-             :close-icon true
-             :close-on-dimmer-click? false
-             :on-close (na/>event [::fsm/page :quit-modal])}
-   [na/modal-header {}
-    (str "About " (<sub [:name]))]
-   [na/modal-content {}
-    [about-panel]]])
-
-(defn modal-confirm-delete []
-  (let [lystro (<sub [:page-param])
-        fn-delete (na/>event [::fsm/page :quit-modal [:clear-lystro lystro]])
-        fn-abort  (na/>event [::fsm/page :quit-modal])]
-    [na/modal {:open? (<sub [:in-page :modal-confirm-delete])
-               :dimmer "blurring"
-               :close-icon true
-               :close-on-dimmer-click? true
-               :on-close fn-abort}
-     [na/modal-header {}
-      (str "Really delete Lystro?")]
-     [na/modal-content {}
-      [na/container {}
-       (str "Will delete \""
-            (subs (or (:text lystro) (:url lystro) "") 0 20)
-            "\"...")
-       [na/divider {}]
-       [na/button {:content "Delete"
-                   :negative? true
-                   :icon "delete"
-                   :floated "right"
-                   :on-click fn-delete}]
-       [na/button {:content "Cancel"
-                   :icon "dont"
-                   :secondary? true
-                   :on-click fn-abort}]]]]))
+(defn main-panel
+  "The main screen"
+  []
+  [na/form {}
+   [na/divider {:horizontal? true :section? true} "Search Lystros"]
+   [search-panel]
+   (let [lystros (<sub [:lystros {:tags-mode (<sub [::fsm/page-param-val :tags-mode])
+                                  :tags (set (<sub [::fsm/page-param-val :tags]))
+                                  :url (<sub [::fsm/page-param-val :url])
+                                  :text (<sub [::fsm/page-param-val :text])}])]
+     [na/divider {:horizontal? true :section? true} (str "Results (" (count lystros) ")")]
+     `[:div {}
+       ~@(mapv lystro-results-panel lystros)])])
 
 
 (defn login-logout-control []
@@ -282,33 +142,15 @@
 (defn top-bar []
   [na/menu {:fixed "top"}
    [na/menu-item {:header? true
-                  :on-click (na/>event [::fsm/page :modal-about])}
+                  :on-click (na/>event [::fsm/goto :modal-about])}
     [na/icon {:name "eye" :size "big"}]
     (<sub [:name])]
    [na/menu-item {:name "Add"
-                  :disabled? (not (<sub [:in-page :logged-in]))
-                  :on-click (na/>event [::fsm/page :modal-new-lystro nil nil])}]
+                  :disabled? (not (<sub [::fsm/in-page? :logged-in]))
+                  :on-click (na/>event [::fsm/goto :modal-new-lystro])}]
    [na/menu-item {:name "About"
-                  :on-click (na/>event [::fsm/page :modal-about])}]
+                  :on-click (na/>event [::fsm/goto :modal-about])}]
    [login-logout-control]])
-
-
-;; [TODO] Move this to Sodium extensions
-(defn google-ad [& {:keys [unit ad-client ad-slot test]}]
-  (reagent/create-class
-   {:display-name "google-ad"
-    :component-did-mount
-    #(when (and js.window.adsbygoogle (not test))
-       (. js.window.adsbygoogle push {}))
-    :reagent-render
-    (fn [& {:keys [unit ad-client ad-slot]}]
-      [na/advertisement {:unit unit :centered? true :test test}
-       (when-not test
-         [:ins {:class-name "adsbygoogle"
-                :style {:display "block"}
-                :data-ad-format "auto"
-                :data-ad-client ad-client
-                :data-ad-slot ad-slot}])])}))
 
 
 
@@ -321,17 +163,17 @@
 
 (defn app-view []
   [na/container {}
-   [modal-about-panel]
-   [modal-entry-panel]
-   [modal-confirm-delete]
+   [v-about/modal-about-panel]
+   [v-entry/modal-entry-panel]
+   [v-confirm-delete/modal-confirm-delete]
    [top-bar]
    [na/container {:style {:margin-top "5em"}}
-    [google-ad
+    [nax/google-ad
      :unit "half banner"
      :ad-client "ca-pub-7080962590442738"
      :ad-slot "5313065038"
      :test (when config/debug? "... ADVERT  HERE ...")]
-    (when (<sub [:in-page :logged-in])
+    (when (<sub [::fsm/in-page? :logged-in])
       (let [open-state ;; Subs that should be held open for efficiency
             [(<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
              (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])

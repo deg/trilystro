@@ -19,7 +19,7 @@
 
 
 (defn init []
-  (re-frame/dispatch-sync [::fsm/page :try-login])
+  (re-frame/dispatch-sync [::fsm/goto :try-login])
   (firebase/init :firebase-app-info      firebase-app-info
                  :get-user-sub           [:user]
                  :set-user-event         [:set-user]

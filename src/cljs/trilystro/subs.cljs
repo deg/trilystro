@@ -8,38 +8,16 @@
                [clojure.spec.alpha :as s]
                [re-frame.core :as re-frame]
                [re-frame.loggers :refer [console]]
-               [sodium.re-utils :as re-utils :refer [<sub]]
+               [sodium.re-utils :as re-utils :refer [sub2 <sub]]
                [sodium.utils :as utils]
                [trilystro.events :as events]
                [trilystro.firebase :as fb]
                [trilystro.fsm :as fsm]))
 
-(defn sub2
-  "Shorthand for simple 'layer 2` usage of re-sub"
-  [key db-path]
-  (re-frame/reg-sub
-   key
-   (fn [db _] (get-in db db-path))))
-
 (sub2 :name       [:name])
-(sub2 :page-state [:page-state])
 (sub2 :user       [:user])
 (sub2 :uid        [:user :uid])
 
-(re-frame/reg-sub
- :in-page
- (fn [db [_ page]]
-   (fsm/in-state? (:page-state db) page)))
-
-(re-frame/reg-sub
- :page-param
- (fn [db _]
-   (fsm/page-param (:page-state db))))
-
-(re-frame/reg-sub
- :page-param-val
- (fn [db [_ val-key]]
-   (-> db :page-state fsm/page-param val-key)))
 
 (re-frame/reg-sub
  :form-state
@@ -81,7 +59,7 @@
             (let [text (or (field lystro) "")]
               (if (empty? match-text)
                 text
-                (re-find (js/RegExp. match-text "i") text))))))
+                (utils/ci-includes? text match-text ))))))
 
 
 (defn filter-lystros [lystros {:keys [tags-mode tags url text] :as options}]
