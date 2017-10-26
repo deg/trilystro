@@ -15,9 +15,9 @@
    [trilystro.events :as events]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
-   [trilystro.views-modal-about :as v-about]
-   [trilystro.views-modal-confirm-delete :as v-confirm-delete]
-   [trilystro.views-modal-entry :as v-entry]))
+   [trilystro.view-modal-about :as v-about]
+   [trilystro.view-modal-confirm-delete :as v-confirm-delete]
+   [trilystro.view-modal-entry :as v-entry]))
 
 
 ;;; [TODO] Move to sodium.utils once this matures a bit

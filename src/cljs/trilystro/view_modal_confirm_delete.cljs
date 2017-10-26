@@ -1,7 +1,7 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.views-modal-confirm-delete
+(ns trilystro.view-modal-confirm-delete
   (:require
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]

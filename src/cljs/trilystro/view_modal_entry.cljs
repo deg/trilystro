@@ -1,7 +1,7 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.views-modal-entry
+(ns trilystro.view-modal-entry
   (:require
    [re-frame.loggers :refer [console]]
    [soda-ash.core :as sa]
