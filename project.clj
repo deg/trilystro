@@ -8,7 +8,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-beta3"]
                  [org.clojure/clojurescript "1.9.946"]
-                 [cljs-ajax "0.7.2"]
+                 [cljs-ajax "0.7.2" :exclusions [com.cognitect/transit-cljs]] [com.cognitect/transit-cljs "0.8.243"]
                  [com.andrewmcveigh/cljs-time "0.5.1"]
                  [compojure "1.6.0"]
                  [day8.re-frame/http-fx "0.1.4"]
