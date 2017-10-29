@@ -60,9 +60,9 @@
                   :value     (<sub      [::fsm/page-param-val :tags-mode] :any-of)
                   :on-change (na/>event [::fsm/update-page-param-val :tags-mode] :any-of keyword)
                   :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
-    [nax/tag-selector {:sub-all-tags            [:all-tags]
-                       :sub-selected-tags       [::fsm/page-param-val :tags]
-                       :event-set-selected-tags [::fsm/update-page-param-val :tags]}]]
+    [nax/tag-selector {:all-tags-sub            [:all-tags]
+                       :selected-tags-sub       [::fsm/page-param-val :tags]
+                       :set-selected-tags-event [::fsm/update-page-param-val :tags]}]]
    [na/input {:type "url"
               :placeholder "Website..."
               :value     (<sub      [::fsm/page-param-val :url] "")
@@ -92,8 +92,8 @@
                  :class-name "lystro-result"}
      (when mine? (mini-button "delete" (na/>event [::fsm/goto :modal-confirm-delete {:param lystro}])))
      (when mine? (mini-button "write"  (na/>event [::fsm/goto :modal-edit-lystro    {:param lystro}])))
-     [nax/draw-tags {:sub-selected-tags       [::fsm/page-param-val :tags]
-                     :event-set-selected-tags [::fsm/update-page-param-val :tags]}
+     [nax/draw-tags {:selected-tags-sub       [::fsm/page-param-val :tags]
+                     :set-selected-tags-event [::fsm/update-page-param-val :tags]}
       tags]
      [:div {:on-click #(when mine?
                          (>evt [::fsm/goto :modal-edit-lystro {:param lystro}]))
