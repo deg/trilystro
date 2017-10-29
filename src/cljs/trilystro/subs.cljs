@@ -14,9 +14,10 @@
                [trilystro.firebase :as fb]
                [trilystro.fsm :as fsm]))
 
+(sub2 :git-commit [:git-commit])
 (sub2 :name       [:name])
-(sub2 :user       [:user])
 (sub2 :uid        [:user :uid])
+(sub2 :user       [:user])
 
 
 (re-frame/reg-sub

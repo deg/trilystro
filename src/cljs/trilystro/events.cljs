@@ -3,11 +3,13 @@
 
 (ns trilystro.events
   (:require
+   [ajax.core :as ajax]
    [cljs-time.coerce :as time-coerce]
    [cljs-time.core :as time]
    [cljs-time.format :as time-format]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
+   [day8.re-frame.http-fx]
    [reagent.core :as reagent]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
@@ -19,10 +21,32 @@
 
 (s/check-asserts true)
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
  :initialize-db
  (fn  [_ _]
-   db/default-db))
+   {:db db/default-db
+    :http-xhrio {:method :get
+                 :uri "/git-describe.txt"
+                 :params {:cachebuster (str (rand))}
+                 :response-format (ajax/text-response-format)
+                 :on-success [:got-git-describe]
+                 :on-failure [:no-git-describe]}}))
+
+(defn cache-git-commit [db git-desc]
+  (assoc db :git-commit git-desc))
+
+(re-frame/reg-event-db
+ :got-git-describe
+ (fn [db [_ raw-desc]]
+   (let [[commit date] (str/split raw-desc #"[\n\r]")]
+     (cache-git-commit db {:commit commit :date date}))))
+
+(re-frame/reg-event-db
+ :no-git-describe
+ (fn [db [_ error]]
+   (console :log "Failed to get git description: " error)
+   (cache-git-commit db "[unavailable]")))
+
 
 (re-frame/reg-event-db
  :form-state

@@ -13,7 +13,10 @@
 (defn about-panel []
   [na/container {}
    [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
-   [:div "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
+   [:div {:class "credits"} "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
+   [:div {:class "credits"}
+    (let [{:keys [commit date]} (<sub [:git-commit])]
+      (str "This version built from GIT commit: " commit " of " date))]
    (fsm-graph/render-graph (<sub [::fsm/page-states]))])
 
 (defn modal-about-panel []

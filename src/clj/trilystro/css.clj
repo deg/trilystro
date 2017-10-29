@@ -10,8 +10,13 @@
     :color "black"}]
   [:.hidden
    {:display "none"}]
+
   [:.errmsg
    {:color "red"}]
+
+  [:.credits
+   {:font-size "70%"}]
+
   [:.lystro-result
    [:.url
     {:margin "0 0 0.5rem 0"}]
