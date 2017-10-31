@@ -61,6 +61,8 @@
    (into {:db (assoc db :user user)
           :dispatch [::fsm/goto (if user :login-confirmed :logout)]}
          (when user
+           ;; [TODO][ch94] Should remain :user-details to :users-details in Firebase.
+           ;;    Requires a migration hack.
            {:firebase/write {:path       (fb/my-shared-fb-path [:user-details] (:uid user))
                              :value      (select-keys user [:display-name :email :photo-url])
                              :on-success #(console :log "Logged in:" (:display-name user))
@@ -102,5 +104,3 @@
                      :access (if public? :shared :private)
                      :path [:lystros firebase-id]
                      :value nil})))))
-
-

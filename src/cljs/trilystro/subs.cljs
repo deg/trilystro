@@ -92,6 +92,33 @@
  (fn [settings _]
    settings))
 
+(re-frame/reg-sub
+ :users-details
+ (fn [_ _]
+   ;; [TODO][ch94] Rename :user-details to :users-details
+   (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}]))
+ (fn [details _]
+   details))
+
+
+
+(re-frame/reg-sub
+ :user-of-id
+ (fn [_ _] (re-frame/subscribe [:users-details]))
+ (fn [details [_ user-id]]
+   (when user-id
+     ((keyword user-id) details))))
+
+(re-frame/reg-sub
+ :user-pretty-name
+ (fn [[_ id]]
+   (re-frame/subscribe [:user-of-id id]))
+ (fn [user [_ _]]
+   (or (:display-name user)
+       (:email user))))
+
+
+
 (defn- lystros-with-id [lystros-tree]
   (map->vec-of-val+key lystros-tree :firebase-id))
 

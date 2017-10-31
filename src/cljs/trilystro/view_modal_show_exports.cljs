@@ -6,21 +6,15 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
-   [trilystro.firebase :as fb] ;; [TODO] NOT NEEDED LATER
-
    [trilystro.fsm :as fsm]))
 
-(defn export-lystro [{:keys [owner] :as lystro}]
-  (let [;; [TODO] Move to sub
-        user-details (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
-        user (when owner
-               ((keyword owner) user-details))]
-    {:uid (:firebase-id lystro)
-     :visibility (if (:public lystro) "Shared" "Private")
-     :owner (or (:display-name user) (:email user))
-     :text (:text lystro)
-     :url (:url lystro)
-     :tags (vec (sort (:tags lystro)))}))
+(defn export-lystro [{:keys [firebase-id public? owner text url tags]}]
+  {:uid firebase-id
+   :visibility (if public? "Shared" "Private")
+   :owner (<sub [:user-pretty-name owner])
+   :text text
+   :url url
+   :tags (vec (sort tags))})
 
 
 (defn modal-show-exports []

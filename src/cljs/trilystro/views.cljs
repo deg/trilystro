@@ -15,22 +15,11 @@
    [trilystro.events :as events]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
+   [trilystro.temp-utils :as tmp-utils]
    [trilystro.view-modal-about :as v-about]
    [trilystro.view-modal-confirm-delete :as v-confirm-delete]
    [trilystro.view-modal-show-exports :as v-show-exports]
    [trilystro.view-modal-entry :as v-entry]))
-
-
-;;; [TODO] Move to sodium.utils once this matures a bit
-;;; [TODO] The URL is tainted text. Is there any risk here?
-(defn link-to
-  "Create an HTTP link. Use some smarts re user intention"
-  [url-string]
-  (when url-string
-    (let [url (if (str/includes? url-string "/")
-                url-string
-                (str "http://" url-string))]
-      [:a {:class "break-long-words" :href url} url-string])))
 
 
 (defn lystro-search-grid
@@ -46,7 +35,7 @@
        [na/grid-column value-params tags]]
       [na/grid-row row-params
        [na/grid-column label-params "URL:"]
-       [na/grid-column value-params (if (string? url) (link-to url) url)]]
+       [na/grid-column value-params (if (string? url) (tmp-utils/link-to url) url)]]
       [na/grid-row row-params
        [na/grid-column label-params "Text:"]
        [na/grid-column value-params text]]]))
@@ -58,7 +47,7 @@
   [lystro-search-grid {:color "brown"}
    [na/container {}
     [na/dropdown {:inline? true
-                  :value     (<sub      [::fsm/page-param-val :tags-mode] :any-of)
+                  :value     (<sub      [::fsm/page-param-val        :tags-mode] :any-of)
                   :on-change (na/>event [::fsm/update-page-param-val :tags-mode] :any-of keyword)
                   :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
     [nax/tag-selector {:all-tags-sub            [:all-tags]
@@ -101,16 +90,11 @@
             :class-name (str "text break-long-words "
                              (if mine? "editable-text" "frozen-text"))}
       text]
-     [:div {:class-name "url"} (link-to url)]
+     [:div {:class-name "url"}
+      (tmp-utils/link-to url)]
      (when (not mine?)
-       ;; [TODO] Pull this into a sub
-       (let [user-details (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
-             user ;; Too many bugs elsewhere have hit this weak spot, so be noisily defensive
-                  (if (str owner)
-                    ((keyword owner) user-details)
-                    {:display-name "Internal error - Unowned Lystro"})]
-         [:div {:class "owner-sig"}
-          (or (:display-name user) (:email user))]))]))
+       [:div {:class "owner-sig"}
+        (<sub [:user-pretty-name owner])])]))
 
 
 (defn main-panel
@@ -158,7 +142,7 @@
   [na/menu {:fixed "top"}
    [na/menu-item {:header? true
                   :on-click (na/>event [::fsm/goto :modal-about])}
-    [na/icon {:name "eye" :size "big"}]
+    [na/icon {:name "tasks" :size "big"}]
     (<sub [:name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [::fsm/in-page? :logged-in]))
@@ -194,6 +178,7 @@
             [(<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
              (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
              (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
-             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])]]
+             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}]) ;; [TODO][ch94] rename
+             ]]
         (null-op open-state)
         [main-panel]))]])
