@@ -42,7 +42,7 @@
     :shift (conj (pop stack) [new-state param])
     :push  (conj stack [new-state param])
     :pop   (pop stack)
-    [[:error "Invalid fsm action" action]]))
+    nil))
 
 (defn transit-state!
   "This is the FSM manager. Perform an action on the stack, and dispatch any trigger.
@@ -64,7 +64,9 @@
   (let [top-state-and- (peek state-stack)
         top-state (if (vector? top-state-and-) (first top-state-and-) top-state-and-)
         [action new-state trigger] (get-in state-graph [top-state transition])
-        new-stack (next-stack state-stack action new-state param)
+        new-stack (or (next-stack state-stack action new-state param)
+                      (do (js/alert (str "Error: Invalid FSM action!\nSaw " transition " from " top-state))
+                          state-stack))
         full-trigger (when (or trigger one-time-trigger)
                        (utils/vconcat trigger one-time-trigger))]
     ;; (console :log "PAGE TRANSITION: " state-stack transition new-stack)
