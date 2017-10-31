@@ -44,8 +44,8 @@
 (re-frame/reg-event-db
  :no-git-describe
  (fn [db [_ error]]
-   (console :log "Failed to get git description: " error)
-   (cache-git-commit db "[unavailable]")))
+   (console :log "Failed to get git description: " (:status-text error))
+   (cache-git-commit db {:commit "[unknown]" :date "[unknown]"})))
 
 
 (re-frame/reg-event-db
