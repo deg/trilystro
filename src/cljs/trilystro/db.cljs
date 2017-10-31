@@ -20,10 +20,12 @@
                                              :modal-confirm-delete [:push :modal-confirm-delete]
                                              :modal-edit-lystro    [:push :modal-edit-lystro]
                                              :modal-new-lystro     [:push :modal-new-lystro]
+                                             :modal-show-exports   [:push :modal-show-exports]
                                              :modal-about          [:push :modal-about]}
                       :modal-edit-lystro    {:quit-modal           [:pop]}
                       :modal-new-lystro     {:quit-modal           [:pop]}
                       :modal-about          {:quit-modal           [:pop]}
                       :modal-confirm-delete {:quit-modal           [:pop]}
+                      :modal-show-exports   {:quit-modal           [:pop]}
                       :error                {:error-handled        [:shift :start]}}
    ::fsm/page-state [[:start]]})

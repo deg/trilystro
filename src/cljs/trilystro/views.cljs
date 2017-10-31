@@ -17,6 +17,7 @@
    [trilystro.fsm :as fsm]
    [trilystro.view-modal-about :as v-about]
    [trilystro.view-modal-confirm-delete :as v-confirm-delete]
+   [trilystro.view-modal-show-exports :as v-show-exports]
    [trilystro.view-modal-entry :as v-entry]))
 
 
@@ -102,6 +103,7 @@
       text]
      [:div {:class-name "url"} (link-to url)]
      (when (not mine?)
+       ;; [TODO] Pull this into a sub
        (let [user-details (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}])
              user ;; Too many bugs elsewhere have hit this weak spot, so be noisily defensive
                   (if (str owner)
@@ -117,13 +119,26 @@
   [na/form {}
    [na/divider {:horizontal? true :section? true} "Search Lystros"]
    [search-panel]
-   (let [lystros (<sub [:lystros {:tags-mode (<sub [::fsm/page-param-val :tags-mode])
-                                  :tags (set (<sub [::fsm/page-param-val :tags]))
-                                  :url (<sub [::fsm/page-param-val :url])
-                                  :text (<sub [::fsm/page-param-val :text])}])]
-     [na/divider {:horizontal? true :section? true} (str "Results (" (count lystros) ")")]
-     `[:div {}
-       ~@(mapv lystro-results-panel lystros)])])
+   (let [selected-lystros
+         (<sub [:lystros {:tags-mode (<sub [::fsm/page-param-val :tags-mode])
+                          :tags      (<sub [::fsm/page-param-val :tags])
+                          :url       (<sub [::fsm/page-param-val :url])
+                          :text      (<sub [::fsm/page-param-val :text])}])]
+     [:div
+      [na/divider {:horizontal? true :section? true}
+       (str "Results (" (count selected-lystros) ")")]
+      `[:div {}
+        ~@(mapv lystro-results-panel selected-lystros)]
+      [na/divider {:horizontal? true :section? true}]
+      [na/container {}
+       [na/button {:size "mini"
+                   :icon "external share"
+                   :content "export all"
+                   :on-click #(>evt [::fsm/goto :modal-show-exports {:param (<sub [:lystros])}])}]
+       [na/button {:size "mini"
+                   :icon "share"
+                   :content "export current"
+                   :on-click #(>evt [::fsm/goto :modal-show-exports {:param selected-lystros}])}]]])])
 
 
 (defn login-logout-control []
@@ -166,6 +181,7 @@
    [v-about/modal-about-panel]
    [v-entry/modal-entry-panel]
    [v-confirm-delete/modal-confirm-delete]
+   [v-show-exports/modal-show-exports]
    [top-bar]
    [na/container {:style {:margin-top "5em"}}
     [nax/google-ad

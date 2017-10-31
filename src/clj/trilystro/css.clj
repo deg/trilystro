@@ -31,6 +31,16 @@
   [:.break-long-words
    {:overflow-wrap "break-word"}]
 
+  [:.literal-whitespace
+   {:font-family "Monospace"
+    :font-size "80%"
+    :white-space "pre-wrap"}]
+
+  [:.minor
+   {:color "dark-gray"
+    :font-size "60%"
+    :font-style "italic"}]
+
   [:.owner-sig
    {:color "dark-gray"
     :font-style "italic"
