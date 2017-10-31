@@ -1,5 +1,8 @@
-mkdir ../trilystro-website
-pushd ../trilystro-website
+#!/bin/bash
+
+deploydir=../trilystro-website
+mkdir $deploydir
+pushd $deploydir
 
 git init
 
