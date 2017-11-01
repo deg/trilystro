@@ -6,7 +6,7 @@
   :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-beta3"]
+  :dependencies [[org.clojure/clojure "1.9.0-beta4"]
                  [org.clojure/clojurescript "1.9.946"]
                  [cljs-ajax "0.7.2" :exclusions [com.cognitect/transit-cljs]] [com.cognitect/transit-cljs "0.8.243"]
                  [com.andrewmcveigh/cljs-time "0.5.1"]
