@@ -10,6 +10,7 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.extensions :as nax]
+   [sodium.utils :as utils]
    [sodium.re-utils :refer [<sub >evt]]
    [trilystro.config :as config]
    [trilystro.events :as events]
@@ -83,7 +84,8 @@
      (when mine? (mini-button "delete" (na/>event [::fsm/goto :modal-confirm-delete {:param lystro}])))
      (when mine? (mini-button "write"  (na/>event [::fsm/goto :modal-edit-lystro    {:param lystro}])))
      [nax/draw-tags {:selected-tags-sub       [::fsm/page-param-val :tags]
-                     :set-selected-tags-event [::fsm/update-page-param-val :tags]}
+                     :set-selected-tags-event [::fsm/update-page-param-val :tags]
+                     :class-of-tag-sub        [:tag-class-by-frequency]}
       tags]
      [:div {:on-click #(when mine?
                          (>evt [::fsm/goto :modal-edit-lystro {:param lystro}]))
@@ -112,7 +114,7 @@
       [na/divider {:horizontal? true :section? true}
        (str "Results (" (count selected-lystros) ")")]
       `[:div {}
-        ~@(mapv lystro-results-panel selected-lystros)]
+        ~@(mapv lystro-results-panel (utils/ci-sort-by :text selected-lystros))]
       [na/divider {:horizontal? true :section? true}]
       [na/container {}
        [na/button {:size "mini"

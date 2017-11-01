@@ -46,13 +46,18 @@
     :font-style "italic"
     :text-align "right"}]
 
-  [:.tag
-   {:color "black"
-    :cursor "pointer"
-    :padding "0.1rem 0.5rem 0.2rem 0.5rem"
+  [:.rare-tag :.average-tag :.common-tag
+   {:cursor "pointer"
     :margin "0 0.1rem 0 0.1rem"
     :text-align "center"
     :border-radius "100px"}]
+  [:.rare-tag
+   {:font-weight "bold"
+    :padding "0.14rem 0.7rem 0.28rem 0.7rem"}]
+  [:.average-tag
+   {:padding "0.12rem 0.6rem 0.24rem 0.6rem"}]
+  [:.common-tag
+   {:padding "0.1rem 0.5rem 0.2rem 0.5rem"}]
   [:.selected-tag
    {:background-color "orange"
     :color "black"}]
