@@ -46,7 +46,7 @@
     :font-style "italic"
     :text-align "right"}]
 
-  [:.rare-tag :.average-tag :.common-tag
+  [:.tag :.rare-tag :.average-tag :.common-tag
    {:cursor "pointer"
     :margin "0 0.1rem 0 0.1rem"
     :text-align "center"
@@ -56,7 +56,7 @@
     :padding "0.14rem 0.7rem 0.28rem 0.7rem"}]
   [:.average-tag
    {:padding "0.12rem 0.6rem 0.24rem 0.6rem"}]
-  [:.common-tag
+  [:.tag :.common-tag
    {:padding "0.1rem 0.5rem 0.2rem 0.5rem"}]
   [:.selected-tag
    {:background-color "orange"

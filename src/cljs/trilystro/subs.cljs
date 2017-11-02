@@ -140,7 +140,6 @@
    [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
     (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])])
  (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text] :as options}] _]
-   (console :log "RUNNING :lystros")
    (into (filter-lystros (cleanup-lystros private-lystros) options)
          (mapcat #(filter-lystros (cleanup-lystros %) options)
                  (vals shared-lystros)))))

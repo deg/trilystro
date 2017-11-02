@@ -99,6 +99,15 @@
         (<sub [:user-pretty-name owner])])]))
 
 
+;;; [TODO] Maybe move to utils, if this proves itself
+(defn sort-by-alpha
+  "Sort strings, ignoring case and non-alphabetic chars"
+  [keyfn coll]
+  (sort-by (comp #(apply str (re-seq #"[A-Z]" %))
+                 str/upper-case
+                 keyfn)
+           coll))
+
 (defn main-panel
   "The main screen"
   []
@@ -114,7 +123,7 @@
       [na/divider {:horizontal? true :section? true}
        (str "Results (" (count selected-lystros) ")")]
       `[:div {}
-        ~@(mapv lystro-results-panel (utils/ci-sort-by :text selected-lystros))]
+        ~@(mapv lystro-results-panel (sort-by-alpha :text selected-lystros))]
       [na/divider {:horizontal? true :section? true}]
       [na/container {}
        [na/button {:size "mini"
