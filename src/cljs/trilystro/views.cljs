@@ -42,36 +42,49 @@
        [na/grid-column value-params text]]]))
 
 
+(defn mini-button
+  "Icon-only button, good for standard actions"
+  [icon options]
+  [na/button (into {:icon icon
+                    :floated "right"
+                    :color "brown"
+                    :size "mini"}
+                   options)])
+
+
 (defn search-panel
   "Component to specify Lystro search terms"
   []
-  [lystro-search-grid {:color "brown"}
-   [na/container {}
-    [na/dropdown {:inline? true
-                  :value     (<sub      [::fsm/page-param-val        :tags-mode] :any-of)
-                  :on-change (na/>event [::fsm/update-page-param-val :tags-mode] :any-of keyword)
-                  :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
-    [nax/tag-selector {:all-tags-sub            [:all-tags]
-                       :selected-tags-sub       [::fsm/page-param-val :tags]
-                       :set-selected-tags-event [::fsm/update-page-param-val :tags]}]]
-   [na/input {:type "url"
-              :placeholder "Website..."
-              :value     (<sub      [::fsm/page-param-val :url] "")
-              :on-change (na/>event [::fsm/update-page-param-val :url])}]
-   [na/text-area {:rows 3
-                  :placeholder "Description..."
-                  :value     (<sub      [::fsm/page-param-val :text] "")
-                  :on-change (na/>event [::fsm/update-page-param-val :text])}]])
-
-
-(defn mini-button
-  "Icon-only button, good for standard actions"
-  [icon handler]
-  [na/button {:icon icon
-              :floated "right"
-              :color "brown"
-              :size "mini"
-              :on-click handler}])
+  (let [getter ::fsm/page-param-val
+        setter ::fsm/update-page-param-val]
+    [lystro-search-grid {:color "brown"}
+     [na/container {}
+      [na/dropdown {:inline? true
+                    :value (<sub [getter :tags-mode] :any-of)
+                    :on-change (na/>event [setter :tags-mode] :any-of keyword)
+                    :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
+      [nax/tag-selector {:all-tags-sub            [:all-tags]
+                         :selected-tags-sub       [getter :tags]
+                         :set-selected-tags-event [setter :tags]}]]
+     [na/input {:type "url"
+                :placeholder "Website..."
+                :value     (<sub      [getter :url] "")
+                :on-change (na/>event [setter :url])}]
+     (let [corner (fn [icon side field]
+                    (let [value (<sub [getter field])]
+                      [na/label {:icon icon
+                                 :corner side
+                                 :size "mini"
+                                 :class-name "clickable"
+                                 :color (if value "orange" "brown")
+                                 :on-click (na/>event [setter field (not value)])}]))]
+       [:div
+        (corner "tags" "left" :tags-as-text?)
+        (corner "linkify" "right" :url-as-text?)
+        [na/text-area {:rows 3
+                       :placeholder "Description..."
+                       :value     (<sub      [getter :text] "")
+                       :on-change (na/>event [setter :text])}]])]))
 
 
 (defn lystro-results-panel
@@ -81,8 +94,10 @@
     [na/segment {:secondary? (not mine?)
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
-     (when mine? (mini-button "delete" (na/>event [::fsm/goto :modal-confirm-delete {:param lystro}])))
-     (when mine? (mini-button "write"  (na/>event [::fsm/goto :modal-edit-lystro    {:param lystro}])))
+     (when mine? (mini-button "delete"
+                              {:on-click (na/>event [::fsm/goto :modal-confirm-delete {:param lystro}])}))
+     (when mine? (mini-button "write"
+                              {:on-click (na/>event [::fsm/goto :modal-edit-lystro    {:param lystro}])}))
      [nax/draw-tags {:selected-tags-sub       [::fsm/page-param-val :tags]
                      :set-selected-tags-event [::fsm/update-page-param-val :tags]
                      :class-of-tag-sub        [:tag-class-by-frequency]}
@@ -115,10 +130,12 @@
    [na/divider {:horizontal? true :section? true} "Search Lystros"]
    [search-panel]
    (let [selected-lystros
-         (<sub [:lystros {:tags-mode (<sub [::fsm/page-param-val :tags-mode])
-                          :tags      (<sub [::fsm/page-param-val :tags])
-                          :url       (<sub [::fsm/page-param-val :url])
-                          :text      (<sub [::fsm/page-param-val :text])}])]
+         (<sub [:lystros {:tags-mode     (<sub [::fsm/page-param-val :tags-mode])
+                          :tags          (<sub [::fsm/page-param-val :tags])
+                          :url           (<sub [::fsm/page-param-val :url])
+                          :text          (<sub [::fsm/page-param-val :text])
+                          :tags-as-text? (<sub [::fsm/page-param-val :tags-as-text?])
+                          :url-as-text?  (<sub [::fsm/page-param-val :url-as-text?])}])]
      [:div
       [na/divider {:horizontal? true :section? true}
        (str "Results (" (count selected-lystros) ")")]

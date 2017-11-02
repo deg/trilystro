@@ -51,24 +51,41 @@
               (= (set/intersection match-set (set tags))
                  match-set)))))
 
-(defn filter-text-field
-  "Filter function that selects lystros whose text or url field
-  includes match-text."
-  [field match-text]
-  {:pre [(utils/validate (s/nilable string?) match-text)]}
+(defn filter-url-field
+  "Filter function that selects lystros whose url field includes match-url."
+  [match-url]
+  {:pre [(utils/validate string? match-url)]}
   (filter (fn [lystro]
-            (let [text (or (field lystro) "")]
-              (if (empty? match-text)
-                text
-                (utils/ci-includes? text match-text ))))))
+            (if (empty? match-url)
+              (:url lystro)
+              (utils/ci-includes? (:url lystro) match-url)))))
+
+(defn filter-text-field
+  "Filter function that selects lystros whose text field includes
+  match-text or if the text is found in the tags or url, when them
+  matching option has been passed in."
+  [match-text tags-as-text? url-as-text?]
+  {:pre [(utils/validate string? match-text)]}
+  (filter (fn [lystro]
+            (if (empty? match-text)
+              (:text lystro)
+              (let [all-text
+                    (str (when tags-as-text?
+                           (->> (:tags lystro) (interpose " ") (apply str)))
+                         " "
+                         (when url-as-text?
+                           (:url lystro))
+                         " "
+                         (:text lystro))]
+                (utils/ci-includes? all-text match-text))))))
 
 
-(defn filter-lystros [lystros {:keys [tags-mode tags url text] :as options}]
+(defn filter-lystros [lystros {:keys [tags-mode tags url text tags-as-text? url-as-text?]}]
   (transduce (comp (if (= tags-mode :all-of)
                      (filter-all-tags tags)
                      (filter-some-tags tags))
-                   (filter-text-field :url url)
-                   (filter-text-field :text text))
+                   (filter-url-field (str/trim (or url "")))
+                   (filter-text-field (str/trim (or text "")) tags-as-text? url-as-text?))
              conj
              lystros))
 
@@ -139,7 +156,7 @@
  (fn [_ _]
    [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
     (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])])
- (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text] :as options}] _]
+ (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text tags-as-text? url-as-text?] :as options}] _]
    (into (filter-lystros (cleanup-lystros private-lystros) options)
          (mapcat #(filter-lystros (cleanup-lystros %) options)
                  (vals shared-lystros)))))

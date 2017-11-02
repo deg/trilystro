@@ -23,7 +23,7 @@
 
    [:.text
     {:margin "0.5rem 0px 0.5rem 0"}]]
-  [:.editable-text
+  [:.editable-text :.clickable
    {:cursor "pointer"}]
   [:.frozen-text
    {:color "dark-grey"}]
