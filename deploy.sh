@@ -22,7 +22,11 @@ lein clean
 lein cljsbuild once min || die "Lein cljsbuild failed!"
 
 pushd $deploydir
+rm -rf *
 cp -r ../trilystro/resources/public/* .
+cat > CNAME <<EOF
+trilystro.vuagain.com
+EOF
 popd
 
 git describe --always               > $deploydir/git-describe.txt

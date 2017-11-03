@@ -3,6 +3,7 @@
 
 (ns trilystro.view-modal-show-exports
   (:require
+   [cljs.pprint :as pprint]
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
@@ -24,7 +25,6 @@
                   :header (str "Exporting " (count lystros) " Lystros")}
      [na/container {:class-name "literal-whitespace"}
       (with-out-str
-        (cljs.pprint/pprint
-         (mapv export-lystro lystros)))]]))
+        (pprint/pprint (mapv export-lystro lystros)))]]))
 
 

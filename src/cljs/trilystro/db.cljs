@@ -8,7 +8,7 @@
 
 (def default-db
   {:name "Trilystro"
-   ::modal/all-modals #{}
+   ::modal/all-modal-views #{}
    ::fsm/page-states {:start                {:initialize-db        [:shift :logged-out]}
                       :logged-out           {:login-confirmed      [:shift :logged-in]
                                              :logout               [:shift :logged-out]
