@@ -6,7 +6,8 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
-   [trilystro.fsm :as fsm]))
+   [trilystro.fsm :as fsm]
+   [trilystro.modal :as modal]))
 
 (defn export-lystro [{:keys [firebase-id public? owner text url tags]}]
   {:uid firebase-id
@@ -17,23 +18,13 @@
    :tags (vec (sort tags))})
 
 
-(defn modal-show-exports []
-  (when (<sub [::fsm/in-page? :modal-show-exports])
-    (let [lystros (<sub [::fsm/page-param])
-          fn-abort  (na/>event [::fsm/goto :quit-modal])]
-      [na/modal {:open? (<sub [::fsm/in-page? :modal-show-exports])
-                 :dimmer "blurring"
-                 :close-icon true
-                 :close-on-dimmer-click? true
-                 :on-close fn-abort}
-       [na/modal-header {}
-        (str "Exporting " (count lystros) " Lystros")
-        [:div {:class "minor"}
-         "Cut-n-paste to save"]]
-       [na/modal-content {}
-        [na/container {:class-name "literal-whitespace"}
-         (with-out-str
-           (cljs.pprint/pprint
-            (mapv export-lystro lystros)))]]])))
+(defn view-modal-show-exports []
+  (let [lystros (<sub [::fsm/page-param])]
+    [modal/modal {:page :modal-show-exports
+                  :header (str "Exporting " (count lystros) " Lystros")}
+     [na/container {:class-name "literal-whitespace"}
+      (with-out-str
+        (cljs.pprint/pprint
+         (mapv export-lystro lystros)))]]))
 
 

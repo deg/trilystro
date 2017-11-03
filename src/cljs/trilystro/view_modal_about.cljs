@@ -7,26 +7,17 @@
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
    [trilystro.fsm :as fsm]
-   [trilystro.fsm-graph :as fsm-graph]))
+   [trilystro.fsm-graph :as fsm-graph]
+   [trilystro.modal :as modal]))
 
 
-(defn about-panel []
-  [na/container {}
-   [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
-   [:div {:class "credits"} "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
-   [:div {:class "credits"}
-    (let [{:keys [commit date]} (<sub [:git-commit])]
-      (str "This version built from GIT commit: " commit " of " date))]
-   (fsm-graph/render-graph (<sub [::fsm/page-states]))])
-
-(defn modal-about-panel []
-  [na/modal {:open? (<sub [::fsm/in-page? :modal-about])
-             :dimmer "blurring"
-             :close-icon true
-             :close-on-dimmer-click? false
-             :on-close (na/>event [::fsm/goto :quit-modal])}
-   [na/modal-header {}
-    (str "About " (<sub [:name]))]
-   [na/modal-content {}
-    [about-panel]]])
-
+(defn view-modal-about []
+  [modal/modal {:page :modal-about
+                :header (str "About " (<sub [:name]))}
+   [na/container {}
+    [:div "Trilystro is still a toy app, playing with ideas about Firebase and data curation."]
+    [:div {:class "credits"} "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
+    [:div {:class "credits"}
+     (let [{:keys [commit date]} (<sub [:git-commit])]
+       (str "This version built from GIT commit: " commit " of " date))]
+    (fsm-graph/render-graph (<sub [::fsm/page-states]))]])

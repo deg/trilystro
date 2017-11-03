@@ -16,11 +16,8 @@
    [trilystro.events :as events]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
-   [trilystro.temp-utils :as tmp-utils]
-   [trilystro.view-modal-about :as v-about]
-   [trilystro.view-modal-confirm-delete :as v-confirm-delete]
-   [trilystro.view-modal-show-exports :as v-show-exports]
-   [trilystro.view-modal-entry :as v-entry]))
+   [trilystro.modal :as modal]
+   [trilystro.temp-utils :as tmp-utils]))
 
 
 (defn lystro-search-grid
@@ -95,15 +92,14 @@
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
      (when mine? (mini-button "delete"
-                              {:on-click (na/>event [::fsm/goto :modal-confirm-delete {:param lystro}])}))
+                              {:on-click (na/>event (modal/goto :modal-confirm-delete lystro))}))
      (when mine? (mini-button "write"
-                              {:on-click (na/>event [::fsm/goto :modal-edit-lystro    {:param lystro}])}))
+                              {:on-click (na/>event (modal/goto :modal-edit-lystro lystro))}))
      [nax/draw-tags {:selected-tags-sub       [::fsm/page-param-val :tags]
                      :set-selected-tags-event [::fsm/update-page-param-val :tags]
                      :class-of-tag-sub        [:tag-class-by-frequency]}
       tags]
-     [:div {:on-click #(when mine?
-                         (>evt [::fsm/goto :modal-edit-lystro {:param lystro}]))
+     [:div {:on-click #(when mine? (>evt (modal/goto :modal-edit-lystro lystro)))
             :class-name (str "text break-long-words "
                              (if mine? "editable-text" "frozen-text"))}
       text]
@@ -146,11 +142,11 @@
        [na/button {:size "mini"
                    :icon "external share"
                    :content "export all"
-                   :on-click #(>evt [::fsm/goto :modal-show-exports {:param (<sub [:lystros])}])}]
+                   :on-click #(>evt (modal/goto :modal-show-exports (<sub [:lystros])))}]
        [na/button {:size "mini"
                    :icon "share"
                    :content "export current"
-                   :on-click #(>evt [::fsm/goto :modal-show-exports {:param selected-lystros}])}]]])])
+                   :on-click #(>evt (modal/goto :modal-show-exports selected-lystros))}]]])])
 
 
 (defn login-logout-control []
@@ -169,14 +165,14 @@
 (defn top-bar []
   [na/menu {:fixed "top"}
    [na/menu-item {:header? true
-                  :on-click (na/>event [::fsm/goto :modal-about])}
+                  :on-click (na/>event (modal/goto :modal-about))}
     [na/icon {:name "tasks" :size "big"}]
     (<sub [:name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [::fsm/in-page? :logged-in]))
-                  :on-click (na/>event [::fsm/goto :modal-new-lystro])}]
+                  :on-click (na/>event (modal/goto :modal-new-lystro))}]
    [na/menu-item {:name "About"
-                  :on-click (na/>event [::fsm/goto :modal-about])}]
+                  :on-click (na/>event (modal/goto :modal-about))}]
    [login-logout-control]])
 
 
@@ -190,10 +186,7 @@
 
 (defn app-view []
   [na/container {}
-   [v-about/modal-about-panel]
-   [v-entry/modal-entry-panel]
-   [v-confirm-delete/modal-confirm-delete]
-   [v-show-exports/modal-show-exports]
+   (into [:div] (<sub [::modal/all-modal-views]))
    [top-bar]
    [na/container {:style {:margin-top "5em"}}
     [nax/google-ad

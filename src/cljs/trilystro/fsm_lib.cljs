@@ -75,6 +75,13 @@
       (>evt full-trigger))
     new-stack))
 
+
+(defn add-transition
+  "Extend the FSM with a new/replaced transition"
+  [state-graph from-state transition result]
+  (assoc-in state-graph [from-state transition] result))
+
+
 (defn in-state?
   "Test if a state is active."
   [state-stack state]

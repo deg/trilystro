@@ -10,7 +10,12 @@
             [trilystro.views :as views]
             [trilystro.config :as config]
             [trilystro.firebase :as fb]
-            [trilystro.fsm :as fsm]))
+            [trilystro.fsm :as fsm]
+            [trilystro.modal :as modal]
+            [trilystro.view-modal-about :as v-about]
+            [trilystro.view-modal-confirm-delete :as v-confirm-delete]
+            [trilystro.view-modal-show-exports :as v-show-exports]
+            [trilystro.view-modal-entry :as v-entry]))
 
 (enable-console-print!)
 
@@ -30,6 +35,21 @@
 (defn ^:export init []
   (re-frame/dispatch-sync [:initialize-db])
   (re-frame/dispatch-sync [::fsm/goto :initialize-db])
+  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
+                           :modal-about
+                           v-about/view-modal-about])
+  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
+                           :modal-confirm-delete
+                           v-confirm-delete/view-modal-confirm-delete])
+  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
+                           :modal-edit-lystro
+                           v-entry/view-modal-entry-panel])
+  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
+                           :modal-new-lystro
+                           v-entry/view-modal-entry-panel])
+  (re-frame/dispatch-sync [::modal/register-modal [:logged-in :logged-out]
+                           :modal-show-exports
+                           v-show-exports/view-modal-show-exports])
   (dev-setup)
   (fb/init)
   (mount-root))
