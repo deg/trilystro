@@ -14,6 +14,9 @@
   [:.errmsg
    {:color "red"}]
 
+  [:.about
+   {:font-size "95%"}]
+
   [:.credits
    {:font-size "70%"}]
 
