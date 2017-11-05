@@ -68,29 +68,35 @@
                              :on-success #(console :log "Logged in:" (:display-name user))
                              :on-failure #(console :error "Login failure: " %)}}))))
 
+
+(re-frame/reg-event-fx
+ :commit-user-setting
+ (fn [{db :db} [_ setting value]]
+   (fb/fb-event
+    {:for-multi? false
+     :effect-type :firebase/write
+     :db db
+     :access :private
+     :path [:user-settings setting]
+     :value value})))
+
+
 (re-frame/reg-event-fx
  :commit-lystro
  (fn [{db :db} [_ {:keys [firebase-id tags url text owner public?]}]]
-   (let [base-options {:db db
-                       :for-multi? true
-                       :effect-type :firebase/write}]
-     {:firebase/multi [(fb/fb-event (into base-options
-                                          {:access :private
-                                           :path [:user-settings :default-public?]
-                                           :value public?}))
-                       (let [lystro-options (into base-options
-                                                  {:access (if public? :shared :private)
-                                                   :value {:tags tags
-                                                           :url url
-                                                           :text text
-                                                           :owner owner
-                                                           :public? public?}})]
-                         (if-let [old-id firebase-id]
-                           (fb/fb-event (assoc lystro-options
-                                               :path [:lystros old-id]))
-                           (fb/fb-event (assoc lystro-options
-                                               :effect-type :firebase/push
-                                               :path [:lystros]))))]})))
+   (assoc
+    (fb/fb-event {:db db
+                  :for-multi? false
+                  :effect-type (if firebase-id
+                                 :firebase-write
+                                 :firebase/push)
+                  :access (if public? :shared :private)
+                  :path (if firebase-id
+                          [:lystros firebase-id]
+                          [:lystros])
+                  :value {:tags tags, :url url, :text text, :owner owner, :public? public?}})
+    :dispatch [:commit-user-setting :default-public? public?])))
+
 
 (re-frame/reg-event-fx
  :clear-lystro
