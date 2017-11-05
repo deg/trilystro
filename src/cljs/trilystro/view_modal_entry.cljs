@@ -21,12 +21,9 @@
             lystro (when (or new? edit?)
                      (<sub [::fsm/page-param]))
             public-checked? (:public? lystro)
-            public? (if (or public-checked?
-                            (false? public-checked?))
-                      public-checked?
-                      (or (and (<sub [:uid])
-                               (get-in (<sub [:user-settings]) [:default-public?]))
-                          false))]
+            public? (if (nil? public-checked?)
+                      (<sub [:user-settings [:default-public?] false])
+                      public-checked?)]
         [modal/modal {:open? (or new? edit?)
                       :header (cond new? "Add Lystro"
                                     edit? "Edit Lystro"

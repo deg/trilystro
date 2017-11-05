@@ -106,8 +106,10 @@
  :user-settings
  (fn [_ _]
    (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}]))
- (fn [settings _]
-   settings))
+ (fn [settings [_ ks not-found]]
+   (if ks
+     (get-in settings ks not-found)
+     settings)))
 
 (re-frame/reg-sub
  :users-details

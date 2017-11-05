@@ -8,7 +8,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-beta4"]
                  [org.clojure/clojurescript "1.9.946"]
-                 [cljs-ajax "0.7.2" :exclusions [com.cognitect/transit-cljs]] [com.cognitect/transit-cljs "0.8.243"]
+                 [cljs-ajax "0.7.3"]
                  [com.andrewmcveigh/cljs-time "0.5.1"]
                  [compojure "1.6.0"]
                  [day8.re-frame/http-fx "0.1.4"]
@@ -22,8 +22,7 @@
                  [ring "1.6.2"]
                  [secretary "1.2.3"]
                  [yogthos/config "0.9"]
-                 [com.degel/re-frame-firebase "0.3.0"]
-                 [com.degel/re-frame-storage-fx "0.1.0"]
+                 [com.degel/re-frame-firebase "0.4.0-SNAPSHOT"]
                  [com.degel/sodium "0.8.0-SNAPSHOT"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
