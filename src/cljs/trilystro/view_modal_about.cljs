@@ -16,7 +16,7 @@
                 :header (str "About " (<sub [:name]))}
    [na/container {}
     [:div {:class "about"}
-     "Trilystro is still a toy app, playing with ideas about data curation, Firebase,
+     "Trilystro is still a toy app, playing with ideas about data curation, Firebase, FSMs
      re-frame, and reactive websites. But, it is slowly becoming useful to me as a real
      tool, so here are some quick docs:"]
     [:div {:class "about"}
