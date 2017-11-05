@@ -16,23 +16,50 @@
 ;;; https://github.com/jebberjeb/fsmviz/blob/master/src/fsmviz/core.cljc
 
 
-(s/def ::fsm-tuple (s/tuple any? any? any?))
+(s/def ::fsm-tuple (s/tuple any? any? any? any?))
 (s/def ::fsm-tuples (s/coll-of ::fsm-tuple))
 (s/def ::fsm-transition-map (s/nilable (s/map-of any? any?)))
 (s/def ::fsm-map (s/map-of any? ::fsm-transition-map))
 (s/def ::fsm (s/or :tuples ::fsm-tuples
                    :map ::fsm-map))
 
+(defn- nodes-pushing-into
+  "Return the set of all nodes that push to a node.
+  This is an attempt to graph the effects of pop. It is not complete, since it ignores
+  potential non-structured usages such as {:push a; :shift b; :pop}. But, to be fair:
+  1) I don't have any usages of shift while a state is pushed
+  2) They would violate 50 years of good taste in structured programming
+  3) It may have been a mistake to even support this usage in next-stack."
+  [graph node]
+  (reduce-kv
+   (fn [coll source edge-map]
+     (into coll
+           (reduce-kv
+            (fn [sub-coll edge [type sink]]
+              (if (and (= sink node) (= type :push))
+                (conj sub-coll source)
+                sub-coll))
+            #{}
+            edge-map)))
+   #{}
+   graph))
+
+;(def xxx @(re-frame/subscribe [:trilystro.fsm/page-states]))
+
 (defn- map->tuples
   "Returns a collection of [from via to] tuples representing the FSM."
   [state-map]
   (mapcat (fn [[from m]]
-            (map (fn [[trans to]]
-                   [from trans to])
+            (map (fn [[trans [type to]]]
+                   (let [to (if (= type :pop)
+                              (first (nodes-pushing-into state-map from))
+                              to)]
+                     [from trans to type]))
                  m))
           state-map))
 
 (defn- third [coll] (nth coll 2))
+(defn- fourth [coll] (nth coll 2))
 
 (defn- start-states
   "Returns states which have no inbound transitions."
@@ -52,10 +79,15 @@
 
 (defn tuples->graphviz
   [tuples]
+  (console :log "TUPLES: " tuples)
   (concat
-   (mapcat (fn [[from via to]]
+   (mapcat (fn [[from via to type]]
              [{::graphviz/from (clean-name from)
-               ::graphviz/label via
+               ::graphviz/label (str (case type
+                                       :push "PUSH "
+                                       :pop "POP "
+                                       "")
+                                     via)
                ::graphviz/to (clean-name to)}])
            tuples)
 
@@ -95,8 +127,7 @@
           [{::graphviz/name "Error"}])
       (fsm->graphviz* conformed))))
 
-(s/fdef generate-image :args (s/cat :state-data ::fsm
-                                    :filename string?))
+(s/fdef generate-image :args (s/cat :state-data ::fsm))
 
 ;; TODO this won't handle cursors
  (defn transform-js-data
@@ -113,25 +144,11 @@
 
   `state-data` a map of state -> transition map, or a colletion of
                [from via to] triples."
-  [state-data filename]
+  [state-data]
   (-> state-data
-      transform-js-data
       fsm->graphviz
       graphviz/dot-string
-      (graphviz/generate-image! filename)))
-
-(comment
-  (fsmviz.core/generate-image {:start {:t1 :foo
-                                       :t2 :bar}
-                               :foo {:t3 :baz}
-                               :bar {:t4 :baz}} "example-map")
-  (fsmviz.core/generate-image [[:start :t1 :x]
-                               [:start :t2 :y]
-                               [:start :t3 :z]
-                               [:z :t4 :x]
-                               [:z :t5 :finish]
-                               [:x :t6 :finish]
-                               [:y :t7 :finish]] "example-tuples"))
+      (graphviz/generate-image! "")))
 
 
 ;;; ================================================================
@@ -139,59 +156,10 @@
 ;;; ================================================================
 
 
-(defn- nodes-pushing-into
-  "Return the set of all nodes that push to a node.
-  This is an attempt to graph the effects of pop. It is not complete, since it ignores
-  potential non-structured usages such as {:push a; :shift b; :pop}. But, to be fair:
-  1) I don't have any usages of shift while a state is pushed
-  2) They would violate 50 years of good taste in structured programming
-  3) It may have been a mistake to even support this usage in next-stack."
-  [graph node]
-  (reduce-kv
-   (fn [coll source edge-map]
-     (into coll
-           (reduce-kv
-            (fn [sub-coll edge [type sink]]
-              (if (and (= sink node) (= type :push))
-                (conj sub-coll source)
-                sub-coll))
-            #{}
-            edge-map)))
-   #{}
-   graph))
-
-
 (defn- node-name
   "For some reason, fsmviz loses hyphens in node names"
   [key]
   (str/replace (name key) #"-" "_"))
-
-
-(defn- graph-triple [type source edge sink]
-  (let [edge-name (let [edge (name edge)]
-                    (case type
-                      :pop (str "POP " edge)
-                      :push (str "PUSH " edge)
-                      edge))]
-    [(node-name source) edge-name (node-name sink)]))
-
-
-(defn- flatten-graph
-  "Convert state graph to flat form, as required by https://github.com/jebberjeb/fsmviz"
-  [graph]
-  (reduce-kv
-   (fn [coll source edge-map]
-     (into coll
-           (reduce-kv
-            (fn [sub-coll edge [type sink]]
-              (if (= type :pop)
-                (let [pushers (nodes-pushing-into graph source)]
-                  (concat sub-coll (map (partial graph-triple type source edge) pushers)))
-                (conj sub-coll (graph-triple type source edge sink))))
-            []
-            edge-map)))
-   []
-   graph))
 
 
 (defn render-graph
@@ -201,7 +169,6 @@
   [graph]
   [:div {:dangerouslySetInnerHTML
          {:__html (-> graph
-                      flatten-graph
-                      (generate-image "fsm")
+                      (generate-image)
                       (str/replace-first #"width=\"\d*pt\""  "")
                       (str/replace-first #"height=\"\d*pt\"" ""))}}])

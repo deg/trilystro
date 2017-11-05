@@ -18,5 +18,6 @@
                                              :logout               [:shift :logged-out]}
                       :logged-in            {:login-confirmed      [:shift :logged-in]
                                              :logout               [:shift :logged-out]}
-                      :error                {:error-handled        [:shift :start]}}
+                      ;; [TODO] Eventually figure out what an error handler can do
+                      :error                {:error-handled        [:shift :error]}}
    ::fsm/page-state [[:start]]})
