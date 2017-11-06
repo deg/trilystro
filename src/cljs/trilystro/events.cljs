@@ -88,7 +88,7 @@
     (fb/fb-event {:db db
                   :for-multi? false
                   :effect-type (if firebase-id
-                                 :firebase-write
+                                 :firebase/write
                                  :firebase/push)
                   :access (if public? :shared :private)
                   :path (if firebase-id
