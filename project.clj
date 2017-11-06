@@ -84,6 +84,9 @@
                     :optimizations   :advanced
                     :closure-defines {goog.DEBUG false}
                     :externs         ["externs.js"]
+                    ;; [NOTE] When release build fails, uncomment these and set :pretty-print to true
+                    ;; :pseudo-names true
+                    ;; :verbose true
                     :pretty-print    false}}
 
     {:id           "test"
