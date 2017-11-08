@@ -51,7 +51,8 @@
            ;; [TODO][ch94] Should remain :user-details to :users-details in Firebase.
            ;;    Requires a migration hack.
            {:firebase/write {:path       (fb/my-shared-fb-path [:user-details] (:uid user))
-                             :value      (select-keys user [:display-name :email :photo-url])
+                             :value      (into {:timestamp fb/timestamp-marker}
+                                               (select-keys user [:display-name :email :photo-url]))
                              :on-success #(console :log "Logged in:" (:display-name user))
                              :on-failure #(console :error "Login failure: " %)}}))))
 
@@ -81,7 +82,12 @@
                   :path (if firebase-id
                           [:lystros firebase-id]
                           [:lystros])
-                  :value {:tags tags, :url url, :text text, :owner owner, :public? public?}})
+                  :value {:tags tags
+                          :url url
+                          :text text
+                          :owner owner
+                          :public? public?
+                          :timestamp fb/timestamp-marker}})
     :dispatch [:commit-user-setting :default-public? public?])))
 
 

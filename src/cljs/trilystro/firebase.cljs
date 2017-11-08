@@ -17,6 +17,10 @@
    :databaseURL "https://trilystro.firebaseio.com"
    :storageBucket "trilystro.appspot.com"})
 
+;;; Magic Firebase object that the server translates into a timestamp
+(defonce timestamp-marker
+  (-> js/firebase .-database .-ServerValue .-TIMESTAMP))
+
 
 (defn init []
   (re-frame/dispatch-sync [::fsm/goto :try-login])
