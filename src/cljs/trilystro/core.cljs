@@ -2,13 +2,15 @@
 ;;; Copyright (c) 2017, David Goldfarb
 
 (ns trilystro.core
-  (:require [reagent.core :as reagent]
+  (:require [ajax.core :as ajax]
+            [reagent.core :as reagent]
             [re-frame.core :as re-frame]
             [re-frisk.core :refer [enable-re-frisk!]]
             [trilystro.events]
             [trilystro.subs]
             [trilystro.views :as views]
             [trilystro.config :as config]
+            [trilystro.db :as db]
             [trilystro.firebase :as fb]
             [trilystro.fsm :as fsm]
             [trilystro.modal :as modal]
@@ -31,25 +33,27 @@
   (reagent/render [views/app-view]
                   (.getElementById js/document "app")))
 
+(re-frame/reg-event-fx
+ ::initialize-db
+ (fn  [_ _]
+   {:db (fsm/goto db/default-db :initialize-db {})
+    :http-xhrio {:method :get
+                 :uri "/git-describe.txt"
+                 :params {:cachebuster (str (rand))}
+                 :response-format (ajax/text-response-format)
+                 :on-success [:got-git-describe]
+                 :on-failure [:no-git-describe]}
+    :dispatch [::modal/register-modals
+               [[[:logged-in]  :modal-about          v-about/view-modal-about]
+                [[:logged-in]  :modal-confirm-delete v-confirm-delete/view-modal-confirm-delete]
+                [[:logged-in]  :modal-edit-lystro    v-entry/view-modal-entry-panel]
+                [[:logged-in]  :modal-new-lystro     v-entry/view-modal-entry-panel]
+                [[:logged-in
+                  :logged-out] :modal-show-exports    v-show-exports/view-modal-show-exports]]]}))
+
 
 (defn ^:export init []
-  (re-frame/dispatch-sync [:initialize-db])
-  (re-frame/dispatch-sync [::fsm/goto :initialize-db])
-  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
-                           :modal-about
-                           v-about/view-modal-about])
-  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
-                           :modal-confirm-delete
-                           v-confirm-delete/view-modal-confirm-delete])
-  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
-                           :modal-edit-lystro
-                           v-entry/view-modal-entry-panel])
-  (re-frame/dispatch-sync [::modal/register-modal [:logged-in]
-                           :modal-new-lystro
-                           v-entry/view-modal-entry-panel])
-  (re-frame/dispatch-sync [::modal/register-modal [:logged-in :logged-out]
-                           :modal-show-exports
-                           v-show-exports/view-modal-show-exports])
+  (re-frame/dispatch-sync [::initialize-db])
   (dev-setup)
   (fb/init)
   (mount-root))

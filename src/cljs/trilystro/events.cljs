@@ -3,7 +3,6 @@
 
 (ns trilystro.events
   (:require
-   [ajax.core :as ajax]
    [cljs-time.coerce :as time-coerce]
    [cljs-time.core :as time]
    [cljs-time.format :as time-format]
@@ -15,22 +14,10 @@
    [re-frame.loggers :refer [console]]
    [vimsical.re-frame.cofx.inject :as inject]
    [sodium.chrome-utils :as chrome]
-   [trilystro.db :as db]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]))
 
 (s/check-asserts true)
-
-(re-frame/reg-event-fx
- :initialize-db
- (fn  [_ _]
-   {:db db/default-db
-    :http-xhrio {:method :get
-                 :uri "/git-describe.txt"
-                 :params {:cachebuster (str (rand))}
-                 :response-format (ajax/text-response-format)
-                 :on-success [:got-git-describe]
-                 :on-failure [:no-git-describe]}}))
 
 (defn cache-git-commit [db git-desc]
   (assoc db :git-commit git-desc))

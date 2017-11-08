@@ -17,16 +17,25 @@
  (fn [db _]
    (mapv vector (::all-modal-views db))))
 
+(defn register-modal [db [from-states modal view]]
+  (as-> db $
+    (update $ ::all-modal-views conj view)
+    (reduce #(update %1 ::fsm/page-states fsm-lib/add-transition
+                     %2 modal [:push modal])
+            $ from-states)
+    (update $ ::fsm/page-states fsm-lib/add-transition
+            modal :quit-modal [:pop])))
+
 (re-frame/reg-event-db
  ::register-modal
  (fn [db [_ from-states modal view]]
-   (as-> db $
-     (update $ ::all-modal-views conj view)
-     (reduce #(update %1 ::fsm/page-states fsm-lib/add-transition
-                      %2 modal [:push modal])
-             $ from-states)
-     (update $ ::fsm/page-states fsm-lib/add-transition
-             modal :quit-modal [:pop]))))
+   (register-modal db [from-states modal view])))
+
+(re-frame/reg-event-db
+ ::register-modals
+ (fn [db [_ modals]]
+   (reduce register-modal db modals)))
+
 
 (defn goto
   ;; Enter a modal popup, optionally passing it state

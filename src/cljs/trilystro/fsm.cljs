@@ -21,6 +21,14 @@
  (fn [db [_ page]]
    (fsm-lib/in-state? (::page-state db) page)))
 
+(defn goto
+  "This is mostly an internal function, used by the ::goto event. But, it
+  is exposed for those occassional times (e.g. startup) that is is useful
+  to do a synchronous transition."
+  [db transition {:keys [param dispatch]}]
+  (update db ::page-state
+           (partial fsm-lib/transit-state! (::page-states db))
+           transition param dispatch))
 
 ;;; Goto a new app state
 ;;; - param - Store this parameter in the new state
@@ -28,9 +36,7 @@
 (re-frame/reg-event-db
  ::goto
  (fn [db [_ transition {:keys [param dispatch]}]]
-   (update db ::page-state
-           (partial fsm-lib/transit-state! (::page-states db))
-           transition param dispatch)))
+   (goto db transition {:param param :dispatch dispatch})))
 
 
 (defn- page-param [state-stack]
