@@ -56,9 +56,10 @@
   [match-url]
   {:pre [(utils/validate string? match-url)]}
   (filter (fn [lystro]
-            (if (empty? match-url)
-              (or (:url lystro) "")
-              (utils/ci-includes? (:url lystro) match-url)))))
+            (let [lystro-url (or (:url lystro) "")]
+              (if (empty? match-url)
+                lystro-url
+                (utils/ci-includes? lystro-url match-url))))))
 
 (defn filter-text-field
   "Filter function that selects lystros whose text field includes
