@@ -13,6 +13,7 @@
    [sodium.utils :as utils]
    [sodium.re-utils :refer [<sub >evt]]
    [trilystro.config :as config]
+   [trilystro.db :as db]
    [trilystro.events :as events]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
@@ -57,8 +58,8 @@
     [lystro-search-grid {:color "brown"}
      [na/container {}
       [na/dropdown {:inline? true
-                    :value (<sub [:user-settings [:tags-mode] :any-of])
-                    :on-change (na/>event [:commit-user-setting :tags-mode] :any-of)
+                    :value (<sub [::fb/user-settings [:tags-mode] :any-of])
+                    :on-change (na/>event [::fb/commit-user-setting :tags-mode] :any-of)
                     :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
       [nax/tag-selector {:all-tags-sub            [:all-tags]
                          :selected-tags-sub       [getter :tags]
@@ -68,13 +69,13 @@
                 :value     (<sub      [getter :url] "")
                 :on-change (na/>event [setter :url])}]
      (let [corner (fn [icon side field]
-                    (let [value (<sub [:user-settings [field]])]
+                    (let [value (<sub [::fb/user-settings [field]])]
                       [na/label {:icon icon
                                  :corner side
                                  :size "mini"
                                  :class-name "clickable"
                                  :color (if value "orange" "brown")
-                                 :on-click (na/>event [:commit-user-setting field (not value)])}]))]
+                                 :on-click (na/>event [::fb/commit-user-setting field (not value)])}]))]
        [:div
         (corner "tags" "left" :tags-as-text?)
         (corner "linkify" "right" :url-as-text?)
@@ -87,7 +88,7 @@
 (defn lystro-results-panel
   "Render one Lystro"
   [{:keys [tags text url owner public?] :as lystro}]
-  (let [mine? (= owner (<sub [:uid]))]
+  (let [mine? (= owner (<sub [::fb/uid]))]
     [na/segment {:secondary? (not mine?)
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
@@ -107,7 +108,7 @@
       (tmp-utils/link-to url)]
      (when (not mine?)
        [:div {:class "owner-sig"}
-        (<sub [:user-pretty-name owner])])]))
+        (<sub [::fb/user-pretty-name owner])])]))
 
 
 ;;; [TODO] Maybe move to utils, if this proves itself
@@ -126,12 +127,12 @@
    [na/divider {:horizontal? true :section? true} "Search Lystros"]
    [search-panel]
    (let [selected-lystros
-         (<sub [:lystros {:tags-mode     (keyword (<sub [:user-settings [:tags-mode] :any-of]))
+         (<sub [:lystros {:tags-mode     (keyword (<sub [::fb/user-settings [:tags-mode] :any-of]))
                           :tags          (<sub [::fsm/page-param-val :tags])
                           :url           (<sub [::fsm/page-param-val :url])
                           :text          (<sub [::fsm/page-param-val :text])
-                          :tags-as-text? (<sub [:user-settings [:tags-as-text?]])
-                          :url-as-text?  (<sub [:user-settings [:url-as-text?]])}])]
+                          :tags-as-text? (<sub [::fb/user-settings [:tags-as-text?]])
+                          :url-as-text?  (<sub [::fb/user-settings [:url-as-text?]])}])]
      [:div
       [na/divider {:horizontal? true :section? true}
        (str "Results (" (count selected-lystros) ")")]
@@ -150,7 +151,7 @@
 
 
 (defn login-logout-control []
-  (let [user (<sub [:user])]
+  (let [user (<sub [::fb/user])]
     [na/menu-menu {:position "right"}
      [na/menu-item {:on-click (na/>event [(if user :sign-out :sign-in)])}
       (if user
@@ -167,7 +168,7 @@
    [na/menu-item {:header? true
                   :on-click (na/>event (modal/goto :modal-about))}
     [na/icon {:name "tasks" :size "big"}]
-    (<sub [:name])]
+    (<sub [::db/name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [::fsm/in-page? :logged-in]))
                   :on-click (na/>event (modal/goto :modal-new-lystro))}]

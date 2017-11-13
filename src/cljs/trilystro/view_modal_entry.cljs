@@ -9,6 +9,7 @@
    [sodium.core :as na]
    [sodium.extensions :as nax]
    [sodium.re-utils :refer [<sub >evt]]
+   [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
    [trilystro.modal :as modal]))
 
@@ -22,7 +23,7 @@
                      (<sub [::fsm/page-param]))
             public-checked? (:public? lystro)
             public? (if (nil? public-checked?)
-                      (<sub [:user-settings [:default-public?] false])
+                      (<sub [::fb/user-settings [:default-public?] false])
                       public-checked?)]
         [modal/modal {:open? (or new? edit?)
                       :header (cond new? "Add Lystro"
@@ -60,7 +61,7 @@
                                             (not connected?))
                              :on-click (na/>event [::fsm/goto :quit-modal {:dispatch
                                                                            [:commit-lystro (assoc lystro
-                                                                                                  :owner (<sub [:uid])
+                                                                                                  :owner (<sub [::fb/uid])
                                                                                                   :public? public?)]}])
                              :icon (if connected? "add" "wait")
                              :content (if connected?

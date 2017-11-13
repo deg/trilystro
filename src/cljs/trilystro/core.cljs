@@ -49,7 +49,7 @@
                 [[:logged-in]  :modal-edit-lystro    v-entry/view-modal-entry-panel]
                 [[:logged-in]  :modal-new-lystro     v-entry/view-modal-entry-panel]
                 [[:logged-in
-                  :logged-out] :modal-show-exports    v-show-exports/view-modal-show-exports]]]}))
+                  :logged-out] :modal-show-exports   v-show-exports/view-modal-show-exports]]]}))
 
 
 (defn ^:export init []

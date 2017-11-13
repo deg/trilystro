@@ -6,6 +6,7 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
+   [trilystro.db :as db]
    [trilystro.fsm :as fsm]
    [trilystro.fsm-graph :as fsm-graph]
    [trilystro.modal :as modal]))
@@ -13,7 +14,7 @@
 
 (defn view-modal-about []
   [modal/modal {:page :modal-about
-                :header (str "About " (<sub [:name]))}
+                :header (str "About " (<sub [::db/name]))}
    [na/container {}
     [:div {:class "about"}
      "Trilystro is still a toy app, playing with ideas about data curation, Firebase,
@@ -49,7 +50,7 @@
     [:div {:class "about"}
      "(Mostly for my own amusement/debugging), the following is the FSM navigated
      by the app."]
-    (fsm-graph/render-graph (<sub [::fsm/page-states]))
+    (fsm-graph/render-graph (<sub [::fsm/page-graph]))
     [:div {:class "credits"} "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
     [:div {:class "credits"}
      (let [{:keys [commit date]} (<sub [:git-commit])]

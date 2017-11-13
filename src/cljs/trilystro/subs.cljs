@@ -10,14 +10,13 @@
                [re-frame.loggers :refer [console]]
                [sodium.re-utils :as re-utils :refer [sub2 <sub]]
                [sodium.utils :as utils]
+               [trilystro.db :as db]
                [trilystro.events :as events]
                [trilystro.firebase :as fb]
                [trilystro.fsm :as fsm]))
 
 (sub2 :git-commit [:git-commit])
-(sub2 :name       [:name])
-(sub2 :uid        [:user :uid])
-(sub2 :user       [:user])
+(sub2 ::db/name   [::db/name])
 
 
 (re-frame/reg-sub
@@ -102,42 +101,6 @@
      (conj coll (assoc v key-key k)))
    []
    vals-map))
-
-(re-frame/reg-sub
- :user-settings
- (fn [_ _]
-   (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}]))
- (fn [settings [_ ks not-found]]
-   (if ks
-     (get-in settings ks not-found)
-     settings)))
-
-(re-frame/reg-sub
- :users-details
- (fn [_ _]
-   ;; [TODO][ch94] Rename :user-details to :users-details
-   (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}]))
- (fn [details _]
-   details))
-
-
-
-(re-frame/reg-sub
- :user-of-id
- (fn [_ _] (re-frame/subscribe [:users-details]))
- (fn [details [_ user-id]]
-   (when user-id
-     ((keyword user-id) details))))
-
-(re-frame/reg-sub
- :user-pretty-name
- (fn [[_ id]]
-   (re-frame/subscribe [:user-of-id id]))
- (fn [user [_ _]]
-   (or (:display-name user)
-       (:email user))))
-
-
 
 (defn- lystros-with-id [lystros-tree]
   (map->vec-of-val+key lystros-tree :firebase-id))

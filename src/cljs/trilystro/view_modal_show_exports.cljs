@@ -7,13 +7,14 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
+   [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
    [trilystro.modal :as modal]))
 
 (defn export-lystro [{:keys [firebase-id public? owner text url tags]}]
   {:uid firebase-id
    :visibility (if public? "Shared" "Private")
-   :owner (<sub [:user-pretty-name owner])
+   :owner (<sub [::fb/user-pretty-name owner])
    :text text
    :url url
    :tags (vec (sort tags))})

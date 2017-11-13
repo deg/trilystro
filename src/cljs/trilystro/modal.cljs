@@ -3,14 +3,19 @@
 
 (ns trilystro.modal
   (:require
+   [clojure.spec.alpha :as s]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.re-utils :refer [<sub >evt]]
+   [trilystro.db :as db]
    [trilystro.fsm-lib :as fsm-lib]
    [trilystro.fsm :as fsm]
    [trilystro.fsm-graph :as fsm-graph]))
 
+
+(s/def ::all-modal-views (s/coll-of fn?))
+(s/def ::db-keys (s/keys :req [::all-modal-views]))
 
 (re-frame/reg-sub
  ::all-modal-views
@@ -20,19 +25,21 @@
 (defn register-modal [db [from-states modal view]]
   (as-> db $
     (update $ ::all-modal-views conj view)
-    (reduce #(update %1 ::fsm/page-states fsm-lib/add-transition
+    (reduce #(update %1 ::fsm/page-graph fsm-lib/add-transition
                      %2 modal [:push modal])
             $ from-states)
-    (update $ ::fsm/page-states fsm-lib/add-transition
+    (update $ ::fsm/page-graph fsm-lib/add-transition
             modal :quit-modal [:pop])))
 
 (re-frame/reg-event-db
  ::register-modal
+ [db/check-spec-interceptor]
  (fn [db [_ from-states modal view]]
    (register-modal db [from-states modal view])))
 
 (re-frame/reg-event-db
  ::register-modals
+ [db/check-spec-interceptor]
  (fn [db [_ modals]]
    (reduce register-modal db modals)))
 
