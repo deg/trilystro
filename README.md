@@ -1,5 +1,7 @@
 # trilystro
 
+[![Dependencies Status](https://versions.deps.co/deg/trilystro/status.svg)](https://versions.deps.co/deg/trilystro)
+
 Trilystro is a [re-frame](https://github.com/Day8/re-frame) application written for two purposes:
 
 1) It is a testbed for me to play with ideas for [Sodium](https://github.com/deg/sodium),

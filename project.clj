@@ -9,7 +9,7 @@
   :dependencies [[org.clojure/clojure "1.9.0-beta4"]
                  [org.clojure/clojurescript "1.9.946"]
                  [cljs-ajax "0.7.3"]
-                 [com.andrewmcveigh/cljs-time "0.5.1"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
                  [compojure "1.6.0"]
                  [day8.re-frame/http-fx "0.1.4"]
                  [expound "0.3.3"]
@@ -18,16 +18,16 @@
                  [ns-tracker "0.3.1"]
                  [re-frame "0.10.2"]
                  [re-frame-utils "0.1.0"]
-                 [re-frisk "0.5.0"]
+                 [re-frisk "0.5.2"]
                  [reagent "0.7.0"]
-                 [ring "1.6.2"]
+                 [ring "1.6.3"]
                  [secretary "1.2.3"]
                  [yogthos/config "0.9"]
                  [com.degel/re-frame-firebase "0.4.0-SNAPSHOT"]
                  [com.degel/sodium "0.8.0-SNAPSHOT"]]
 
-  :plugins [[lein-cljsbuild "1.1.4"]
-            [lein-garden "0.2.8"]]
+  :plugins [[lein-cljsbuild "1.1.7"]
+            [lein-garden "0.3.0"]]
 
   :min-lein-version "2.5.3"
 
@@ -57,8 +57,7 @@
                    ]
 
     :plugins      [[lein-figwheel "0.5.14"]
-                   [lein-doo "0.1.7"]]
-    }}
+                   [lein-doo "0.1.8"]]}}
 
   :cljsbuild
   {:builds
