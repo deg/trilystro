@@ -74,7 +74,7 @@
  :clear-lystro
  [(re-frame/inject-cofx ::inject/sub [::fb/uid])
   db/check-spec-interceptor]
- (fn [{db :db uid :uid} [_ {:keys [firebase-id owner public?]} :as lystro]]
+ (fn [{db :db uid ::fb/uid} [_ {:keys [firebase-id owner public?]} :as lystro]]
    (let [mine? (= owner uid)]
      (when mine?
        (fb/fb-event {:for-multi? false
