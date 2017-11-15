@@ -22,6 +22,7 @@
               edit? (<sub [::fsm/in-page? :modal-edit-lystro])
               lystro (when (or new? edit?)
                        (<sub [::fsm/page-param]))
+              original-public? (:original-public? lystro)
               public-checked? (:public? lystro)
               public? (if (nil? public-checked?)
                         (<sub [::fb/user-settings [:default-public?] false])
@@ -60,10 +61,13 @@
               [na/form-button {:disabled? (or (not (empty? @partial-tag-text))
                                               (empty? (:text lystro))
                                               (not connected?))
-                               :on-click (na/>event [::fsm/goto :quit-modal {:dispatch
-                                                                             [:commit-lystro (assoc lystro
-                                                                                                    :owner (<sub [::fb/uid])
-                                                                                                    :public? public?)]}])
+                               :on-click (na/>event [::fsm/goto
+                                                     :quit-modal
+                                                     {:dispatch
+                                                      [:commit-lystro (assoc lystro
+                                                                             :owner (<sub [::fb/uid])
+                                                                             :original-public? original-public?
+                                                                             :public? public?)]}])
                                :icon (if connected? "add" "wait")
                                :content (if connected?
                                           (str "Save " (if public? "public" "private"))

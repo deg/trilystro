@@ -88,7 +88,8 @@
 (defn lystro-results-panel
   "Render one Lystro"
   [{:keys [tags text url owner public?] :as lystro}]
-  (let [mine? (= owner (<sub [::fb/uid]))]
+  (let [mine? (= owner (<sub [::fb/uid]))
+        lystro (assoc lystro :original-public? public?)]
     [na/segment {:secondary? (not mine?)
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
