@@ -44,12 +44,12 @@
                  :on-success [:got-git-describe]
                  :on-failure [:no-git-describe]}
     :dispatch [::modal/register-modals
-               [[[:logged-in]  :modal-about          v-about/view-modal-about]
+               [[[:logged-in
+                  :logged-out] :modal-about          v-about/view-modal-about]
                 [[:logged-in]  :modal-confirm-delete v-confirm-delete/view-modal-confirm-delete]
                 [[:logged-in]  :modal-edit-lystro    v-entry/view-modal-entry-panel]
                 [[:logged-in]  :modal-new-lystro     v-entry/view-modal-entry-panel]
-                [[:logged-in
-                  :logged-out] :modal-show-exports   v-show-exports/view-modal-show-exports]]]}))
+                [[:logged-in]  :modal-show-exports   v-show-exports/view-modal-show-exports]]]}))
 
 
 (defn ^:export init []

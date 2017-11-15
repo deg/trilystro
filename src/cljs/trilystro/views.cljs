@@ -173,6 +173,8 @@
                   :disabled? (not (<sub [::fsm/in-page? :logged-in]))
                   :on-click (na/>event (modal/goto :modal-new-lystro))}]
    [na/menu-item {:name "About"
+                  :disabled? (not (or (<sub [::fsm/in-page? :logged-in])
+                                      (<sub [::fsm/in-page? :logged-out])))
                   :on-click (na/>event (modal/goto :modal-about))}]
    [login-logout-control]])
 
