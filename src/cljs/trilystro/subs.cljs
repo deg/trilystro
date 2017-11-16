@@ -119,38 +119,36 @@
 
 (re-frame/reg-sub
  :lystros
- (fn [_ _]
-   [(re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
-    (re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])])
- (fn [[private-lystros shared-lystros] [_ {:keys [tags-mode tags url text tags-as-text? url-as-text?] :as options}] _]
+ :<- [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}]
+ :<- [:firebase/on-value {:path (fb/private-fb-path [:lystros])}]
+ (fn [[shared-lystros private-lystros] [_ {:keys [tags-mode tags url text tags-as-text? url-as-text?] :as options}] _]
    (into (filter-lystros (cleanup-lystros private-lystros) options)
          (mapcat #(filter-lystros (cleanup-lystros %) options)
                  (vals shared-lystros)))))
 
 (re-frame/reg-sub
  :all-tags
- (fn [_ _] (re-frame/subscribe [:lystros]))
+ :<- [:lystros]
  (fn [lystros]
    (into #{} (mapcat :tags lystros))))
 
 
 (re-frame/reg-sub
  :tag-counts
- (fn [_ _] (re-frame/subscribe [:lystros]))
+ :<- [:lystros]
  (fn [lystros]
    (frequencies (mapcat :tags lystros))))
 
 (re-frame/reg-sub
  :max-tag-count
- (fn [_ _] (re-frame/subscribe [:tag-counts]))
+ :<- [:tag-counts]
  (fn [counts _]
    (apply max (vals counts))))
 
 (re-frame/reg-sub
  :tag-class-by-frequency
- (fn [_ _]
-   [(re-frame/subscribe [:tag-counts])
-    (re-frame/subscribe [:max-tag-count])])
+ :<- [:tag-counts]
+ :<- [:max-tag-count]
  (fn [[counts max-count] [_ tag]]
    (let [count (counts tag)]
      (cond (<= count 1) "rare-tag"
