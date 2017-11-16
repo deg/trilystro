@@ -5,7 +5,7 @@
   (:require [ajax.core :as ajax]
             [reagent.core :as reagent]
             [re-frame.core :as re-frame]
-            [re-frisk.core :refer [enable-re-frisk!]]
+            ;[re-frisk.core :refer [enable-re-frisk!]]
             [trilystro.events]
             [trilystro.subs]
             [trilystro.views :as views]
@@ -24,7 +24,7 @@
 
 (defn dev-setup []
   (when config/debug?
-    (enable-re-frisk!)
+    ;(enable-re-frisk!)
     (println "dev mode")))
 
 

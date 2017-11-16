@@ -18,7 +18,7 @@
                  [ns-tracker "0.3.1"]
                  [re-frame "0.10.2"]
                  [re-frame-utils "0.1.0"]
-                 [re-frisk "0.5.2"]
+                 ;[re-frisk "0.5.2"]
                  [reagent "0.7.0"]
                  [ring "1.6.3"]
                  [secretary "1.2.3"]
@@ -53,7 +53,7 @@
    {:dependencies [[binaryage/devtools "0.9.7"]
                    [figwheel-sidecar "0.5.14"]
                    [com.cemerick/piggieback "0.2.2"]
-                   ;[day8.re-frame/trace "0.1.7"]
+                   [day8.re-frame/trace "0.1.12"]
                    ]
 
     :plugins      [[lein-figwheel "0.5.14"]
@@ -70,8 +70,8 @@
                     :asset-path           "js/compiled/out"
                     :source-map-timestamp true
                     :language-in :ecmascript5
-                    ;:closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
-                    :preloads             [devtools.preload #_ day8.re-frame.trace.preload]
+                    :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                    :preloads             [devtools.preload day8.re-frame.trace.preload]
                     :external-config      {:devtools/config {:features-to-install :all}}
                     }}
 
