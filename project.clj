@@ -1,4 +1,4 @@
-(defproject binaryage/chromex-sample "0.1.0-SNAPSHOT"
+(defproject vuagain-chromex "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
@@ -23,7 +23,7 @@
                                     "resources/unpacked/compiled"
                                     "resources/release/compiled"]
 
-  :cljsbuild {:builds {}}                                                                                                     ; prevent https://github.com/emezeske/lein-cljsbuild/issues/413
+  :cljsbuild {:builds {}} ; prevent https://github.com/emezeske/lein-cljsbuild/issues/413
 
   :profiles {:unpacked
              {:cljsbuild {:builds
@@ -34,7 +34,7 @@
                                            :output-dir    "resources/unpacked/compiled/background"
                                            :asset-path    "compiled/background"
                                            :preloads      [devtools.preload]
-                                           :main          chromex-sample.background
+                                           :main          vuagain.chromex.background
                                            :optimizations :none
                                            :source-map    true}}
                            :popup
@@ -44,7 +44,7 @@
                                            :output-dir    "resources/unpacked/compiled/popup"
                                            :asset-path    "compiled/popup"
                                            :preloads      [devtools.preload]
-                                           :main          chromex-sample.popup
+                                           :main          vuagain.chromex.popup
                                            :optimizations :none
                                            :source-map    true}}}}}
              :unpacked-content-script
@@ -54,9 +54,9 @@
                             :compiler     {:output-to     "resources/unpacked/compiled/content-script/main.js"
                                            :output-dir    "resources/unpacked/compiled/content-script"
                                            :asset-path    "compiled/content-script"
-                                           :main          chromex-sample.content-script
-                                           ;:optimizations :whitespace                                                        ; content scripts cannot do eval / load script dynamically
-                                           :optimizations :advanced                                                           ; let's use advanced build with pseudo-names for now, there seems to be a bug in deps ordering under :whitespace mode
+                                           :main          vuagain.chromex.content-script
+                                           ;:optimizations :whitespace ; content scripts cannot do eval / load script dynamically
+                                           :optimizations :advanced    ; let's use advanced build with pseudo-names for now, there seems to be a bug in deps ordering under :whitespace mode
                                            :pseudo-names  true
                                            :pretty-print  true}}}}}
              :checkouts
@@ -96,7 +96,7 @@
                             :compiler     {:output-to     "resources/release/compiled/background.js"
                                            :output-dir    "resources/release/compiled/background"
                                            :asset-path    "compiled/background"
-                                           :main          chromex-sample.background
+                                           :main          vuagain.chromex.background
                                            :optimizations :advanced
                                            :elide-asserts true}}
                            :popup
@@ -104,7 +104,7 @@
                             :compiler     {:output-to     "resources/release/compiled/popup.js"
                                            :output-dir    "resources/release/compiled/popup"
                                            :asset-path    "compiled/popup"
-                                           :main          chromex-sample.popup
+                                           :main          vuagain.chromex.popup
                                            :optimizations :advanced
                                            :elide-asserts true}}
                            :content-script
@@ -112,7 +112,7 @@
                             :compiler     {:output-to     "resources/release/compiled/content-script.js"
                                            :output-dir    "resources/release/compiled/content-script"
                                            :asset-path    "compiled/content-script"
-                                           :main          chromex-sample.content-script
+                                           :main          vuagain.chromex.content-script
                                            :optimizations :advanced
                                            :elide-asserts true}}}}}}
 
@@ -121,7 +121,7 @@
             "content"         ["with-profile" "+unpacked-content-script" "cljsbuild" "auto" "content-script"]
             "fig-dev-no-repl" ["with-profile" "+unpacked,+figwheel,+disable-figwheel-repl,+checkouts" "figwheel" "background" "popup"]
             "content-dev"     ["with-profile" "+unpacked-content-script,+checkouts-content-script" "cljsbuild" "auto"]
-            "devel"           ["with-profile" "+cooper" "do"                                                                  ; for mac only
+            "devel"           ["with-profile" "+cooper" "do" ; for mac only
                                ["shell" "scripts/ensure-checkouts.sh"]
                                ["cooper"]]
             "release"         ["with-profile" "+release" "do"

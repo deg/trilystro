@@ -1,4 +1,4 @@
-(ns chromex-sample.background.core
+(ns vuagain.chromex.background.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [goog.string :as gstring]
             [goog.string.format]
@@ -8,7 +8,7 @@
             [chromex.protocols :refer [post-message! get-sender]]
             [chromex.ext.tabs :as tabs]
             [chromex.ext.runtime :as runtime]
-            [chromex-sample.background.storage :refer [test-storage!]]))
+            [vuagain.chromex.background.storage :refer [test-storage!]]))
 
 (def clients (atom []))
 

@@ -1,4 +1,4 @@
-(ns chromex-sample.popup.core
+(ns vuagain.chromex.popup.core
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:require [cljs.core.async :refer [<!]]
             [reagent.core :as reagent]
@@ -6,9 +6,9 @@
             [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
             [chromex.ext.runtime :as runtime :refer-macros [connect]]
-            [chromex-sample.popup.handlers]
-            [chromex-sample.popup.subs]
-            [chromex-sample.popup.views :as views]))
+            [vuagain.chromex.popup.handlers]
+            [vuagain.chromex.popup.subs]
+            [vuagain.chromex.popup.views :as views]))
 
 ; -- a message loop ---------------------------------------------------------------------------------------------------------
 

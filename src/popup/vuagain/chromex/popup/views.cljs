@@ -1,4 +1,4 @@
-(ns chromex-sample.popup.views
+(ns vuagain.chromex.popup.views
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame]))
 

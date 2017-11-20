@@ -1,6 +1,6 @@
-(ns chromex-sample.popup.handlers
+(ns vuagain.chromex.popup.handlers
   (:require [re-frame.core :as re-frame]
-            [chromex-sample.popup.db :as db]))
+            [vuagain.chromex.popup.db :as db]))
 
 (re-frame/reg-event-db
   :initialize-db
