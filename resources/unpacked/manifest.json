@@ -3,30 +3,32 @@
    also we allow unsafe eval for figwheel
 */
 {
-  "name": "vuagain-chromex-dev",
+  "manifest_version": 2,
+  "name": "VuAgain Chrome Extension",
+  "short_name": "VuAgain",
+  "description": "Add pages to VuAgain, and show in Google search",
   "version": "0.1.0",
   "browser_action": {
-    "default_title": "Show the popup",
+    "default_title": "VuAgain this page",
     "default_popup": "popup.html",
-    "default_icon": {
-      "19": "images/icon19.png",
-      "38": "images/icon38.png"
-    }
+    "default_icon": { "16":  "images/icon/icon16-trans.png",
+                      "19":  "images/icon/icon19-trans.png",
+                      "38":  "images/icon/icon38-trans.png",
+                      "48":  "images/icon/icon48-trans.png",
+                      "128": "images/icon/icon128-trans.png"}
   },
-  "icons": {
-    "16": "images/icon16.png",
-    "48": "images/icon48.png",
-    "128": "images/icon128.png"
-  },
+  "icons": { "16":  "images/icon/icon16-trans.png",
+             "19":  "images/icon/icon19-trans.png",
+             "38":  "images/icon/icon38-trans.png",
+             "48":  "images/icon/icon48-trans.png",
+             "128": "images/icon/icon128-trans.png"},
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "content_scripts": [
     {
       "matches": [
         "<all_urls>"
       ],
-      "js": [
-        "compiled/content-script/main.js"
-      ],
+      "js": [ "compiled/content-script/main.js" ],
       "run_at": "document_end"
     }
   ],
@@ -36,6 +38,5 @@
   },
   "permissions": [
     "storage"
-  ],
-  "manifest_version": 2
+  ]
 }

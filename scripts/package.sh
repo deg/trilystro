@@ -32,7 +32,7 @@ if [ -d "$PACKAGE_DIR" ] ; then
   rm -rf "$PACKAGE_DIR"
 fi
 
-cp -r "$RELEASE_BUILD" "$PACKAGE_DIR" # this will copy actual files, not symlinks
+cp -RL "$RELEASE_BUILD" "$PACKAGE_DIR" # this will copy actual files, not symlinks
 
 # prune release directory from extra files/folders
 rm -rf "$PACKAGE_DIR/compiled/background"
