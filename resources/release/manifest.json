@@ -18,6 +18,7 @@
              "38":  "images/icon/icon38-trans.png",
              "48":  "images/icon/icon48-trans.png",
              "128":  "images/icon/icon128-trans.png"},
+  "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
   "content_scripts": [
     {
       "matches": [
@@ -37,4 +38,3 @@
     "storage"
   ]
 }
-

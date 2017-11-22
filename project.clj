@@ -7,7 +7,9 @@
                  [figwheel "0.5.14"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.2"]
-                 [environ "1.1.0"]]
+                 [environ "1.1.0"]
+                 [com.degel/re-frame-firebase "0.4.0-SNAPSHOT"]
+                 [com.degel/sodium "0.8.0-SNAPSHOT"]]
 
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-figwheel "0.5.14"]
