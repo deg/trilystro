@@ -24,14 +24,15 @@
                  [secretary "1.2.3"]
                  [yogthos/config "0.9"]
                  [com.degel/re-frame-firebase "0.4.0-SNAPSHOT"]
-                 [com.degel/sodium "0.8.0-SNAPSHOT"]]
+                 [com.degel/iron "0.1.0-SNAPSHOT"]
+                 [com.degel/sodium "0.9.0-SNAPSHOT"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
             [lein-garden "0.3.0"]]
 
   :min-lein-version "2.5.3"
 
-  :source-paths ["src/clj" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
+  :source-paths ["src/clj" "checkouts/iron/src" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
                                     "test/js"
@@ -62,7 +63,7 @@
   :cljsbuild
   {:builds
    [{:id           "dev"
-     :source-paths ["src/cljs" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
+     :source-paths ["src/cljs" "checkouts/iron/src" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
      :figwheel     {:on-jsload "trilystro.core/mount-root"}
      :compiler     {:main                 trilystro.core
                     :output-to            "resources/public/js/compiled/app.js"

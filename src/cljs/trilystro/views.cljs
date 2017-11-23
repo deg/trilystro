@@ -10,8 +10,7 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [sodium.extensions :as nax]
-   [sodium.utils :as utils]
-   [sodium.re-utils :refer [<sub >evt]]
+   [iron.re-utils :refer [<sub >evt]]
    [trilystro.config :as config]
    [trilystro.db :as db]
    [trilystro.events :as events]
@@ -59,7 +58,7 @@
      [na/container {}
       [na/dropdown {:inline? true
                     :value (<sub [::fb/user-settings [:tags-mode] :any-of])
-                    :on-change (na/>event [::fb/commit-user-setting :tags-mode] :any-of)
+                    :on-change (na/value->event-fn [::fb/commit-user-setting :tags-mode] {:default :any-of})
                     :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
       [nax/tag-selector {:all-tags-sub            [:all-tags]
                          :selected-tags-sub       [getter :tags]
@@ -67,7 +66,7 @@
      [na/input {:type "url"
                 :placeholder "Website..."
                 :value     (<sub      [getter :url] "")
-                :on-change (na/>event [setter :url])}]
+                :on-change (na/value->event-fn [setter :url])}]
      (let [corner (fn [icon side field]
                     (let [value (<sub [::fb/user-settings [field]])]
                       [na/label {:icon icon
@@ -75,14 +74,14 @@
                                  :size "mini"
                                  :class-name "clickable"
                                  :color (if value "orange" "brown")
-                                 :on-click (na/>event [::fb/commit-user-setting field (not value)])}]))]
+                                 :on-click #(>evt [::fb/commit-user-setting field (not value)])}]))]
        [:div
         (corner "tags" "left" :tags-as-text?)
         (corner "linkify" "right" :url-as-text?)
         [na/text-area {:rows 3
                        :placeholder "Description..."
                        :value     (<sub      [getter :text] "")
-                       :on-change (na/>event [setter :text])}]])]))
+                       :on-change (na/value->event-fn [setter :text])}]])]))
 
 
 (defn lystro-results-panel
@@ -94,9 +93,9 @@
                  :tertiary? (not public?)
                  :class-name "lystro-result"}
      (when mine? (mini-button "delete"
-                              {:on-click (na/>event (modal/goto :modal-confirm-delete lystro))}))
+                              {:on-click #(>evt (modal/goto :modal-confirm-delete lystro))}))
      (when mine? (mini-button "write"
-                              {:on-click (na/>event (modal/goto :modal-edit-lystro lystro))}))
+                              {:on-click #(>evt (modal/goto :modal-edit-lystro lystro))}))
      [nax/draw-tags {:selected-tags-sub       [::fsm/page-param-val :tags]
                      :set-selected-tags-event [::fsm/update-page-param-val :tags]
                      :class-of-tag-sub        [:tag-class-by-frequency]}
@@ -154,7 +153,7 @@
 (defn login-logout-control []
   (let [user (<sub [::fb/user])]
     [na/menu-menu {:position "right"}
-     [na/menu-item {:on-click (na/>event [(if user :sign-out :sign-in)])}
+     [na/menu-item {:on-click #(>evt [(if user :sign-out :sign-in)])}
       (if user
         [na/label {:image true :circular? true}
          [na/image {:src (:photo-url user)}]
@@ -167,16 +166,16 @@
 (defn top-bar []
   [na/menu {:fixed "top"}
    [na/menu-item {:header? true
-                  :on-click (na/>event (modal/goto :modal-about))}
+                  :on-click #(>evt (modal/goto :modal-about))}
     [na/icon {:name "tasks" :size "big"}]
     (<sub [::db/name])]
    [na/menu-item {:name "Add"
                   :disabled? (not (<sub [::fsm/in-page? :logged-in]))
-                  :on-click (na/>event (modal/goto :modal-new-lystro))}]
+                  :on-click #(>evt (modal/goto :modal-new-lystro))}]
    [na/menu-item {:name "About"
                   :disabled? (not (or (<sub [::fsm/in-page? :logged-in])
                                       (<sub [::fsm/in-page? :logged-out])))
-                  :on-click (na/>event (modal/goto :modal-about))}]
+                  :on-click #(>evt (modal/goto :modal-about))}]
    [login-logout-control]])
 
 

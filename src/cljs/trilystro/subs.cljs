@@ -8,8 +8,8 @@
                [clojure.spec.alpha :as s]
                [re-frame.core :as re-frame]
                [re-frame.loggers :refer [console]]
-               [sodium.re-utils :as re-utils :refer [sub2 <sub]]
-               [sodium.utils :as utils]
+               [iron.re-utils :as re-utils :refer [sub2 <sub]]
+               [iron.utils :refer [ci-includes? validate]]
                [trilystro.db :as db]
                [trilystro.events :as events]
                [trilystro.firebase :as fb]
@@ -30,7 +30,7 @@
   "Filter function that selects lystros whose tags include at least
   one of the match-set"
   [match-set]
-  {:pre [(utils/validate (s/nilable set?) match-set)]}
+  {:pre [(validate (s/nilable set?) match-set)]}
   (filter (fn [{:keys [tags]}]
             (let [tags (set tags)
                   intersection (if (empty? match-set)
@@ -43,7 +43,7 @@
   "Filter function that selects lystros whose tags include all
   of the match-set"
   [match-set]
-  {:pre [(utils/validate (s/nilable set?) match-set)]}
+  {:pre [(validate (s/nilable set?) match-set)]}
   (filter (fn [{:keys [tags]}]
             (if (empty? match-set)
               true
@@ -53,19 +53,19 @@
 (defn filter-url-field
   "Filter function that selects lystros whose url field includes match-url."
   [match-url]
-  {:pre [(utils/validate string? match-url)]}
+  {:pre [(validate string? match-url)]}
   (filter (fn [lystro]
             (let [lystro-url (or (:url lystro) "")]
               (if (empty? match-url)
                 lystro-url
-                (utils/ci-includes? lystro-url match-url))))))
+                (ci-includes? lystro-url match-url))))))
 
 (defn filter-text-field
   "Filter function that selects lystros whose text field includes
   match-text or if the text is found in the tags or url, when them
   matching option has been passed in."
   [match-text tags-as-text? url-as-text?]
-  {:pre [(utils/validate string? match-text)]}
+  {:pre [(validate string? match-text)]}
   (filter (fn [lystro]
             (if (empty? match-text)
               (:text lystro)
@@ -77,7 +77,7 @@
                            (:url lystro))
                          " "
                          (:text lystro))]
-                (utils/ci-includes? all-text match-text))))))
+                (ci-includes? all-text match-text))))))
 
 
 (defn filter-lystros [lystros {:keys [tags-mode tags url text tags-as-text? url-as-text?]}]

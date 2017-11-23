@@ -13,8 +13,7 @@
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [vimsical.re-frame.cofx.inject :as inject]
-   [sodium.chrome-utils :as chrome]
-   [sodium.re-utils :refer [>evt]]
+   [iron.re-utils :refer [>evt]]
    [trilystro.db :as db]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]))

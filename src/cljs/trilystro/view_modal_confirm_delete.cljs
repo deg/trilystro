@@ -5,14 +5,13 @@
   (:require
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
-   [sodium.re-utils :refer [<sub >evt]]
+   [iron.re-utils :refer [<sub >evt]]
    [trilystro.fsm :as fsm]
    [trilystro.modal :as modal]))
 
 
 (defn view-modal-confirm-delete []
-  (let [lystro (<sub [::fsm/page-param])
-        fn-delete (na/>event [::fsm/goto :quit-modal {:dispatch [:clear-lystro lystro]}])]
+  (let [lystro (<sub [::fsm/page-param])]
     [modal/modal {:page :modal-confirm-delete
                   :header "Really delete Lystro?"}
      [na/modal-content {}
@@ -25,8 +24,9 @@
                    :negative? true
                    :icon "delete"
                    :floated "right"
-                   :on-click fn-delete}]
+                   :on-click #(>evt [::fsm/goto :quit-modal
+                                     {:dispatch [:clear-lystro lystro]}])}]
        [na/button {:content "Cancel"
                    :icon "dont"
                    :secondary? true
-                   :on-click (modal/quit)}]]]]))
+                   :on-click #(modal/quit)}]]]]))

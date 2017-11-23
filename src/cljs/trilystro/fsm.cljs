@@ -6,7 +6,7 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [fsmviz.core :as fsmviz]
-   [sodium.re-utils :as re-utils :refer [sub2]]
+   [iron.re-utils :refer [sub2]]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [trilystro.db :as db]

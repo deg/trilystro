@@ -7,7 +7,7 @@
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
-   [sodium.re-utils :refer [<sub >evt]]
+   [iron.re-utils :refer [<sub >evt]]
    [trilystro.db :as db]
    [trilystro.fsm-lib :as fsm-lib]
    [trilystro.fsm :as fsm]
@@ -52,7 +52,7 @@
    [::fsm/goto page {:param param}]))
 
 (defn quit []
-  (na/>event [::fsm/goto :quit-modal]))
+  (>evt [::fsm/goto :quit-modal]))
 
 
 (defn modal [{:keys [page open? header]} content]
@@ -63,7 +63,7 @@
                :dimmer "blurring"
                :close-icon true
                :close-on-dimmer-click? true
-               :on-close (quit)}
+               :on-close #(quit)}
      [na/modal-header {} header]
      [na/modal-content {}
       (when open?

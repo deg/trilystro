@@ -5,7 +5,7 @@
   (:require
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
-   [sodium.re-utils :refer [<sub >evt]]
+   [iron.re-utils :refer [<sub]]
    [trilystro.db :as db]
    [trilystro.fsm :as fsm]
    [trilystro.fsm-graph :as fsm-graph]

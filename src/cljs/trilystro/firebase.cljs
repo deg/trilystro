@@ -6,7 +6,7 @@
    [clojure.spec.alpha :as s]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [sodium.re-utils :as re-utils :refer [sub2 <sub]]
+   [iron.re-utils :as re-utils :refer [sub2 <sub]]
    [com.degel.re-frame-firebase :as firebase]
    [trilystro.db :as db]
    [trilystro.fsm :as fsm]))
@@ -110,7 +110,7 @@
    (if-let [path (public-fb-path path)]
      {:firebase/write (assoc args :path path)}
 
-     ;; [TODO] Need to use pending Sodium generalization of :dispatch that takes a fn too.
+     ;; [TODO] Need to use pending Iron generalization of :dispatch that takes a fn too.
      ((if on-failure (re-utils/event->fn on-failure) js/alert)
       (str "Can't write to Firebase, because not logged in:\n " path ": " value)))))
 
@@ -130,7 +130,7 @@
         [effect-type effect-args]
         {effect-type effect-args}))
 
-    ;; [TODO] Need to use pending Sodium generalization of :dispatch that takes a fn too.
+    ;; [TODO] Need to use pending Iron generalization of :dispatch that takes a fn too.
     ((if on-failure
        (re-utils/event->fn on-failure)
        js/alert)

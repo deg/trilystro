@@ -8,7 +8,7 @@
    [soda-ash.core :as sa]
    [sodium.core :as na]
    [sodium.extensions :as nax]
-   [sodium.re-utils :refer [<sub >evt]]
+   [iron.re-utils :refer [<sub >evt]]
    [trilystro.firebase :as fb]
    [trilystro.fsm :as fsm]
    [trilystro.modal :as modal]))
@@ -45,29 +45,29 @@
              :content [na/input {:type "url"
                                  :placeholder "Website..."
                                  :default-value (:url lystro)
-                                 :on-change (na/>event [::fsm/update-page-param-val :url])}]]
+                                 :on-change (na/value->event-fn [::fsm/update-page-param-val :url])}]]
             [nax/labelled-field
              :label "Text:"
              :content [na/text-area {:rows 3
                                      :placeholder "Description..."
                                      :default-value (:text lystro)
-                                     :on-change (na/>event [::fsm/update-page-param-val :text])}]]
+                                     :on-change (na/value->event-fn [::fsm/update-page-param-val :text])}]]
             [nax/labelled-field
              :label "Visibility:"
              :content [sa/Checkbox {:label "Public"
                                     :default-checked public?
-                                    :on-change (na/>event [::fsm/update-page-param-val :public?] false)}]]
+                                    :on-change (na/value->event-fn [::fsm/update-page-param-val :public?] {:default false})}]]
             (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
               [na/form-button {:disabled? (or (not (empty? @partial-tag-text))
                                               (empty? (:text lystro))
                                               (not connected?))
-                               :on-click (na/>event [::fsm/goto
-                                                     :quit-modal
-                                                     {:dispatch
-                                                      [:commit-lystro (assoc lystro
-                                                                             :owner (<sub [::fb/uid])
-                                                                             :original-public? original-public?
-                                                                             :public? public?)]}])
+                               :on-click #(>evt [::fsm/goto
+                                                :quit-modal
+                                                {:dispatch
+                                                 [:commit-lystro (assoc lystro
+                                                                        :owner (<sub [::fb/uid])
+                                                                        :original-public? original-public?
+                                                                        :public? public?)]}])
                                :icon (if connected? "add" "wait")
                                :content (if connected?
                                           (str "Save " (if public? "public" "private"))

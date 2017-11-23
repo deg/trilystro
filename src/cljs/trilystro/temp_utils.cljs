@@ -8,7 +8,7 @@
    [clojure.string :as str]))
 
 
-;;; [TODO] Move to sodium.utils once this matures a bit
+;;; [TODO] Move to iron.utils once this matures a bit
 ;;; [TODO] The URL is tainted text. Is there any risk here?
 (defn link-to
   "Create an HTTP link. Use some smarts re user intention"

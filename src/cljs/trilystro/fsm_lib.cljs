@@ -27,8 +27,8 @@
    [clojure.string :as str]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [sodium.re-utils :refer [>evt]]
-   [sodium.utils :as utils]))
+   [iron.re-utils :refer [>evt]]
+   [iron.utils :as utils]))
 
 
 (defn- next-stack
