@@ -23,9 +23,9 @@
                  [ring "1.6.3"]
                  [secretary "1.2.3"]
                  [yogthos/config "0.9"]
-                 [com.degel/re-frame-firebase "0.4.0-SNAPSHOT"]
-                 [com.degel/iron "0.1.0-SNAPSHOT"]
-                 [com.degel/sodium "0.9.0-SNAPSHOT"]]
+                 [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]
+                 [com.degel/iron "0.2.0-SNAPSHOT"]
+                 [com.degel/sodium "0.10.0-SNAPSHOT"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
             [lein-garden "0.3.0"]]
