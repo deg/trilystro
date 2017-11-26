@@ -119,8 +119,17 @@
 
 (re-frame/reg-sub
  :lystros
- :<- [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}]
- :<- [:firebase/on-value {:path (fb/private-fb-path [:lystros])}]
+ ;; [TODO] Got rid of shortcut syntax here, 26Nov17, because with it the private
+ ;;        lystros were often not showing. I don't understand why, but this seems
+ ;;        to fix it.
+ ;; - :<- [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}]
+ ;; - :<- [:firebase/on-value {:path (fb/private-fb-path [:lystros])}]
+ ;; + (fn [_ _]
+ ;; +   [(re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
+ ;; +    (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])])
+ (fn [_ _]
+   [(re-frame/subscribe [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
+    (re-frame/subscribe [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])])
  (fn [[shared-lystros private-lystros] [_ {:keys [tags-mode tags url text tags-as-text? url-as-text?] :as options}] _]
    (into (filter-lystros (cleanup-lystros private-lystros) options)
          (mapcat #(filter-lystros (cleanup-lystros %) options)
