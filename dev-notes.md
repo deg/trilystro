@@ -1,3 +1,7 @@
+## Running
+
+For now, see instructions in <readme-chromex-sample.md>.
+
 ## Extension details
 
 From https://chrome.google.com/webstore/developer/dashboard (logged in as david.goldfarb@vuagain.com)
