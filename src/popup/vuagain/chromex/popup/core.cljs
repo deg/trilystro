@@ -8,12 +8,18 @@
             [chromex.ext.runtime :as runtime :refer-macros [connect]]
             [vuagain.chromex.popup.handlers]
             [vuagain.chromex.popup.subs]
-            [vuagain.chromex.popup.views :as views]))
+            [vuagain.chromex.popup.views :as views]
+            [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]))
 
 ; -- a message loop ---------------------------------------------------------------------------------------------------------
 
 (defn process-message! [message]
-  (log "POPUP: got message:" message))
+  (log "POPUP: got message:" message)
+  (when (map? (js->clj message))
+    (>evt [:set-user (:user (js->clj message :keywordize-keys true))]))
+  #_
+  (let [background-port (runtime/connect)]
+    (post-message! background-port "POPUP RESPONDING!")))
 
 (defn run-message-loop! [message-channel]
   (log "POPUP: starting message loop...")
@@ -25,8 +31,9 @@
 
 (defn connect-to-background-page! []
   (let [background-port (runtime/connect)]
-    (post-message! background-port "hello from POPUP!")
-    (run-message-loop! background-port)))
+    (post-message! background-port "<<42>> hello from POPUP!")
+    (run-message-loop! background-port)
+    background-port))
 
 ; -- main entry point -------------------------------------------------------------------------------------------------------
 (defn mount-root []
@@ -36,5 +43,5 @@
 (defn init! []
   (log "POPUP: init")
   (re-frame/dispatch-sync [:initialize-db])
-  (connect-to-background-page!)
+  (>evt [:set-background-port (connect-to-background-page!)])
   (mount-root))

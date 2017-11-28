@@ -1,6 +1,10 @@
 (ns vuagain.chromex.popup.views
   (:require [reagent.core :as reagent]
-            [re-frame.core :as re-frame]))
+            [re-frame.core :as re-frame]
+            [re-frame.loggers :refer [console]]
+            [chromex.protocols :refer [post-message!]]
+            [chromex.ext.runtime :as runtime :refer-macros [connect]]
+            [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]))
 
 (defn display [display?]
   {:display (if display? "block" "none")})
@@ -31,7 +35,8 @@
    [:p "VuAgain is in alpha pre-release, and may not yet be fully reliable."]
    [:p "Do not yet use VuAgain to store any information that you cannot afford to\nlose, or that you must keep confidential."]
    [:p "We plan to upgrade rapidly. Please contact our"
-    [:a {:href "mailto:info@vuagain.com"} "support desk"]" with your comments\nand suggestions."]
+    [:a {:href "mailto:info@vuagain.com"}
+     "support desk"]" with your comments\nand suggestions."]
    [:h5 "How to Use"]
    [:p "VuAgain helps you save notes about web pages you want to remember.\nUnlike bookmarking services, VuAgain does not force\nyou to look for your saved notes. Instead, they appear in your regular\nGoogle search results."]
    [:p "You can save two kinds of notes:"]
@@ -40,11 +45,31 @@
     [:li "Public comments can be seen by everyone"]]
    [:button {:class "btn btn-default", :id "acceptTOSButton", :type "button"} "I agree"]])
 
+(defn bg-msg [message]
+  (post-message! (<sub [:background-port])
+                 (clj->js (assoc message :app "VuAgain"))))
+
+
 (defn logging-in-page [display?]
   [:form {:class "spaPage", :id "loginForm", :style (display display?)}
    [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]
+   [:p {} (str "So ==>" (<sub [:user]) "<==")]
    [:div {:class "form-group"}
-    [:button {:class "btn btn-social btn-google", :id "socialLogin"} "Login to VuAgain"]]])
+    [:button {:class "btn btn-social btn-google",
+              :type "button"
+              :id "socialLogin"
+              :on-click #(bg-msg {:command "sign-in"})}
+     "Login to VuAgain"]
+    [:button {:class "btn btn-social",
+              :type "button"
+              :id "logout"
+              :on-click #(bg-msg {:command "sign-out"})}
+     "Logout"]
+    [:button {:class "btn btn-social",
+              :type "button"
+              :id "WhoMe"
+              :on-click #(bg-msg {:command "user"})}
+     "Who am I"]]])
 
 (defn logged-in-page [display?]
   [:form {:class "spaPage", :id "vaForm", :style (display display?)}
