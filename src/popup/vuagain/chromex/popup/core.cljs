@@ -11,15 +11,12 @@
             [vuagain.chromex.popup.views :as views]
             [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]))
 
-; -- a message loop ---------------------------------------------------------------------------------------------------------
+;;; -- a message loop ----------------
 
 (defn process-message! [message]
   (log "POPUP: got message:" message)
   (when (map? (js->clj message))
-    (>evt [:set-user (:user (js->clj message :keywordize-keys true))]))
-  #_
-  (let [background-port (runtime/connect)]
-    (post-message! background-port "POPUP RESPONDING!")))
+    (>evt [:set-user (:user (js->clj message :keywordize-keys true))])))
 
 (defn run-message-loop! [message-channel]
   (log "POPUP: starting message loop...")
@@ -35,7 +32,7 @@
     (run-message-loop! background-port)
     background-port))
 
-; -- main entry point -------------------------------------------------------------------------------------------------------
+;;; -- main entry point ----------------
 (defn mount-root []
   (reagent/render [views/popup]
                   (.getElementById js/document "app")))
