@@ -37,6 +37,7 @@
     "persistent": false
   },
   "permissions": [
+    "tabs",
     "storage"
   ]
 }

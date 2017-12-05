@@ -17,3 +17,8 @@
  :set-background-port
  (fn [db [_ background-port]]
    (assoc db :background-port background-port)))
+
+(re-frame/reg-event-db
+ :set-current-tab
+ (fn [db [_ current-tab]]
+   (assoc db :current-tab current-tab)))

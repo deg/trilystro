@@ -53,13 +53,12 @@
      [:a {:href "mailto:info@vuagain.com"} "support desk"]"."]]
    [:form {:class "spaPage", :id "loginForm", :style (display display?)}
     [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]
-    [:p {} (str "So ==>" (<sub [:user-name]) "<==")]
     [:button {:class "btn btn-social btn-google",
                :type "button"
                :id "socialLogin"
                :on-click #(bg-msg {:command "sign-in"})}
-     "Login to VuAgain"]
-    [TOS-page true]]])
+     "Login to VuAgain"]]
+   [TOS-page true]])
 
 
 (defn logged-in-page [display?]
@@ -70,7 +69,9 @@
               :type "button"
               :id "logout"
               :on-click #(bg-msg {:command "sign-out"})}
-     "Logout"]]        [:input {:class "form-control", :id "page", :type "hidden", :name "page"}]
+     "Logout"]]
+   [:span "URL" (<sub [:url]) "Title" (<sub [:title])]
+   [:input {:class "form-control", :id "page", :type "hidden", :name "page"}]
    [:input {:id "originalPublicComment", :type "hidden", :name "originalPublicComment"}]
    [:input {:id "originalPrivateNote", :type "hidden", :name "originalPrivateNote"}]
    [:input {:id "rating", :type "hidden", :name "rating"}]
