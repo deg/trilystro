@@ -21,13 +21,11 @@
        :id "warning",
        :style {:display "none"}}])
 
-(defn logged-out-page [display?]
-  [:form {:class "spaPage", :id "anonymousForm", :style (display display?)}
-   [:p "You do not seem to be logged in with a chrome identity."]
-   [:p "VuAgain depends on features supplied by Chrome and cannot start until you are\nlogged in with a Chrome identity."]
-   [:p "VuAgain will not work if you are using a non-Chrome browser or are logged in\nanonymously."]
-   [:p "If you are seeing this message in other circumstances, please\ncontact our "
-    [:a {:href "mailto:info@vuagain.com"} "support desk"]"."]])
+
+(defn bg-msg [message]
+  (post-message! (<sub [:background-port])
+                 (clj->js (assoc message :app "VuAgain"))))
+
 
 (defn TOS-page [display?]
   [:form {:class "spaPage", :id "TOSForm", :style (display display?)}
@@ -45,35 +43,34 @@
     [:li "Public comments can be seen by everyone"]]
    [:button {:class "btn btn-default", :id "acceptTOSButton", :type "button"} "I agree"]])
 
-(defn bg-msg [message]
-  (post-message! (<sub [:background-port])
-                 (clj->js (assoc message :app "VuAgain"))))
-
-
-(defn logging-in-page [display?]
-  [:form {:class "spaPage", :id "loginForm", :style (display display?)}
-   [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]
-   [:p {} (str "So ==>" (<sub [:user]) "<==")]
-   [:div {:class "form-group"}
+(defn logged-out-page [display?]
+  [:div
+   [:form {:class "spaPage", :id "anonymousForm", :style (display display?)}
+    [:p "You do not seem to be logged in with a chrome identity."]
+    [:p "VuAgain depends on features supplied by Chrome and cannot start until you are\nlogged in with a Chrome identity."]
+    [:p "VuAgain will not work if you are using a non-Chrome browser or are logged in\nanonymously."]
+    [:p "If you are seeing this message in other circumstances, please\ncontact our "
+     [:a {:href "mailto:info@vuagain.com"} "support desk"]"."]]
+   [:form {:class "spaPage", :id "loginForm", :style (display display?)}
+    [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]
+    [:p {} (str "So ==>" (<sub [:user-name]) "<==")]
     [:button {:class "btn btn-social btn-google",
-              :type "button"
-              :id "socialLogin"
-              :on-click #(bg-msg {:command "sign-in"})}
+               :type "button"
+               :id "socialLogin"
+               :on-click #(bg-msg {:command "sign-in"})}
      "Login to VuAgain"]
+    [TOS-page true]]])
+
+
+(defn logged-in-page [display?]
+  [:form {:class "spaPage", :id "vaForm", :style (display display?)}
+   [:span
+    [:span (<sub [:user-name])]
     [:button {:class "btn btn-social",
               :type "button"
               :id "logout"
               :on-click #(bg-msg {:command "sign-out"})}
-     "Logout"]
-    [:button {:class "btn btn-social",
-              :type "button"
-              :id "WhoMe"
-              :on-click #(bg-msg {:command "user"})}
-     "Who am I"]]])
-
-(defn logged-in-page [display?]
-  [:form {:class "spaPage", :id "vaForm", :style (display display?)}
-   [:input {:class "form-control", :id "page", :type "hidden", :name "page"}]
+     "Logout"]]        [:input {:class "form-control", :id "page", :type "hidden", :name "page"}]
    [:input {:id "originalPublicComment", :type "hidden", :name "originalPublicComment"}]
    [:input {:id "originalPrivateNote", :type "hidden", :name "originalPrivateNote"}]
    [:input {:id "rating", :type "hidden", :name "rating"}]
@@ -128,14 +125,9 @@
 (defn footer-bar [display?]
   [:div {:class "panel-footer", :style {:margin-top "15px"}}
    [:small
-    [:form {:id "chooseServer", :style (display display?)}
-     [:div {:class "checkbox-inline"}
-      [:label {:for "localServer"}]
-      [:input {:id "localServer", :type "checkbox", :value "false"}]"Use debug server"]]
     [:p {:class "alignLeft", :id "versionString"}]
     [:p {:class "alignRight"}
-     [:a {:id "showTOSButton", :href "#"} "Show Terms of Service"]]
-    [:div {:style {:clear "both"}}]]])
+     [:a {:id "showTOSButton", :href "#"} "Show Terms of Service"]]]])
 
 (defn popup []
   (fn []
@@ -143,10 +135,7 @@
      [top-bar]
      [:div {:class "container"}
       [warning-bar]
-      [logged-out-page true]
-      [logging-in-page true]
-      [TOS-page true]
-      [:form {:class "spaPage", :id "vaWaiting", :style (display true)}
-             [:p {:class "warning", :id "waiting"} "Waiting for server..."]]
-      [logged-in-page true]]
+      (if (<sub [:user])
+        [logged-in-page true]
+        [logged-out-page true])]
      [footer-bar true]]))

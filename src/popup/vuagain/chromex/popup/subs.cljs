@@ -7,3 +7,8 @@
 (sub2 :user [:user])
 (sub2 :background-port [:background-port])
 
+(re-frame/reg-sub
+ :user-name
+ :<- [:user]
+ (fn [user _]
+   (or (:display-name user) (:email user))))
