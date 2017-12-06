@@ -1,30 +1,40 @@
 (ns vuagain.chromex.popup.views
-  (:require [reagent.core :as reagent]
-            [re-frame.core :as re-frame]
-            [re-frame.loggers :refer [console]]
-            [chromex.protocols :refer [post-message!]]
-            [chromex.ext.runtime :as runtime :refer-macros [connect]]
-            [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]))
+  (:require
+   [chromex.ext.runtime :as runtime :refer-macros [connect]]
+   [chromex.protocols :refer [post-message!]]
+   [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]
+   [re-frame.core :as re-frame]
+   [re-frame.loggers :refer [console]]
+   [reagent.core :as reagent]
+   [sodium.core :as na]
+   [sodium.extensions :as nax]))
 
 (defn display [display?]
   {:display (if display? "block" "none")})
 
+(defn bg-msg [message]
+  (post-message! (<sub [:background-port])
+                 (clj->js (assoc message :app "VuAgain"))))
+
+
 (defn top-bar []
-  [:nav {:class "navbar navbar-default"}
-   [:div {:class "container-fluid"}
-    [:div {:class "navbar-header"}
-     [:div {:class "navbar-brand"}]
-     [:h3 "VuAgain"]]]])
+  (let [user (<sub [:user])]
+    [:div
+     [:nav {:class "navbar navbar-default"}
+      [:div {:class "container-fluid"}
+       [:div {:class "navbar-header"}
+        [:div {:class "navbar-brand"}]
+        [:h3 "VuAgain"]]]]
+     [:button.alignRight {:class "btn btn-social",
+                          :type "button"
+                          :id (if user "logout" "login")
+                          :on-click #(bg-msg {:command (if user "sign-out" "sign-in")})}
+      (if user (<sub [:user-name]) "login")]]))
 
 (defn warning-bar []
   [:p {:class "warning",
        :id "warning",
        :style {:display "none"}}])
-
-
-(defn bg-msg [message]
-  (post-message! (<sub [:background-port])
-                 (clj->js (assoc message :app "VuAgain"))))
 
 
 (defn TOS-page [display?]
@@ -52,76 +62,43 @@
     [:p "If you are seeing this message in other circumstances, please\ncontact our "
      [:a {:href "mailto:info@vuagain.com"} "support desk"]"."]]
    [:form {:class "spaPage", :id "loginForm", :style (display display?)}
-    [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]
-    [:button {:class "btn btn-social btn-google",
-               :type "button"
-               :id "socialLogin"
-               :on-click #(bg-msg {:command "sign-in"})}
-     "Login to VuAgain"]]
+    [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]]
    [TOS-page true]])
 
 
 (defn logged-in-page [display?]
   [:form {:class "spaPage", :id "vaForm", :style (display display?)}
-   [:span
-    [:span (<sub [:user-name])]
-    [:button {:class "btn btn-social",
-              :type "button"
-              :id "logout"
-              :on-click #(bg-msg {:command "sign-out"})}
-     "Logout"]]
-   [:span "URL" (<sub [:url]) "Title" (<sub [:title])]
-   [:input {:class "form-control", :id "page", :type "hidden", :name "page"}]
-   [:input {:id "originalPublicComment", :type "hidden", :name "originalPublicComment"}]
-   [:input {:id "originalPrivateNote", :type "hidden", :name "originalPrivateNote"}]
-   [:input {:id "rating", :type "hidden", :name "rating"}]
-   [:input {:id "originalRating", :type "hidden", :name "originalRating"}]
-   [:input {:id "visibility", :type "hidden", :name "visibility"}]
-   [:input {:id "userFacebookId", :type "hidden", :name "userFacebookId"}]
-   [:div {:class "form-group"}]
    [:div {:class "form-group"}
-    [:label "Private Note"]
+    [:div "Add Lystro for " [:b(<sub [:title])] ", from " [:em (<sub [:url])]]
+    [:hr]
+    [:label "Tags"]
     [:input {:dir "auto",
-             :placeholder "Note",
-             :name "privateNote",
+             :placeholder "(NYI)",
+             :name "tags",
              :type "text",
              :maxLength "140",
-             :id "privateNoteInput",
+             :id "tagsInput",
              :class "form-control",
              :autoFocus true,
              :autoComplete "off"}]]
-   [:div {:class "form-group"}
-    [:label "Public Comment"]
-    [:input {:class "form-control",
-             :id "publicCommentInput",
-             :type "text",
-             :placeholder "Comment",
-             :name "publicComment",
-             :autoComplete "off",
-             :dir "auto",
-             :maxLength "140"}]]
-   [:label "Rating"]
-   [:div {:class "form-group centered"}
-    [:div {:class "btn-group btn-group-sm", :role "group"}
-     [:button {:class "btn btn-default ratingButton", :id "hateButton", :type "button", :value "-1.0"}
-      [:img {:src "images/hate-32.png"}]
-      [:br]"hate"]
-     [:button {:class "btn btn-default ratingButton", :id "dislikeButton", :type "button", :value "-0.5"}
-      [:img {:src "images/dislike-32.png"}]
-      [:br]"dislike"]
-     [:button {:class "btn btn-default ratingButton", :id "soSoButton", :type "button", :value "0.0"}
-      [:img {:src "images/so-so-32.png"}]
-      [:br]"ok"]
-     [:button {:class "btn btn-default ratingButton", :id "likeButton", :type "button", :value "0.5"}
-      [:img {:src "images/like-32.png"}]
-      [:br]"like"]
-     [:button {:class "btn btn-default ratingButton", :id "loveButton", :type "button", :value "1.0"}
-      [:img {:src "images/love-32.png"}]
-      [:br]"love"]]]
+   [nax/labelled-field
+    :label "Text:"
+    :content [na/text-area {:rows 3
+                            :placeholder "Description..."
+                            :default-value (<sub [:page-param :text])
+                            :on-change (na/value->event-fn [:update-page-param-val :text])}]]
    [:hr]
    [:div {:class "form-group centered"}
     [:button {:class "btn", :id "cancelButton"} "Cancel"]
-    [:button {:class "btn btn-primary", :id "submitButton"} "Save"]]])
+    [:button {:class "btn btn-primary",
+              :type "button"
+              :id "submitButton"
+              :on-click #(>evt [:commit-lystro {:tags #{}
+                                                :url (<sub [:url])
+                                                :text (<sub [:page-param :text])
+                                                :owner (<sub [:fb-uid])
+                                                :public? false}])}
+     "Save"]]])
 
 (defn footer-bar [display?]
   [:div {:class "panel-footer", :style {:margin-top "15px"}}

@@ -22,3 +22,17 @@
  :set-current-tab
  (fn [db [_ current-tab]]
    (assoc db :current-tab current-tab)))
+
+
+(re-frame/reg-event-db
+ :update-page-param-val
+ (fn [db [_ param val]]
+   (console :log "Setting " param " to " val)
+   (assoc-in db [:page-params param] val)
+   db))
+
+(re-frame/reg-event-db
+ :commit-lystro
+ (fn [db [_ lystro]]
+   (console :log "COMMITTING: --- :" lystro)
+   db))
