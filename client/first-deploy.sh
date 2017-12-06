@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEPLOYDIR=../trilystro-website
+DEPLOYDIR=../../trilystro-website
 mkdir $DEPLOYDIR
 pushd $DEPLOYDIR
 

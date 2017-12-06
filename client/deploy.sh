@@ -3,7 +3,7 @@
 # See also https://stackoverflow.com/questions/37667931/how-do-i-deploy-a-single-page-app-written-in-clojurescript-figwheel-to-a-stat
 set -e
 
-DEPLOYDIR=../trilystro-website
+DEPLOYDIR=../../trilystro-website
 
 RED='\033[0;31m'
 NOCOLOR='\033[0m'
@@ -25,7 +25,7 @@ GIT_COMMIT=$(git show -s --oneline HEAD)
 
 pushd $DEPLOYDIR
 rm -rf *
-cp -r ../trilystro/resources/public/* .
+cp -r ../trilystro/client/resources/public/* .
 cat > CNAME <<EOF
 trilystro.vuagain.com
 EOF
