@@ -1,13 +1,13 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.fsm-graph
+(ns trilib.fsm-graph
   (:require
    [clojure.string :as str]
    [fsmviz.core :as fsmviz]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [trilystro.fsm-lib :as fsm-lib]))
+   [trilib.fsm-lib :as fsm-lib]))
 
 
 ;;; Graphing. (This is still a bit hackish, as it works around the existing fsmviz rather than modifying it).

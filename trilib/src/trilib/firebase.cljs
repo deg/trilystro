@@ -1,15 +1,15 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.firebase
+(ns trilib.firebase
   (:require
    [clojure.spec.alpha :as s]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [iron.re-utils :as re-utils :refer [sub2 <sub]]
    [com.degel.re-frame-firebase :as firebase]
-   [trilystro.db :as db]
-   [trilystro.fsm :as fsm]))
+   [trilib.db :as db]
+   [trilib.fsm :as fsm]))
 
 
 (s/def ::uid string?)
@@ -36,7 +36,7 @@
 
 
 (defn init []
-  (re-frame/dispatch-sync [::fsm/goto :try-login])
+  (re-frame/dispatch-sync [:trilib.fsm/goto :try-login])
   (firebase/init :firebase-app-info      firebase-app-info
                  :get-user-sub           [::user]
                  :set-user-event         [::set-user]
@@ -75,7 +75,7 @@
  [db/check-spec-interceptor]
  (fn [{db :db} [_ user]]
    (into {:db (assoc db ::user user)
-          :dispatch [::fsm/goto (if user :login-confirmed :logout)]}
+          :dispatch [:trilib.fsm/goto (if user :login-confirmed :logout)]}
          (when user
            ;; [TODO][ch94] Should remain :user-details to :users-details in Firebase.
            ;;    Requires a migration hack.

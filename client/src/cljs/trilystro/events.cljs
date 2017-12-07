@@ -15,8 +15,8 @@
    [vimsical.re-frame.cofx.inject :as inject]
    [iron.re-utils :refer [>evt]]
    [trilystro.db :as db]
-   [trilystro.firebase :as fb]
-   [trilystro.fsm :as fsm]))
+   [trilib.firebase :as fb]
+   [trilib.fsm :as fsm]))
 
 (s/check-asserts true)
 

@@ -9,9 +9,9 @@
    [sodium.core :as na]
    [iron.re-utils :refer [<sub >evt]]
    [trilystro.db :as db]
-   [trilystro.fsm-lib :as fsm-lib]
-   [trilystro.fsm :as fsm]
-   [trilystro.fsm-graph :as fsm-graph]))
+   [trilib.fsm-lib :as fsm-lib]
+   [trilib.fsm :as fsm]
+   [trilib.fsm-graph :as fsm-graph]))
 
 
 (s/def ::all-modal-views (s/coll-of fn?))

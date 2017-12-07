@@ -7,8 +7,8 @@
    [sodium.core :as na]
    [iron.re-utils :refer [<sub]]
    [trilystro.db :as db]
-   [trilystro.fsm :as fsm]
-   [trilystro.fsm-graph :as fsm-graph]
+   [trilib.fsm :as fsm]
+   [trilib.fsm-graph :as fsm-graph]
    [trilystro.modal :as modal]))
 
 

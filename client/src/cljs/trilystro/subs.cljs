@@ -12,8 +12,8 @@
                [iron.utils :refer [ci-includes? validate]]
                [trilystro.db :as db]
                [trilystro.events :as events]
-               [trilystro.firebase :as fb]
-               [trilystro.fsm :as fsm]))
+               [trilib.firebase :as fb]
+               [trilib.fsm :as fsm]))
 
 (sub2 :git-commit [:git-commit])
 (sub2 ::db/name   [::db/name])

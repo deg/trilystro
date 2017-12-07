@@ -7,8 +7,8 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [iron.re-utils :refer [<sub]]
-   [trilystro.firebase :as fb]
-   [trilystro.fsm :as fsm]
+   [trilib.firebase :as fb]
+   [trilib.fsm :as fsm]
    [trilystro.modal :as modal]))
 
 (defn export-lystro [{:keys [firebase-id public? owner text url tags]}]

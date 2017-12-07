@@ -5,14 +5,15 @@
   (:require [ajax.core :as ajax]
             [reagent.core :as reagent]
             [re-frame.core :as re-frame]
+            [re-frame.loggers :refer [console]]
             [re-frisk.core :refer [enable-re-frisk!]]
             [trilystro.events]
             [trilystro.subs]
             [trilystro.views :as views]
             [trilystro.config :as config]
             [trilystro.db :as db]
-            [trilystro.firebase :as fb]
-            [trilystro.fsm :as fsm]
+            [trilib.firebase :as fb]
+            [trilib.fsm :as fsm]
             [trilystro.modal :as modal]
             [trilystro.view-modal-about :as v-about]
             [trilystro.view-modal-confirm-delete :as v-confirm-delete]
@@ -60,4 +61,4 @@
 
 
 ;;; This project assumes corresponding Firebase auth rules:
-;;; See firebase-rules.json in the root of this project.
+;;; See firebase-rules.json in the root of trilib of this project.

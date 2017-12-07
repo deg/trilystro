@@ -14,8 +14,8 @@
    [trilystro.config :as config]
    [trilystro.db :as db]
    [trilystro.events :as events]
-   [trilystro.firebase :as fb]
-   [trilystro.fsm :as fsm]
+   [trilib.firebase :as fb]
+   [trilib.fsm :as fsm]
    [trilystro.modal :as modal]
    [trilystro.temp-utils :as tmp-utils]))
 

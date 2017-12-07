@@ -9,8 +9,8 @@
    [sodium.core :as na]
    [sodium.extensions :as nax]
    [iron.re-utils :refer [<sub >evt]]
-   [trilystro.firebase :as fb]
-   [trilystro.fsm :as fsm]
+   [trilib.firebase :as fb]
+   [trilib.fsm :as fsm]
    [trilystro.modal :as modal]))
 
 

@@ -6,7 +6,7 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [iron.re-utils :refer [<sub >evt]]
-   [trilystro.fsm :as fsm]
+   [trilib.fsm :as fsm]
    [trilystro.modal :as modal]))
 
 

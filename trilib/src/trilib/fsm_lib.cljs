@@ -1,7 +1,7 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.fsm-lib
+(ns trilib.fsm-lib
   "Enhanced finite state machines for re-frame. This is a work in progress but my
   goal is to achieve something more expressive than the basic FSMs described in
   http://blog.cognitect.com/blog/2017/8/14/restate-your-ui-creating-a-user-interface-with-re-frame-and-state-machines

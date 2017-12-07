@@ -1,7 +1,7 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.fsm
+(ns trilib.fsm
   (:require
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
@@ -9,14 +9,14 @@
    [iron.re-utils :refer [sub2]]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [trilystro.db :as db]
-   [trilystro.fsm-lib :as fsm-lib]))
+   [trilib.db :as db]
+   [trilib.fsm-lib :as fsm-lib]))
 
 ;;; Trilystro app states (login status and page transitions)
 ;;; Note: The state graph is in db.cljs
 
 (s/def ::page-state (s/tuple keyword? any?))
-(s/def ::page-state-stack (s/coll-of :trilystro.fsm/page-state))
+(s/def ::page-state-stack (s/coll-of :trilib.fsm/page-state))
 
 (s/def ::db-keys (s/keys :req [::page-graph ::page-state-stack]))
 

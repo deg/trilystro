@@ -3,7 +3,12 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-RC2"]
-                 [org.clojure/clojurescript "1.9.946"]]
+                 [org.clojure/clojurescript "1.9.946"]
+                 [expound "0.3.4"]
+                 [fsmviz "0.1.2"]
+                 [re-frame "0.10.3-alpha1"]
+                 [com.degel/iron "0.2.0-SNAPSHOT"]
+                 [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]]
   :plugins [[lein-cljsbuild "1.1.7"]]
   :cljsbuild
   {:builds
