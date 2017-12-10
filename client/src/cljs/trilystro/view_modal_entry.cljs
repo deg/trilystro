@@ -11,7 +11,7 @@
    [iron.re-utils :refer [<sub >evt]]
    [trilib.firebase :as fb]
    [trilib.fsm :as fsm]
-   [trilystro.modal :as modal]))
+   [trilib.modal :as modal]))
 
 
 (defn view-modal-entry-panel []
@@ -64,10 +64,10 @@
                                :on-click #(>evt [::fsm/goto
                                                 :quit-modal
                                                 {:dispatch
-                                                 [:commit-lystro (assoc lystro
-                                                                        :owner (<sub [::fb/uid])
-                                                                        :original-public? original-public?
-                                                                        :public? public?)]}])
+                                                 [::fb/commit-lystro (assoc lystro
+                                                                            :owner (<sub [::fb/uid])
+                                                                            :original-public? original-public?
+                                                                            :public? public?)]}])
                                :icon (if connected? "add" "wait")
                                :content (if connected?
                                           (str "Save " (if public? "public" "private"))

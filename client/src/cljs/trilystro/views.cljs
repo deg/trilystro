@@ -11,12 +11,12 @@
    [sodium.core :as na]
    [sodium.extensions :as nax]
    [iron.re-utils :refer [<sub >evt]]
-   [trilystro.config :as config]
+   [iron.closure-utils :refer [debug?]]
    [trilystro.db :as db]
    [trilystro.events :as events]
    [trilib.firebase :as fb]
    [trilib.fsm :as fsm]
-   [trilystro.modal :as modal]
+   [trilib.modal :as modal]
    [trilystro.temp-utils :as tmp-utils]))
 
 
@@ -116,7 +116,7 @@
   "Sort strings, ignoring case and non-alphabetic chars"
   [keyfn coll]
   (sort-by (comp #(apply str (re-seq #"[A-Z]" %))
-                 str/upper-case
+                 (fnil str/upper-case "")
                  keyfn)
            coll))
 
@@ -196,7 +196,7 @@
      :unit "half banner"
      :ad-client "ca-pub-7080962590442738"
      :ad-slot "5313065038"
-     :test (when config/debug? "... ADVERT  HERE ...")]
+     :test (when debug? "... ADVERT  HERE ...")]
     (when (<sub [::fsm/in-page? :logged-in])
       (let [open-state ;; Subs that should be held open for efficiency
             [(<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])

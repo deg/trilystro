@@ -1,17 +1,14 @@
 (ns vuagain.chromex.popup.handlers
   (:require [re-frame.core :as re-frame]
             [re-frame.loggers :refer [console]]
+            [trilib.firebase :as fb]
             [vuagain.chromex.popup.db :as db]))
 
-(re-frame/reg-event-db
-  :initialize-db
-  (fn [_ _]
-    db/default-db))
 
 (re-frame/reg-event-db
  :set-user
  (fn [db [_ user]]
-   (assoc db :user user)))
+   (assoc db ::fb/user user)))
 
 (re-frame/reg-event-db
  :set-background-port
@@ -27,12 +24,4 @@
 (re-frame/reg-event-db
  :update-page-param-val
  (fn [db [_ param val]]
-   (console :log "Setting " param " to " val)
-   (assoc-in db [:page-params param] val)
-   db))
-
-(re-frame/reg-event-db
- :commit-lystro
- (fn [db [_ lystro]]
-   (console :log "COMMITTING: --- :" lystro)
-   db))
+   (assoc-in db [:page-params param] val)))

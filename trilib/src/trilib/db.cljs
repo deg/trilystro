@@ -4,7 +4,8 @@
    [expound.alpha :as expound]
    [re-frame.core :as re-frame :refer [after]]
    [re-frame.loggers :refer [console]]
-   [iron.closure-utils :refer [debug?]]))
+   [iron.closure-utils :refer [debug?]]
+   [trilib.modal]))
 
 ;;; (See https://github.com/Day8/re-frame/blob/master/examples/todomvc/src/todomvc/events.cljs)
 (defn check-and-throw
@@ -17,10 +18,12 @@
                     {}))))
 
 (s/def ::db  (s/merge :trilib.firebase/db-keys   ;; [TODO] Still needs cleanup
+                      :trilib.modal/db-keys
                       :trilib.fsm/db-keys))
 
 (def default-db
   {:trilib.firebase/user nil
+   :trilib.modal/all-modal-views #{}
    :trilib.fsm/page-graph
    {:start                {:initialize-db        [:shift :logged-out]}
     :logged-out           {:login-confirmed      [:shift :logged-in]
@@ -33,7 +36,7 @@
                            :logout               [:shift :logged-out]}
     ;; [TODO] Eventually figure out what an error handler can do
     :error                {:error-handled        [:shift :error]}}
-   :trilib.fsm/page-state-stack [[:start]]})
+   :trilib.fsm/page-state-stack [[:start nil]]})
 
 
 (def check-spec-interceptor (after (partial check-and-throw ::db)))

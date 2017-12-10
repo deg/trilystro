@@ -3,14 +3,15 @@
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
                  [binaryage/chromex "0.5.14"]
-                 [binaryage/devtools "0.9.8"]
                  [figwheel "0.5.14"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.2"]
+                 [re-frame-utils "0.1.0"]
                  [environ "1.1.0"]
                  [com.degel/iron "0.2.0-SNAPSHOT"]
                  [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]
-                 [com.degel/sodium "0.10.0-SNAPSHOT"]]
+                 [com.degel/sodium "0.10.0-SNAPSHOT"]
+                 [trilib "0.1.0-SNAPSHOT"]]
 
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-figwheel "0.5.14"]
@@ -20,7 +21,10 @@
 
   :source-paths ["src/background"
                  "src/popup"
-                 "src/content_script"]
+                 "src/content_script"
+                 "checkouts/iron/src"
+                 "checkouts/re-frame-firebase/src"
+                 "checkouts/trilib/src"]
 
   :clean-targets ^{:protect false} ["target"
                                     "resources/unpacked/compiled"
@@ -29,31 +33,44 @@
   :cljsbuild {:builds {}} ; prevent https://github.com/emezeske/lein-cljsbuild/issues/413
 
   :profiles {:unpacked
-             {:cljsbuild {:builds
+             {:dependencies [[binaryage/devtools "0.9.8"]
+                             [re-frisk "0.5.2"]]
+              :cljsbuild {:builds
                           {:background
-                           {:source-paths ["src/background"]
+                           {:source-paths ["src/background"
+                                           "checkouts/iron/src"
+                                           "checkouts/re-frame-firebase/src"
+                                           "checkouts/trilib/src"]
                             :figwheel     true
                             :compiler     {:output-to     "resources/unpacked/compiled/background/main.js"
                                            :output-dir    "resources/unpacked/compiled/background"
                                            :asset-path    "compiled/background"
                                            :preloads      [devtools.preload]
+                                           :external-config      {:devtools/config {:features-to-install :all}}
                                            :main          vuagain.chromex.background
                                            :optimizations :none
                                            :source-map    true}}
                            :popup
-                           {:source-paths ["src/popup"]
+                           {:source-paths ["src/popup"
+                                           "checkouts/iron/src"
+                                           "checkouts/re-frame-firebase/src"
+                                           "checkouts/trilib/src"]
                             :figwheel     true
                             :compiler     {:output-to     "resources/unpacked/compiled/popup/main.js"
                                            :output-dir    "resources/unpacked/compiled/popup"
                                            :asset-path    "compiled/popup"
                                            :preloads      [devtools.preload]
+                                           :external-config {:devtools/config {:features-to-install :all}}
                                            :main          vuagain.chromex.popup
                                            :optimizations :none
                                            :source-map    true}}}}}
              :unpacked-content-script
              {:cljsbuild {:builds
                           {:content-script
-                           {:source-paths ["src/content_script"]
+                           {:source-paths ["src/content_script"
+                                           "checkouts/iron/src"
+                                           "checkouts/re-frame-firebase/src"
+                                           "checkouts/trilib/src"]
                             :compiler     {:output-to     "resources/unpacked/compiled/content-script/main.js"
                                            :output-dir    "resources/unpacked/compiled/content-script"
                                            :asset-path    "compiled/content-script"

@@ -9,7 +9,7 @@
    [trilystro.db :as db]
    [trilib.fsm :as fsm]
    [trilib.fsm-graph :as fsm-graph]
-   [trilystro.modal :as modal]))
+   [trilib.modal :as modal]))
 
 
 (defn view-modal-about []

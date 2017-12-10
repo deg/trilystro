@@ -7,7 +7,9 @@
    [re-frame.loggers :refer [console]]
    [reagent.core :as reagent]
    [sodium.core :as na]
-   [sodium.extensions :as nax]))
+   [sodium.extensions :as nax]
+   [trilib.firebase :as fb]
+   [trilib.fsm :as fsm]))
 
 (defn display [display?]
   {:display (if display? "block" "none")})
@@ -18,7 +20,7 @@
 
 
 (defn top-bar []
-  (let [user (<sub [:user])]
+  (let [user (<sub [::fb/user])]
     [:div
      [:nav {:class "navbar navbar-default"}
       [:div {:class "container-fluid"}
@@ -29,7 +31,7 @@
                           :type "button"
                           :id (if user "logout" "login")
                           :on-click #(bg-msg {:command (if user "sign-out" "sign-in")})}
-      (if user (<sub [:user-name]) "login")]]))
+      (if user (<sub [::fb/user-name]) "login")]]))
 
 (defn warning-bar []
   [:p {:class "warning",
@@ -86,18 +88,18 @@
     :content [na/text-area {:rows 3
                             :placeholder "Description..."
                             :default-value (<sub [:page-param :text])
-                            :on-change (na/value->event-fn [:update-page-param-val :text])}]]
+                            :on-change (na/value->event-fn [::fsm/update-page-param-val :text])}]]
    [:hr]
    [:div {:class "form-group centered"}
     [:button {:class "btn", :id "cancelButton"} "Cancel"]
     [:button {:class "btn btn-primary",
               :type "button"
               :id "submitButton"
-              :on-click #(>evt [:commit-lystro {:tags #{}
-                                                :url (<sub [:url])
-                                                :text (<sub [:page-param :text])
-                                                :owner (<sub [:fb-uid])
-                                                :public? false}])}
+              :on-click #(>evt [::fb/commit-lystro {:tags #{}
+                                                    :url (<sub [:url])
+                                                    :text (<sub [::fsm/page-param-val :text])
+                                                    :owner (<sub [::fb/uid])
+                                                    :public? false}])}
      "Save"]]])
 
 (defn footer-bar [display?]
@@ -113,7 +115,7 @@
      [top-bar]
      [:div {:class "container"}
       [warning-bar]
-      (if (<sub [:user])
+      (if (<sub [::fb/user])
         [logged-in-page true]
         [logged-out-page true])]
      [footer-bar true]]))

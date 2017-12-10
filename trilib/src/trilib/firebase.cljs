@@ -6,7 +6,8 @@
    [clojure.spec.alpha :as s]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [iron.re-utils :as re-utils :refer [sub2 <sub]]
+   [vimsical.re-frame.cofx.inject :as inject]
+   [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]
    [com.degel.re-frame-firebase :as firebase]
    [trilib.db :as db]
    [trilib.fsm :as fsm]))
@@ -68,6 +69,14 @@
 
 (sub2 ::user [::user])
 (sub2 ::uid  [::user :uid])
+
+;; [TODO][NOW] Use this in client too
+(re-frame/reg-sub
+ ::user-name
+ :<- [::user]
+ (fn [user _]
+   (or (:display-name user) (:email user))))
+
 
 
 (re-frame/reg-event-fx
@@ -186,7 +195,60 @@
        (:email user))))
 
 
+(defn lystro-commit-event [db {:keys [firebase-id tags url text owner public? original-public?] :as lystro}]
+  (let [exists? (some? firebase-id)
+        changed-access? (and exists?
+                             (some? original-public?)
+                             (not (= original-public? public?)))]
+    (fb-event {:db db
+               :for-multi? false
+               :effect-type (if exists? :firebase/write :firebase/push)
+               :path (if exists? [:lystros firebase-id] [:lystros])
+               :access (if public? :shared :private)
+               :on-success #(when changed-access?
+                              ;; Private and public lystros are stored in different branches of the
+                              ;; Firebase tree. So, if the access has changed, we need to explicitly
+                              ;; delete the old one. To be safe, we only do so here, on success of
+                              ;; writing the new one.
+                              ;; [TODO][ch153] This whole thing should really be moved into a Firebase
+                              ;; transaction. We are not protected against the broader set of problems
+                              ;; that two clients might be modifying the same Lystro simultaneously
+                              ;; so we need to check for any changes before writing. If done right,
+                              ;; the access stuff should fall out nicely. See
+                              ;; https://stackoverflow.com/questions/42183179/firebase-atmonic-add-and-delete-entry
+                              ;; and
+                              ;; https://firebase.google.com/docs/database/web/read-and-write#save_data_as_transactions
+                              (>evt [::clear-lystro (assoc lystro :public? original-public?)]))
+               :value {:tags tags
+                       :url (str url)
+                       :text (str text)
+                       :owner (str owner)
+                       :public? public?
+                       :timestamp timestamp-marker}})))
 
+(re-frame/reg-event-fx
+ ::commit-lystro
+ [db/check-spec-interceptor]
+ (fn [{db :db} [_ {:keys [firebase-id tags url text owner public? original-public?] :as lystro}]]
+   (console :log "In ::commit-lystro: "     (lystro-commit-event db lystro))
+   (assoc
+    (lystro-commit-event db lystro)
+    :dispatch [::commit-user-setting :default-public? public?])))
+
+
+(re-frame/reg-event-fx
+ ::clear-lystro
+ [(re-frame/inject-cofx ::inject/sub [::uid])
+  db/check-spec-interceptor]
+ (fn [{db :db uid ::uid} [_ {:keys [firebase-id owner public?]} :as lystro]]
+   (let [mine? (= owner uid)]
+     (when mine?
+       (fb-event {:for-multi? false
+                  :effect-type :firebase/write
+                  :db db
+                  :access (if public? :shared :private)
+                  :path [:lystros firebase-id]
+                  :value nil})))))
 
 
 

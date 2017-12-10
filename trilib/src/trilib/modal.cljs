@@ -1,14 +1,13 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(ns trilystro.modal
+(ns trilib.modal
   (:require
    [clojure.spec.alpha :as s]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [iron.re-utils :refer [<sub >evt]]
-   [trilystro.db :as db]
    [trilib.fsm-lib :as fsm-lib]
    [trilib.fsm :as fsm]
    [trilib.fsm-graph :as fsm-graph]))
@@ -33,13 +32,13 @@
 
 (re-frame/reg-event-db
  ::register-modal
- [db/check-spec-interceptor]
+ ;;[db/check-spec-interceptor]  ;; [TODO] Untangle deps, so we can call this here
  (fn [db [_ from-states modal view]]
    (register-modal db [from-states modal view])))
 
 (re-frame/reg-event-db
  ::register-modals
- [db/check-spec-interceptor]
+ ;;[db/check-spec-interceptor] ;; [TODO] Untangle deps, so we can call this here
  (fn [db [_ modals]]
    (reduce register-modal db modals)))
 

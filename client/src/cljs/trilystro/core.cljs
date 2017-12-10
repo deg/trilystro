@@ -7,14 +7,14 @@
             [re-frame.core :as re-frame]
             [re-frame.loggers :refer [console]]
             [re-frisk.core :refer [enable-re-frisk!]]
+            [iron.closure-utils :refer [debug?]]
             [trilystro.events]
             [trilystro.subs]
             [trilystro.views :as views]
-            [trilystro.config :as config]
             [trilystro.db :as db]
             [trilib.firebase :as fb]
             [trilib.fsm :as fsm]
-            [trilystro.modal :as modal]
+            [trilib.modal :as modal]
             [trilystro.view-modal-about :as v-about]
             [trilystro.view-modal-confirm-delete :as v-confirm-delete]
             [trilystro.view-modal-show-exports :as v-show-exports]
@@ -24,7 +24,7 @@
 
 
 (defn dev-setup []
-  (when config/debug?
+  (when debug?
     (enable-re-frisk!)
     (println "dev mode")))
 

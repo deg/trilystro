@@ -31,7 +31,11 @@
 
   :min-lein-version "2.5.3"
 
-  :source-paths ["src/clj" "checkouts/iron/src" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
+  :source-paths ["src/clj"
+                 "checkouts/iron/src"
+                 "checkouts/re-frame-firebase/src"
+                 "checkouts/sodium/src"
+                 "checkouts/trilib/src"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
                                     "test/js"
@@ -63,7 +67,11 @@
   :cljsbuild
   {:builds
    [{:id           "dev"
-     :source-paths ["src/cljs" "checkouts/iron/src" "checkouts/sodium/src" "checkouts/re-frame-firebase/src"]
+     :source-paths ["src/cljs"
+                    "checkouts/iron/src"
+                    "checkouts/re-frame-firebase/src"
+                    "checkouts/trilib/src"
+                    "checkouts/sodium/src"]
      :figwheel     {:on-jsload "trilystro.core/mount-root"}
      :compiler     {:main                 trilystro.core
                     :output-to            "resources/public/js/compiled/app.js"

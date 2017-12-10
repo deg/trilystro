@@ -7,8 +7,7 @@
    [expound.alpha :as expound]
    [re-frame.core :as re-frame :refer [after]]
    [re-frame.loggers :refer [console]]
-   [trilib.db :as lib-db]
-   [trilystro.config :as config]))
+   [trilib.db :as lib-db]))
 
 
 (def check-spec-interceptor (after (partial lib-db/check-and-throw ::db)))
@@ -16,8 +15,7 @@
 
 (def default-db
   (assoc lib-db/default-db
-         ::name "Trilystro"
-         :trilystro.modal/all-modal-views #{}))
+         ::name "Trilystro"))
 
 
 (s/def ::name string?)
@@ -27,5 +25,4 @@
 (s/def ::git-commit (s/keys :req-un [::commit ::date]))
 
 (s/def ::db (s/merge :trilib.db/db
-                     :trilystro.modal/db-keys
                      (s/keys :req [::name] :opt-un [::git-commit])))

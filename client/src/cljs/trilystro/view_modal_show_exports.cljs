@@ -9,7 +9,7 @@
    [iron.re-utils :refer [<sub]]
    [trilib.firebase :as fb]
    [trilib.fsm :as fsm]
-   [trilystro.modal :as modal]))
+   [trilib.modal :as modal]))
 
 (defn export-lystro [{:keys [firebase-id public? owner text url tags]}]
   {:uid firebase-id

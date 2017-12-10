@@ -9,7 +9,6 @@
    [iron.re-utils :refer [sub2]]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
-   [trilib.db :as db]
    [trilib.fsm-lib :as fsm-lib]))
 
 ;;; Trilystro app states (login status and page transitions)
@@ -43,7 +42,7 @@
 ;;; - dispatch - Trigger this re-frame event after the state transition
 (re-frame/reg-event-db
  ::goto
- [db/check-spec-interceptor]
+ ;;[db/check-spec-interceptor]  ;; [TODO] Untangle deps, so we can call this here
  (fn [db [_ transition {:keys [param dispatch]}]]
    (goto db transition {:param param :dispatch dispatch})))
 
@@ -65,7 +64,7 @@
 
 (re-frame/reg-event-db
  ::update-page-param
- [db/check-spec-interceptor]
+ ;;[db/check-spec-interceptor]  ;; [TODO] Untangle deps, so we can call this here
  (fn [db [_ fcn & args]]
    (apply update-page-param db fcn args)))
 
@@ -76,7 +75,7 @@
 
 (re-frame/reg-event-db
  ::update-page-param-val
- [db/check-spec-interceptor]
+ ;;[db/check-spec-interceptor]  ;; [TODO] Untangle deps, so we can call this here
  (fn [db [_ key val]]
    (update-page-param db #(assoc %1 key %2) val)))
 

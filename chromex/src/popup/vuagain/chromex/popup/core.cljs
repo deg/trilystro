@@ -3,6 +3,7 @@
   (:require [cljs.core.async :refer [<!]]
             [reagent.core :as reagent]
             [re-frame.core :as re-frame]
+            [re-frisk.core :refer [enable-re-frisk!]]
             [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
             [chromex.ext.tabs :as tabs]
@@ -10,14 +11,26 @@
             [vuagain.chromex.popup.handlers]
             [vuagain.chromex.popup.subs]
             [vuagain.chromex.popup.views :as views]
-            [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]))
+            [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]
+            [iron.closure-utils :refer [debug?]]
+            [trilib.firebase :as fb]
+            [trilib.fsm :as fsm]
+            [vuagain.chromex.popup.db :as db]))
+
+;; [TODO] This, and copy in client, should move to trilib
+(enable-console-print!)
+(defn dev-setup []
+  (when debug?
+    (enable-re-frisk!)
+    (println "dev mode")))
+
 
 ;;; -- a message loop ----------------
 
 (defn process-message! [message]
   (log "POPUP: got message:" message)
   (when (map? (js->clj message))
-    (>evt [:set-user (:user (js->clj message :keywordize-keys true))])))
+    (>evt [::fb/set-user (:user (js->clj message :keywordize-keys true))])))
 
 (defn run-message-loop! [message-channel]
   (log "POPUP: starting message loop...")
@@ -42,14 +55,35 @@
       (>evt [:set-current-tab] (js->clj tab :keywordize-keys true)))))
 
 
+(re-frame/reg-event-fx
+ ::initialize-db
+ (fn  [_ _]
+   {:db (fsm/goto db/default-db :initialize-db {})
+    ;; :http-xhrio {:method :get
+    ;;              :uri "/git-describe.txt"
+    ;;              :params {:cachebuster (str (rand))}
+    ;;              :response-format (ajax/text-response-format)
+    ;;              :on-success [:got-git-describe]
+    ;;              :on-failure [:no-git-describe]}
+    ;; :dispatch [::modal/register-modals
+    ;;            [[[:logged-in
+    ;;               :logged-out] :modal-about          v-about/view-modal-about]
+    ;;             [[:logged-in]  :modal-confirm-delete v-confirm-delete/view-modal-confirm-delete]
+    ;;             [[:logged-in]  :modal-edit-lystro    v-entry/view-modal-entry-panel]
+    ;;             [[:logged-in]  :modal-new-lystro     v-entry/view-modal-entry-panel]
+    ;;             [[:logged-in]  :modal-show-exports   v-show-exports/view-modal-show-exports]]]
+    }))
+
+
 ;;; -- main entry point ----------------
 (defn mount-root []
   (reagent/render [views/popup]
                   (.getElementById js/document "app")))
 
 (defn init! []
-  (log "POPUP: init")
-  (re-frame/dispatch-sync [:initialize-db])
+  (re-frame/dispatch-sync [::initialize-db])
+  (dev-setup)
   (>evt [:set-background-port (connect-to-background-page!)])
+  (fb/init)
   (set-current-tab)
   (mount-root))

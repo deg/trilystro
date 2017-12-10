@@ -6,8 +6,9 @@
    [re-frame.loggers :refer [console]]
    [sodium.core :as na]
    [iron.re-utils :refer [<sub >evt]]
+   [trilib.firebase :as fb]
    [trilib.fsm :as fsm]
-   [trilystro.modal :as modal]))
+   [trilib.modal :as modal]))
 
 
 (defn view-modal-confirm-delete []
@@ -25,7 +26,7 @@
                    :icon "delete"
                    :floated "right"
                    :on-click #(>evt [::fsm/goto :quit-modal
-                                     {:dispatch [:clear-lystro lystro]}])}]
+                                     {:dispatch [::fb/clear-lystro lystro]}])}]
        [na/button {:content "Cancel"
                    :icon "dont"
                    :secondary? true
