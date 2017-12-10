@@ -1,0 +1,43 @@
+/* this manifest is for development only
+   we include all files individually
+   also we allow unsafe eval for figwheel
+*/
+{
+  "manifest_version": 2,
+  "name": "VuAgain Chrome Extension",
+  "short_name": "VuAgain",
+  "description": "Add pages to VuAgain, and show in Google search",
+  "version": "0.1.1",
+  "browser_action": {
+    "default_title": "VuAgain this page",
+    "default_popup": "popup.html",
+    "default_icon": { "16":  "images/icon/icon16-trans.png",
+                      "19":  "images/icon/icon19-trans.png",
+                      "38":  "images/icon/icon38-trans.png",
+                      "48":  "images/icon/icon48-trans.png",
+                      "128": "images/icon/icon128-trans.png"}
+  },
+  "icons": { "16":  "images/icon/icon16-trans.png",
+             "19":  "images/icon/icon19-trans.png",
+             "38":  "images/icon/icon38-trans.png",
+             "48":  "images/icon/icon48-trans.png",
+             "128": "images/icon/icon128-trans.png"},
+  "content_security_policy": "script-src 'self' https://apis.google.com 'unsafe-eval'; object-src 'self'",
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [ "compiled/content-script/main.js" ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "page": "background.html",
+    "persistent": false
+  },
+  "permissions": [
+    "tabs",
+    "storage"
+  ]
+}

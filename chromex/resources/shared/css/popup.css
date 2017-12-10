@@ -1,0 +1,18 @@
+body {
+    min-width: 40rem;
+    min-height: 20rem;
+    margin: 0;
+    padding: 1rem;
+}
+.centered {
+    text-align: center;
+}
+.alignLeft {
+    float: left;
+}
+.alignRight {
+    float: right;
+}
+.warning  {
+    color: red;
+}
