@@ -6,7 +6,7 @@
   :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-RC2"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [cljs-ajax "0.7.3"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
@@ -54,10 +54,10 @@
 
   :profiles
   {:dev
-   {:dependencies [[binaryage/devtools "0.9.7"]
+   {:dependencies [[binaryage/devtools "0.9.8"]
                    [figwheel-sidecar "0.5.14"]
                    [com.cemerick/piggieback "0.2.2"]
-                   [re-frisk "0.5.2"]
+                   [re-frisk "0.5.3"]
                    ;[day8.re-frame/trace "0.1.13"]
                    ]
 

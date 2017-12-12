@@ -1,8 +1,9 @@
 (defproject vuagain-chromex "0.1.1-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.9.0-RC2"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
                  [binaryage/chromex "0.5.14"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
                  [figwheel "0.5.14"]
                  [reagent "0.7.0"]
                  [re-frame "0.10.2"]
@@ -34,7 +35,7 @@
 
   :profiles {:unpacked
              {:dependencies [[binaryage/devtools "0.9.8"]
-                             [re-frisk "0.5.2"]]
+                             [re-frisk "0.5.3"]]
               :cljsbuild {:builds
                           {:background
                            {:source-paths ["src/background"
@@ -48,6 +49,7 @@
                                            :preloads      [devtools.preload]
                                            :external-config      {:devtools/config {:features-to-install :all}}
                                            :main          vuagain.chromex.background
+                                           :language-in :ecmascript5
                                            :optimizations :none
                                            :source-map    true}}
                            :popup
@@ -62,6 +64,7 @@
                                            :preloads      [devtools.preload]
                                            :external-config {:devtools/config {:features-to-install :all}}
                                            :main          vuagain.chromex.popup
+                                           :language-in :ecmascript5
                                            :optimizations :none
                                            :source-map    true}}}}}
              :unpacked-content-script
@@ -75,6 +78,7 @@
                                            :output-dir    "resources/unpacked/compiled/content-script"
                                            :asset-path    "compiled/content-script"
                                            :main          vuagain.chromex.content-script
+                                           :language-in :ecmascript5
                                            ;:optimizations :whitespace ; content scripts cannot do eval / load script dynamically
                                            :optimizations :advanced    ; let's use advanced build with pseudo-names for now, there seems to be a bug in deps ordering under :whitespace mode
                                            :pseudo-names  true
@@ -110,6 +114,7 @@
 
              :release
              {:env       {:chromex-elide-verbose-logging "true"}
+              :dependencies [[re-frisk "0.5.3"]] ;;; [TODO] How can we get rid of this without breaking `lein release`?
               :cljsbuild {:builds
                           {:background
                            {:source-paths ["src/background"]
@@ -117,6 +122,7 @@
                                            :output-dir    "resources/release/compiled/background"
                                            :asset-path    "compiled/background"
                                            :main          vuagain.chromex.background
+                                           :language-in :ecmascript5
                                            :optimizations :advanced
                                            :elide-asserts true}}
                            :popup
@@ -125,6 +131,7 @@
                                            :output-dir    "resources/release/compiled/popup"
                                            :asset-path    "compiled/popup"
                                            :main          vuagain.chromex.popup
+                                           :language-in :ecmascript5
                                            :optimizations :advanced
                                            :elide-asserts true}}
                            :content-script
@@ -133,6 +140,7 @@
                                            :output-dir    "resources/release/compiled/content-script"
                                            :asset-path    "compiled/content-script"
                                            :main          vuagain.chromex.content-script
+                                           :language-in :ecmascript5
                                            :optimizations :advanced
                                            :elide-asserts true}}}}}}
 
