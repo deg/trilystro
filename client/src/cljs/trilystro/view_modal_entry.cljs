@@ -36,7 +36,7 @@
              :label "Tags:"
              :inline? true
              :content [nax/tag-adder {:partial-tag-text        partial-tag-text
-                                      :all-tags-sub            [:all-tags]
+                                      :all-tags-sub            [::fb/all-tags]
                                       :selected-tags-sub       [::fsm/page-param-val :tags]
                                       :set-selected-tags-event [::fsm/update-page-param-val :tags]}]]
             [nax/labelled-field

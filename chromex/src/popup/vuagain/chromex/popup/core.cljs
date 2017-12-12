@@ -3,7 +3,6 @@
   (:require [cljs.core.async :refer [<!]]
             [reagent.core :as reagent]
             [re-frame.core :as re-frame]
-            [re-frisk.core :refer [enable-re-frisk!]]
             [chromex.logging :refer-macros [log info warn error group group-end]]
             [chromex.protocols :refer [post-message!]]
             [chromex.ext.tabs :as tabs]
@@ -12,20 +11,11 @@
             [vuagain.chromex.popup.subs]
             [vuagain.chromex.popup.views :as views]
             [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]
-            [iron.closure-utils :refer [debug?]]
+            [trilib.browser-utils :refer [dev-setup]]
             [trilib.firebase :as fb]
             [trilib.fsm :as fsm]
             [vuagain.chromex.popup.db :as db]))
 
-;; [TODO] This, and copy in client, should move to trilib
-(enable-console-print!)
-(defn dev-setup []
-  (when debug?
-    (enable-re-frisk!)
-    (println "dev mode")))
-
-
-;;; -- a message loop ----------------
 
 (defn process-message! [message]
   (log "POPUP: got message:" message)

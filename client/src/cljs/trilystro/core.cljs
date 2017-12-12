@@ -2,31 +2,24 @@
 ;;; Copyright (c) 2017, David Goldfarb
 
 (ns trilystro.core
-  (:require [ajax.core :as ajax]
-            [reagent.core :as reagent]
-            [re-frame.core :as re-frame]
-            [re-frame.loggers :refer [console]]
-            [re-frisk.core :refer [enable-re-frisk!]]
-            [iron.closure-utils :refer [debug?]]
-            [trilystro.events]
-            [trilystro.subs]
-            [trilystro.views :as views]
-            [trilystro.db :as db]
-            [trilib.firebase :as fb]
-            [trilib.fsm :as fsm]
-            [trilib.modal :as modal]
-            [trilystro.view-modal-about :as v-about]
-            [trilystro.view-modal-confirm-delete :as v-confirm-delete]
-            [trilystro.view-modal-show-exports :as v-show-exports]
-            [trilystro.view-modal-entry :as v-entry]))
-
-(enable-console-print!)
-
-
-(defn dev-setup []
-  (when debug?
-    (enable-re-frisk!)
-    (println "dev mode")))
+  (:require
+   [ajax.core :as ajax]
+   [re-frame.core :as re-frame]
+   [re-frame.loggers :refer [console]]
+   [re-frisk.core :refer [enable-re-frisk!]]
+   [reagent.core :as reagent]
+   [trilib.browser-utils :refer [dev-setup]]
+   [trilib.firebase :as fb]
+   [trilib.fsm :as fsm]
+   [trilib.modal :as modal]
+   [trilystro.db :as db]
+   [trilystro.events]
+   [trilystro.subs]
+   [trilystro.view-modal-about :as v-about]
+   [trilystro.view-modal-confirm-delete :as v-confirm-delete]
+   [trilystro.view-modal-entry :as v-entry]
+   [trilystro.view-modal-show-exports :as v-show-exports]
+   [trilystro.views :as views]))
 
 
 (defn mount-root []

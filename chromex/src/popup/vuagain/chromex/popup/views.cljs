@@ -6,6 +6,7 @@
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [reagent.core :as reagent]
+   [soda-ash.core :as sa]
    [sodium.core :as na]
    [sodium.extensions :as nax]
    [trilib.firebase :as fb]
@@ -40,7 +41,7 @@
 
 
 (defn TOS-page [display?]
-  [:form {:class "spaPage", :id "TOSForm", :style (display display?)}
+  [na/form {:class-name "spaPage", :id "TOSForm", :style (display display?)}
    [:h4 "VuAgain Terms of Service"]
    [:p "VuAgain is in alpha pre-release, and may not yet be fully reliable."]
    [:p "Do not yet use VuAgain to store any information that you cannot afford to\nlose, or that you must keep confidential."]
@@ -57,50 +58,64 @@
 
 (defn logged-out-page [display?]
   [:div
-   [:form {:class "spaPage", :id "anonymousForm", :style (display display?)}
+   [na/form {:class-name "spaPage", :id "anonymousForm", :style (display display?)}
     [:p "You do not seem to be logged in with a chrome identity."]
     [:p "VuAgain depends on features supplied by Chrome and cannot start until you are\nlogged in with a Chrome identity."]
     [:p "VuAgain will not work if you are using a non-Chrome browser or are logged in\nanonymously."]
     [:p "If you are seeing this message in other circumstances, please\ncontact our "
      [:a {:href "mailto:info@vuagain.com"} "support desk"]"."]]
-   [:form {:class "spaPage", :id "loginForm", :style (display display?)}
+   [na/form {:class-name "spaPage", :id "loginForm", :style (display display?)}
     [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]]
    [TOS-page true]])
 
 
 (defn logged-in-page [display?]
-  [:form {:class "spaPage", :id "vaForm", :style (display display?)}
-   [:div {:class "form-group"}
-    [:div "Add Lystro for " [:b(<sub [:title])] ", from " [:em (<sub [:url])]]
-    [:hr]
-    [:label "Tags"]
-    [:input {:dir "auto",
-             :placeholder "(NYI)",
-             :name "tags",
-             :type "text",
-             :maxLength "140",
-             :id "tagsInput",
-             :class "form-control",
-             :autoFocus true,
-             :autoComplete "off"}]]
-   [nax/labelled-field
-    :label "Text:"
-    :content [na/text-area {:rows 3
-                            :placeholder "Description..."
-                            :default-value (<sub [:page-param :text])
-                            :on-change (na/value->event-fn [::fsm/update-page-param-val :text])}]]
-   [:hr]
-   [:div {:class "form-group centered"}
-    [:button {:class "btn", :id "cancelButton"} "Cancel"]
-    [:button {:class "btn btn-primary",
-              :type "button"
-              :id "submitButton"
-              :on-click #(>evt [::fb/commit-lystro {:tags #{}
-                                                    :url (<sub [:url])
-                                                    :text (<sub [::fsm/page-param-val :text])
-                                                    :owner (<sub [::fb/uid])
-                                                    :public? false}])}
-     "Save"]]])
+  (let [partial-tag-text (reagent/atom "")]
+    (fn []
+      (let [lystro (<sub [::fsm/page-param])
+            original-public? (:original-public? lystro)
+            public-checked? (:public? lystro)
+            public? (if (nil? public-checked?)
+                      (<sub [::fb/user-settings [:default-public?] false])
+                      public-checked?)]
+        [na/form {:class-name "spaPage", :id "vaForm", :style (display display?)}
+         [:div {:class "form-group"}
+          [:div "Add Lystro for " [:b(<sub [:title])] ", from " [:em (<sub [:url])]]
+          [nax/labelled-field
+           :label "Tags:"
+           :inline? true
+           :content [nax/tag-adder {:partial-tag-text        partial-tag-text
+                                    :all-tags-sub            [::fb/all-tags]
+                                    :selected-tags-sub       [::fsm/page-param-val :tags]
+                                    :set-selected-tags-event [::fsm/update-page-param-val :tags]}]]
+          [nax/labelled-field
+           :label "Text:"
+           :content [na/text-area {:rows 3
+                                   :placeholder "Description..."
+                                   :default-value (:text lystro)
+                                   :on-change (na/value->event-fn [::fsm/update-page-param-val :text])}]]
+          [nax/labelled-field
+           :label "Visibility:"
+           :content [sa/Checkbox {:label "Public"
+                                  :default-checked public?
+                                  :on-change (na/value->event-fn [::fsm/update-page-param-val :public?] {:default false})}]]
+          (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
+            [:span
+             [:button {:class "btn", :id "cancelButton"} "Cancel"]
+             [na/form-button {:disabled? (or (not (empty? @partial-tag-text))
+                                             (empty? (:text lystro))
+                                             (not connected?))
+                              :on-click #(>evt [::fb/commit-lystro (assoc lystro
+                                                                          :url (<sub [:url])
+                                                                          :owner (<sub [::fb/uid])
+                                                                          :original-public? original-public?
+                                                                          :public? public?)])
+                              :icon (if connected? "add" "wait")
+                              :content (if connected?
+                                         (str "Save " (if public? "public" "private"))
+                                         "(offline)")
+                              :positive? true}]])]]))))
+
 
 (defn footer-bar [display?]
   [:div {:class "panel-footer", :style {:margin-top "15px"}}

@@ -25,6 +25,7 @@
                  "src/content_script"
                  "checkouts/iron/src"
                  "checkouts/re-frame-firebase/src"
+                 "checkouts/sodium/src"
                  "checkouts/trilib/src"]
 
   :clean-targets ^{:protect false} ["target"
@@ -41,6 +42,7 @@
                            {:source-paths ["src/background"
                                            "checkouts/iron/src"
                                            "checkouts/re-frame-firebase/src"
+                                           "checkouts/sodium/src"
                                            "checkouts/trilib/src"]
                             :figwheel     true
                             :compiler     {:output-to     "resources/unpacked/compiled/background/main.js"
@@ -56,6 +58,7 @@
                            {:source-paths ["src/popup"
                                            "checkouts/iron/src"
                                            "checkouts/re-frame-firebase/src"
+                                           "checkouts/sodium/src"
                                            "checkouts/trilib/src"]
                             :figwheel     true
                             :compiler     {:output-to     "resources/unpacked/compiled/popup/main.js"
@@ -73,6 +76,7 @@
                            {:source-paths ["src/content_script"
                                            "checkouts/iron/src"
                                            "checkouts/re-frame-firebase/src"
+                                           "checkouts/sodium/src"
                                            "checkouts/trilib/src"]
                             :compiler     {:output-to     "resources/unpacked/compiled/content-script/main.js"
                                            :output-dir    "resources/unpacked/compiled/content-script"

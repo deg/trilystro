@@ -20,9 +20,19 @@
    [trilystro.temp-utils :as tmp-utils]))
 
 
+(defn mini-button
+  "Icon-only button, good for standard actions"
+  [icon options]
+  [na/button (into {:icon icon
+                    :floated "right"
+                    :color "brown"
+                    :size "mini"}
+                   options)])
+
+
 (defn lystro-search-grid
   "Grid to show Lystro elements.
-  [TODO] Currently used only for the search box. Cleanup may be due"
+  [TODO] Might be cleaner to merge this into search-panel, below"
   [params tags url text]
   (let [row-params {:color (or (:color params) "grey")}
         label-params {:width 3 :text-align "right"}
@@ -39,16 +49,6 @@
        [na/grid-column value-params text]]]))
 
 
-(defn mini-button
-  "Icon-only button, good for standard actions"
-  [icon options]
-  [na/button (into {:icon icon
-                    :floated "right"
-                    :color "brown"
-                    :size "mini"}
-                   options)])
-
-
 (defn search-panel
   "Component to specify Lystro search terms"
   []
@@ -60,7 +60,7 @@
                     :value (<sub [::fb/user-settings [:tags-mode] :any-of])
                     :on-change (na/value->event-fn [::fb/commit-user-setting :tags-mode] {:default :any-of})
                     :options (na/dropdown-list [[:all-of "All of"] [:any-of "Any of"]] first second)}]
-      [nax/tag-selector {:all-tags-sub            [:all-tags]
+      [nax/tag-selector {:all-tags-sub            [::fb/all-tags]
                          :selected-tags-sub       [getter :tags]
                          :set-selected-tags-event [setter :tags]}]]
      [na/input {:type "url"
@@ -98,7 +98,7 @@
                               {:on-click #(>evt (modal/goto :modal-edit-lystro lystro))}))
      [nax/draw-tags {:selected-tags-sub       [::fsm/page-param-val :tags]
                      :set-selected-tags-event [::fsm/update-page-param-val :tags]
-                     :class-of-tag-sub        [:tag-class-by-frequency]}
+                     :class-of-tag-sub        [::fb/tag-class-by-frequency]}
       tags]
      [:div {:on-click #(when mine? (>evt (modal/goto :modal-edit-lystro lystro)))
             :class-name (str "text break-long-words "
@@ -127,12 +127,12 @@
    [na/divider {:horizontal? true :section? true} "Search Lystros"]
    [search-panel]
    (let [selected-lystros
-         (<sub [:lystros {:tags-mode     (keyword (<sub [::fb/user-settings [:tags-mode] :any-of]))
-                          :tags          (<sub [::fsm/page-param-val :tags])
-                          :url           (<sub [::fsm/page-param-val :url])
-                          :text          (<sub [::fsm/page-param-val :text])
-                          :tags-as-text? (<sub [::fb/user-settings [:tags-as-text?]])
-                          :url-as-text?  (<sub [::fb/user-settings [:url-as-text?]])}])]
+         (<sub [::fb/lystros {:tags-mode     (keyword (<sub [::fb/user-settings [:tags-mode] :any-of]))
+                              :tags          (<sub [::fsm/page-param-val :tags])
+                              :url           (<sub [::fsm/page-param-val :url])
+                              :text          (<sub [::fsm/page-param-val :text])
+                              :tags-as-text? (<sub [::fb/user-settings [:tags-as-text?]])
+                              :url-as-text?  (<sub [::fb/user-settings [:url-as-text?]])}])]
      [:div
       [na/divider {:horizontal? true :section? true}
        (str "Results (" (count selected-lystros) ")")]
@@ -143,7 +143,7 @@
        [na/button {:size "mini"
                    :icon "external share"
                    :content "export all"
-                   :on-click #(>evt (modal/goto :modal-show-exports (<sub [:lystros])))}]
+                   :on-click #(>evt (modal/goto :modal-show-exports (<sub [::fb/lystros])))}]
        [na/button {:size "mini"
                    :icon "share"
                    :content "export current"
@@ -157,7 +157,7 @@
       (if user
         [na/label {:image true :circular? true}
          [na/image {:src (:photo-url user)}]
-         (or (:display-name user) (:email user))]
+         (<sub [::fb/user-name])]
         "login...")]
      (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
        [na/menu-item {:icon (if connected? "signal" "wait")
