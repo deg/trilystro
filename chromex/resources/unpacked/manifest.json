@@ -7,7 +7,7 @@
   "name": "VuAgain development build",
   "short_name": "VuAgain-dev",
   "description": "Add pages to VuAgain, and show in Google search",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "browser_action": {
     "default_title": "VuAgain this page",
     "default_popup": "popup.html",
