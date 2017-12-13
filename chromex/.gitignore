@@ -1,0 +1,13 @@
+*~
+.chrome-profile
+.figwheel*.log
+.lein*
+/.idea
+/.tmp
+/checkouts
+/releases
+/resources/release.crx
+/resources/release.pem
+/resources/release/compiled
+/resources/unpacked/compiled
+/target

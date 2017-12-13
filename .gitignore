@@ -1,10 +1,7 @@
 *#
 *~
 .nrepl-port
-/*-init.clj
-/*.log
-/resources/public/css/screen.css
-/resources/public/js/compiled
-/target
+*.log
+target
 checkouts
 out
