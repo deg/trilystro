@@ -85,6 +85,7 @@
                                            :language-in :ecmascript5
                                            ;:optimizations :whitespace ; content scripts cannot do eval / load script dynamically
                                            :optimizations :advanced    ; let's use advanced build with pseudo-names for now, there seems to be a bug in deps ordering under :whitespace mode
+                                           :closure-defines {goog.DEBUG false}
                                            :pseudo-names  true
                                            :pretty-print  true}}}}}
              :checkouts
@@ -126,8 +127,9 @@
                                            :output-dir    "resources/release/compiled/background"
                                            :asset-path    "compiled/background"
                                            :main          vuagain.chromex.background
-                                           :language-in :ecmascript5
+                                           :language-in   :ecmascript5
                                            :optimizations :advanced
+                                           :closure-defines {goog.DEBUG false}
                                            :elide-asserts true}}
                            :popup
                            {:source-paths ["src/popup"]
@@ -135,8 +137,9 @@
                                            :output-dir    "resources/release/compiled/popup"
                                            :asset-path    "compiled/popup"
                                            :main          vuagain.chromex.popup
-                                           :language-in :ecmascript5
+                                           :language-in   :ecmascript5
                                            :optimizations :advanced
+                                           :closure-defines {goog.DEBUG false}
                                            :elide-asserts true}}
                            :content-script
                            {:source-paths ["src/content_script"]
@@ -146,6 +149,7 @@
                                            :main          vuagain.chromex.content-script
                                            :language-in :ecmascript5
                                            :optimizations :advanced
+                                           :closure-defines {goog.DEBUG false}
                                            :elide-asserts true}}}}}}
 
   :aliases {"dev-build"       ["with-profile" "+unpacked,+unpacked-content-script,+checkouts,+checkouts-content-script" "cljsbuild" "once"]
