@@ -20,19 +20,8 @@
                  (clj->js (assoc message :app "VuAgain"))))
 
 
-(defn top-bar []
-  (let [user (<sub [::fb/user])]
-    [:div
-     [:nav {:class "navbar navbar-default"}
-      [:div {:class "container-fluid"}
-       [:div {:class "navbar-header"}
-        [:div {:class "navbar-brand"}]
-        [:h3 "VuAgain"]]]]
-     [:button.alignRight {:class "btn btn-social",
-                          :type "button"
-                          :id (if user "logout" "login")
-                          :on-click #(bg-msg {:command (if user "sign-out" "sign-in")})}
-      (if user (<sub [::fb/user-name]) "login")]]))
+(defn header-bar []
+  [nax/app-header "VuAgain"])
 
 (defn warning-bar []
   [:p {:class "warning",
@@ -53,19 +42,16 @@
    [:p "You can save two kinds of notes:"]
    [:ul
     [:li "Private notes are seen only by you"]
-    [:li "Public comments can be seen by everyone"]]
-   [:button {:class "btn btn-default", :id "acceptTOSButton", :type "button"} "I agree"]])
+    [:li "Public comments can be seen by everyone"]]])
 
 (defn logged-out-page [display?]
   [:div
    [na/form {:class-name "spaPage", :id "anonymousForm", :style (display display?)}
     [:p "You do not seem to be logged in with a chrome identity."]
-    [:p "VuAgain depends on features supplied by Chrome and cannot start until you are\nlogged in with a Chrome identity."]
+    [:p "VuAgain depends on features supplied by Chrome and cannot start until you are\nlogged in."]
     [:p "VuAgain will not work if you are using a non-Chrome browser or are logged in\nanonymously."]
     [:p "If you are seeing this message in other circumstances, please\ncontact our "
      [:a {:href "mailto:info@vuagain.com"} "support desk"]"."]]
-   [na/form {:class-name "spaPage", :id "loginForm", :style (display display?)}
-    [:p "VuAgain needs to know your Google or Facebook identity to let you share\ncomments publicly or with your friends."]]
    [TOS-page true]])
 
 
@@ -118,16 +104,22 @@
 
 
 (defn footer-bar [display?]
-  [:div {:class "panel-footer", :style {:margin-top "15px"}}
-   [:small
-    [:p {:class "alignLeft", :id "versionString"}]
-    [:p {:class "alignRight"}
-     [:a {:id "showTOSButton", :href "#"} "Show Terms of Service"]]]])
+  (let [user (<sub [::fb/user])]
+    [:div {:class "panel-footer", :style {:margin-top "15px"}}
+     [na/button {:class-name "btn btn-social",
+                 :id (if user "logout" "login")
+                 :content (if user (str "logout: " (<sub [::fb/user-name])) "login")
+                 :on-click #(do
+                              (console :log "GOT CLICK")
+                              (bg-msg {:command (if user "sign-out" "sign-in")}))}]
+     [:small
+      [:p {:class "alignRight", :id "versionString"}
+       "VuAgain v0.2.0"]]]))
 
 (defn popup []
   (fn []
     [:div
-     [top-bar]
+     [header-bar]
      [:div {:class "container"}
       [warning-bar]
       (if (<sub [::fb/user])
