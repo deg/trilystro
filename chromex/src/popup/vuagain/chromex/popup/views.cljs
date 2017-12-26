@@ -83,7 +83,7 @@
           [nax/labelled-field
            :label "Visibility:"
            :content [sa/Checkbox {:label "Public"
-                                  :default-checked public?
+                                  :checked public?
                                   :on-change (na/value->event-fn [::fsm/update-page-param-val :public?] {:default false})}]]
           (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
             [:span
