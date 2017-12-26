@@ -197,7 +197,9 @@
        (:email user))))
 
 
-(defn lystro-commit-event [db {:keys [firebase-id tags url text owner public? original-public?] :as lystro}]
+(defn lystro-commit-event [db
+                           {:keys [firebase-id tags url text owner public? original-public?] :as lystro}
+                           & {:keys [on-success]}]
   (let [exists? (some? firebase-id)
         changed-access? (and exists?
                              (some? original-public?)
@@ -207,20 +209,23 @@
                :effect-type (if exists? :firebase/write :firebase/push)
                :path (if exists? [:lystros firebase-id] [:lystros])
                :access (if public? :shared :private)
-               :on-success #(when changed-access?
-                              ;; Private and public lystros are stored in different branches of the
-                              ;; Firebase tree. So, if the access has changed, we need to explicitly
-                              ;; delete the old one. To be safe, we only do so here, on success of
-                              ;; writing the new one.
-                              ;; [TODO][ch153] This whole thing should really be moved into a Firebase
-                              ;; transaction. We are not protected against the broader set of problems
-                              ;; that two clients might be modifying the same Lystro simultaneously
-                              ;; so we need to check for any changes before writing. If done right,
-                              ;; the access stuff should fall out nicely. See
-                              ;; https://stackoverflow.com/questions/42183179/firebase-atmonic-add-and-delete-entry
-                              ;; and
-                              ;; https://firebase.google.com/docs/database/web/read-and-write#save_data_as_transactions
-                              (>evt [::clear-lystro (assoc lystro :public? original-public?)]))
+               :on-success #(do
+                              (when changed-access?
+                                ;; Private and public lystros are stored in different branches of the
+                                ;; Firebase tree. So, if the access has changed, we need to explicitly
+                                ;; delete the old one. To be safe, we only do so here, on success of
+                                ;; writing the new one.
+                                ;; [TODO][ch153] This whole thing should really be moved into a Firebase
+                                ;; transaction. We are not protected against the broader set of problems
+                                ;; that two clients might be modifying the same Lystro simultaneously
+                                ;; so we need to check for any changes before writing. If done right,
+                                ;; the access stuff should fall out nicely. See
+                                ;; https://stackoverflow.com/questions/42183179/firebase-atmonic-add-and-delete-entry
+                                ;; and
+                                ;; https://firebase.google.com/docs/database/web/read-and-write#save_data_as_transactions
+                                (>evt [::clear-lystro (assoc lystro :public? original-public?)]))
+                              (when on-success
+                                (on-success)))
                :value {:tags tags
                        :url (str url)
                        :text (str text)
@@ -231,10 +236,13 @@
 (re-frame/reg-event-fx
  ::commit-lystro
  [db/check-spec-interceptor]
- (fn [{db :db} [_ {:keys [firebase-id tags url text owner public? original-public?] :as lystro}]]
-   (console :log "In ::commit-lystro: "     (lystro-commit-event db lystro))
+ (fn [{db :db} [_
+                {:keys [firebase-id tags url text owner public? original-public?] :as lystro}
+                & {:keys [on-success]}
+                ]]
+   (console :log "In ::commit-lystro: " (lystro-commit-event db lystro))
    (assoc
-    (lystro-commit-event db lystro)
+    (lystro-commit-event db lystro :on-success on-success)
     :dispatch [::commit-user-setting :default-public? public?])))
 
 
