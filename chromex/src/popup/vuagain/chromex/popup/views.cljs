@@ -118,6 +118,10 @@
                  :on-click #(do
                               (console :log "GOT CLICK")
                               (bg-msg {:command (if user "sign-out" "sign-in")}))}]
+     [na/button {:class-name "btn",
+                 :id "open-VuAgain"
+                 :content "full VuAgain"
+                 :on-click #(js/window.open "http://trilystro.vuagain.com")}]
      [:small
       [:p {:class "alignRight", :id "versionString"}
        "VuAgain v0.2.0"]]]))
