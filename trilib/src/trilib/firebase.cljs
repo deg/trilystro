@@ -238,12 +238,9 @@
  [db/check-spec-interceptor]
  (fn [{db :db} [_
                 {:keys [firebase-id tags url text owner public? original-public?] :as lystro}
-                & {:keys [on-success]}
-                ]]
-   (console :log "In ::commit-lystro: " (lystro-commit-event db lystro))
-   (assoc
-    (lystro-commit-event db lystro :on-success on-success)
-    :dispatch [::commit-user-setting :default-public? public?])))
+                & {:keys [on-success]}]]
+   (assoc (lystro-commit-event db lystro :on-success on-success)
+          :dispatch [::commit-user-setting :default-public? public?])))
 
 
 (re-frame/reg-event-fx
@@ -408,4 +405,14 @@
  (fn [_ [_ tags]]
    (let [old-tags (<sub [::all-tags])]
      (clojure.set/difference (set tags) (set old-tags)))))
+
+;; [TODO] Really, I think, this should filter within Firebase, rather than retrieving
+;; all. But I don't know the syntax yet, and this might be premature optimization, so
+;; let's leave well enough alone for now.
+(re-frame/reg-sub
+ ::lystros-of-url
+ :<- [::lystros]
+ (fn [lystros [_ url]]
+   (filter #(and url (= (:url %) url))
+           lystros)))
 
