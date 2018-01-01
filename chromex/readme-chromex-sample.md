@@ -67,18 +67,29 @@ java, maven, leiningen, etc.
 lein release
 ```
 
-This will build an optimized build into [resources/release](resources/release). You can add this folder via "Load unpacked extension..."
-to test it.
+This will build an optimized build into [resources/release](resources/release).  Then go
+to chrome://extensions, enable developer mode, and click on `"LOAD UNPACKED".  Choose
+the entire release directory, and you are good to go. (To avoid confusion, best to first
+unload or disable the dev version).
 
-When satisfied, you can run:
-```bash
-lein package
-```
+When satisfied, you can create a releasable build.
 
-This will create a folder `releases/chromex-sample-0.1.0` where 0.1.0 will be current version from [project.clj](project.clj).
-This folder will contain only files meant to be packaged.
+First update the package version. This is still a bit awkward. You need to:
+- Set the version in project.clj. It is not strictly required that this be a non
+  -SNAPSHOT version, but doing so will make the tooling easier and smoother to use
+  (mostly by ensuring that you don't feed two versions with the same identity to
+  Google).
+- Set the version in resources/release/manifest.json to match
+- Run: `lein package`. This will create a directory under releases, with a name matching
+  the release version.
+- You can then use "Pack Extension" (on the extensions page) to create a `.crx` and
+  `.pem` package. But, you probably won't need this, unless you need to distribute
+  private releases. See https://developer.chrome.com/apps/packaging
+- Rather, you should zip the directory and go to the [Chrome Developer
+  Dashboard](https://chrome.google.com/webstore/developer/dashboard) to put the app up
+  in the store (either privately or publicly visible). You can either `Add New Item` or,
+  after the first time, `Edit` the existing entry.
 
-Finally you can use Chrome's "Pack extension" tool to prepare the final package (.crx and .pem files).
 
 ### Code discussion
 
@@ -114,13 +125,18 @@ Let's start with [popup button code](src/popup/chromex_sample/popup/core.cljs):
   (connect-to-background-page!))
 ```
 
-When a popup button is clicked, Chrome creates a new javascript context and runs our code by calling `init!`.
-At this point we call [`runtime/connect`](https://developer.chrome.com/extensions/runtime#method-connect) to connect to our background page.
-We get a `background-port` back which is a wrapper of [`runtime.Port`](https://developer.chrome.com/extensions/runtime#type-Port).
-`background-port` implements chromex protocol [`IChromePort`](https://github.com/binaryage/chromex/blob/master/src/lib/chromex/chrome_port.cljs)
-which we can use to `post-message!` to our background page. `background-port` also implements `core-async/ReadPort` so we can treat
-it as a core.async channel for reading incoming messages sent by our background page. You can see that implemented in `run-message-loop!`
-which takes messages off the channel and simply prints them into console (in `process-message!`).
+When a popup button is clicked, Chrome creates a new javascript context and runs our
+code by calling `init!`.  At this point we call
+[`runtime/connect`](https://developer.chrome.com/extensions/runtime#method-connect) to
+connect to our background page.  We get a `background-port` back which is a wrapper of
+[`runtime.Port`](https://developer.chrome.com/extensions/runtime#type-Port).
+`background-port` implements chromex protocol
+[`IChromePort`](https://github.com/binaryage/chromex/blob/master/src/lib/chromex/chrome_port.cljs)
+which we can use to `post-message!` to our background page. `background-port` also
+implements `core-async/ReadPort` so we can treat it as a core.async channel for reading
+incoming messages sent by our background page. You can see that implemented in
+`run-message-loop!` which takes messages off the channel and simply prints them into
+console (in `process-message!`).
 
 ##### Marshalling
 
