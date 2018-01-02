@@ -78,10 +78,11 @@
        [:div
         (corner "tags" "left" :tags-as-text?)
         (corner "linkify" "right" :url-as-text?)
-        [na/text-area {:rows 3
-                       :placeholder "Description..."
-                       :value     (<sub      [getter :text] "")
-                       :on-change (na/value->event-fn [setter :text])}]])]))
+        [nax/native-text-area
+         {:rows 3
+          :placeholder "Description..."
+          :value      (<sub [getter :text] "")
+          :on-change #(>evt [setter :text (-> % .-target .-value)])}]])]))
 
 
 (defn lystro-results-panel

@@ -71,10 +71,11 @@
                                       :set-selected-tags-event #(swap! lystro-atom assoc :tags %)}]]
             [nax/labelled-field
              :label "Text:"
-             :content [:input {:rows 3
-                               :placeholder "Description..."
-                               :value (or (:text @lystro-atom) "")
-                               :on-change #(swap! lystro-atom assoc :text (-> % .-target .-value))}]]
+             :content [nax/native-text-area
+                       {:rows 3
+                        :placeholder "Description..."
+                        :value (or (:text @lystro-atom) "")
+                        :on-change #(swap! lystro-atom assoc :text (-> % .-target .-value))}]]
             [nax/labelled-field
              :label "Visibility:"
              :content [sa/Checkbox {:label "Public"

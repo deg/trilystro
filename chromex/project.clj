@@ -1,4 +1,4 @@
-(defproject vuagain-chromex "0.2.0"
+(defproject vuagain-chromex "0.3.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
