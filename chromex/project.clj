@@ -3,12 +3,15 @@
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
                  [binaryage/chromex "0.5.14"]
+                 [binaryage/oops "0.5.8"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
+                 [environ "1.1.0"]
                  [figwheel "0.5.14"]
-                 [reagent "0.7.0"]
+                 [hipo "0.5.2"]
+                 [prismatic/dommy "1.1.0"]
                  [re-frame "0.10.2"]
                  [re-frame-utils "0.1.0"]
-                 [environ "1.1.0"]
+                 [reagent "0.7.0"]
                  [com.degel/iron "0.2.0-SNAPSHOT"]
                  [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]
                  [com.degel/sodium "0.10.0-SNAPSHOT"]
@@ -52,6 +55,9 @@
                                            :external-config      {:devtools/config {:features-to-install :all}}
                                            :main          vuagain.chromex.background
                                            :language-in :ecmascript5
+                                           ;; [TODO] Eventually, turn on checked-arrays. But breaks too many libs now
+                                           ;;        See: https://clojurescript.org/news/2017-07-14-checked-array-access
+                                           ;; :checked-arrays :warn
                                            :optimizations :none
                                            :source-map    true}}
                            :popup
@@ -68,6 +74,7 @@
                                            :external-config {:devtools/config {:features-to-install :all}}
                                            :main          vuagain.chromex.popup
                                            :language-in :ecmascript5
+                                           ;;:checked-arrays :warn
                                            :optimizations :none
                                            :source-map    true}}}}}
              :unpacked-content-script
@@ -83,6 +90,7 @@
                                            :asset-path    "compiled/content-script"
                                            :main          vuagain.chromex.content-script
                                            :language-in :ecmascript5
+                                           ;;:checked-arrays :warn
                                            ;:optimizations :whitespace ; content scripts cannot do eval / load script dynamically
                                            :optimizations :advanced    ; let's use advanced build with pseudo-names for now, there seems to be a bug in deps ordering under :whitespace mode
                                            :closure-defines {goog.DEBUG false}
@@ -128,6 +136,7 @@
                                            :asset-path    "compiled/background"
                                            :main          vuagain.chromex.background
                                            :language-in   :ecmascript5
+                                           ;;:checked-arrays :warn
                                            :optimizations :advanced
                                            :closure-defines {goog.DEBUG false}
                                            :elide-asserts true}}
@@ -138,6 +147,7 @@
                                            :asset-path    "compiled/popup"
                                            :main          vuagain.chromex.popup
                                            :language-in   :ecmascript5
+                                           ;;:checked-arrays :warn
                                            :optimizations :advanced
                                            :closure-defines {goog.DEBUG false}
                                            :elide-asserts true}}
@@ -148,6 +158,7 @@
                                            :asset-path    "compiled/content-script"
                                            :main          vuagain.chromex.content-script
                                            :language-in :ecmascript5
+                                           ;;:checked-arrays :warn
                                            :optimizations :advanced
                                            :closure-defines {goog.DEBUG false}
                                            :elide-asserts true}}}}}}

@@ -6,6 +6,7 @@
    [clojure.set :as set]
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
+   [lambdaisland.uri :as uri]
    [re-frame.core :as re-frame]
    [re-frame.loggers :refer [console]]
    [vimsical.re-frame.cofx.inject :as inject]
@@ -80,6 +81,19 @@
    (or (:display-name user) (:email user))))
 
 
+
+(re-frame/reg-event-fx
+ ::poor-mans-set-user
+ (fn [{db :db} [_ user]]
+   (into {:db (assoc db ::user user)}
+         (when user
+           ;; [TODO][ch94] Should rename :user-details to :users-details in Firebase.
+           ;;    Requires a migration hack.
+           {:firebase/write {:path       (my-shared-fb-path [:user-details] (:uid user))
+                             :value      (into {:timestamp timestamp-marker}
+                                               (select-keys user [:display-name :email :photo-url]))
+                             :on-success #(console :log "Logged in:" (:display-name user))
+                             :on-failure #(console :error "Login failure: " %)}}))))
 
 (re-frame/reg-event-fx
  ::set-user
@@ -363,6 +377,7 @@
  ;; +   [(re-frame/subscribe [:firebase/on-value {:path (all-shared-fb-path [:lystros])}])
  ;; +    (re-frame/subscribe [:firebase/on-value {:path (private-fb-path [:lystros])}])])
  (fn [_ _]
+   (console :log "PATHS: " (all-shared-fb-path [:lystros]) (private-fb-path [:lystros]))
    [(re-frame/subscribe [:firebase/on-value {:path (all-shared-fb-path [:lystros])}])
     (re-frame/subscribe [:firebase/on-value {:path (private-fb-path [:lystros])}])])
  (fn [[shared-lystros private-lystros] [_ {:keys [tags-mode tags url text tags-as-text? url-as-text?] :as options}] _]
@@ -406,6 +421,20 @@
    (let [old-tags (<sub [::all-tags])]
      (clojure.set/difference (set tags) (set old-tags)))))
 
+
+
+(defn normalize-url [url]
+  (if (string? url)
+    (uri/parse url)
+    url))
+
+(defn url= [url1 url2]
+  (let [url1 (normalize-url url1)
+        url2 (normalize-url url2)]
+    (and (= (:host url1) (:host url2))
+         (= (:path url1) (:path url2)))))
+
+
 ;; [TODO] Really, I think, this should filter within Firebase, rather than retrieving
 ;; all. But I don't know the syntax yet, and this might be premature optimization, so
 ;; let's leave well enough alone for now.
@@ -413,6 +442,8 @@
  ::lystros-of-url
  :<- [::lystros]
  (fn [lystros [_ url]]
-   (filter #(and url (= (:url %) url))
+   ;; [TODO] Keep this logging here until I fix spurious zero counts
+   (console :log "::LYSTROS-OF-URL:" (count lystros) url)
+   (filter #(and url (url= (:url %) url))
            lystros)))
 

@@ -1,22 +1,24 @@
 (ns vuagain.chromex.background.core
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
-  (:require [cljs.core.async :refer [<! chan]]
-            [chromex.logging :refer-macros [log info warn error group group-end]]
-            [chromex.chrome-event-channel :refer [make-chrome-event-channel]]
-            [chromex.protocols :refer [post-message! get-sender]]
-            [chromex.ext.tabs :as tabs]
-            [chromex.ext.runtime :as runtime]
-            [com.degel.re-frame-firebase :as firebase]
-            [com.degel.re-frame-firebase.auth :as auth]))
+  (:require
+   [chromex.chrome-event-channel :refer [make-chrome-event-channel]]
+   [chromex.ext.runtime :as runtime]
+   [chromex.ext.tabs :as tabs]
+   [chromex.logging :refer-macros [log info warn error group group-end]]
+   [chromex.protocols :refer [post-message! get-sender]]
+   [cljs.core.async :refer [<! chan]]
+   [com.degel.re-frame-firebase :as firebase]
+   [com.degel.re-frame-firebase.auth :as auth]
+   [iron.re-utils :as re-utils :refer [sub2 <sub >evt]]
+   [re-frame.core :as re-frame]
+   [re-frame.loggers :refer [console]]
+   [trilib.firebase :as fb]))
 
 
 ;;; All connected clients (popup or content script)
 (defonce clients (atom []))
 
 ;;; -- Firebase authentication ----------------
-
-;;; User, as identified by Firebase
-(defonce logged-in-user (atom nil))
 
 (defonce firebase-app-info
   {:apiKey "AIzaSyDlGqaASOVO2nqFGG35GiUjOgFF2vvntyk"
@@ -33,7 +35,7 @@
   "Initialize Firebase interface"
   []
   (firebase/init :firebase-app-info      firebase-app-info
-                 :get-user-sub           (fn [] @logged-in-user)
+                 :get-user-sub           [::fb/user]
                  :set-user-event         set-user
                  :default-error-handler  firebase-error))
 
@@ -61,11 +63,22 @@
 
 
 (defn user-message []
-  {:user @logged-in-user})
+  {:command "got-user"
+   :user (<sub [::fb/user])})
 
 
 (defn set-user [user]
-  (reset! logged-in-user user)
+  (re-frame/dispatch-sync [::fb/poor-mans-set-user user])
+
+  ;; [TODO] This is pretty hokey.
+  ;; We are calling the subscription here to persuade Firebase to load it into memory.
+  ;; But, I don't really understand the rules, and I suspect this will be much cleaner
+  ;; if we talk to Firebase without going through the re-frame hoops. So, fix someday,
+  ;; presumably when we get both the client and the popup to use the background process
+  ;; for all Firebase access.  (?? But, how does that play on mobile and other platforms
+  ;; besides Chrome Desktop).
+  (when user (<sub [::fb/lystros]))
+
   (msg->all-clients (user-message)))
 
 
@@ -86,16 +99,27 @@
 
 
 (defn dispatch-message
-  "Send a VuAgain message"
-  [this-client message]
-  (when (and (map? message)
+  "Process a VuAgain request from popup or content script"
+  [client message]
+  (let [client-url (-> client get-sender js->clj (get "url"))]
+    (if (and (map? message)
              (= (:app message) "VuAgain"))
-    (log "CLIENT: " this-client)
-    (case (:command message)
-      "sign-in"  (google-sign-in)
-      "sign-out" (sign-out)
-      "user"     (msg->client this-client (user-message))
-      (error "Unknown message:" (:command message)))))
+      (case (:command message)
+        "sign-in"  (google-sign-in)
+        "sign-out" (sign-out)
+        "user"     (msg->client client (user-message))
+        "check-url" (msg->client
+                     client
+                     (let [{:keys [url callback-params]} message]
+                       {:command "checked-url"
+                        :callback-params callback-params
+                        :lystros (<sub [::fb/lystros-of-url url])}))
+        (error "Unhandled" (:command message) "message from" client-url ": " message))
+      (console :error
+               "Received message from "
+               client-url
+               "in unknown format: "
+               message))))
 
 
 (defn run-client-message-loop!
@@ -105,7 +129,6 @@
   (add-client! client)
   (go-loop []
     (when-some [message (<! client)]
-      (log "BACKGROUND: got client message:" message #_"from" #_(get-sender client))
       (dispatch-message client (js->clj message :keywordize-keys true))
       (recur))
     (log "BACKGROUND: leaving event loop for client:" (get-sender client))

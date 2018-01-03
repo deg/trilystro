@@ -6,6 +6,7 @@
                  [org.clojure/clojurescript "1.9.946"]
                  [expound "0.3.4"]
                  [fsmviz "0.1.3"]
+                 [lambdaisland/uri "1.1.0"]
                  [re-frame "0.10.3-alpha1"]
                  [re-frame-utils "0.1.0"]
                  [com.degel/iron "0.2.0-SNAPSHOT"]
