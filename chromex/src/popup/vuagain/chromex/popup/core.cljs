@@ -23,7 +23,6 @@
     (>evt [::fb/set-user (:user (js->clj message :keywordize-keys true))])))
 
 (defn run-message-loop! [message-channel]
-  (log "POPUP: starting message loop...")
   (go-loop []
     (when-some [message (<! message-channel)]
       (process-message! message)

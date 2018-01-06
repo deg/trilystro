@@ -1,34 +1,47 @@
-# trilystro
+# Trilystro
 
-[![Dependencies Status](https://versions.deps.co/deg/trilystro/status.svg)](https://versions.deps.co/deg/trilystro)
+Trilystro is an implementation of VuAgain written in ClojureScript and
+[re-frame](https://github.com/Day8/re-frame), created with several goals in mind:
 
-Trilystro is a [re-frame](https://github.com/Day8/re-frame) application written for two purposes:
+1) It is a testbed for me to play with implementation ideas and styles, exploring and
+   enhancing:
+   * Dividing re-frame projects into single-concern libraries
+   * [Iron](https://github.com/deg/iron) - My utility library for re-frame components.
+   * [Sodium](https://github.com/deg/sodium) - A wrapper around Semantic UI, to deliver
+     a GUI that is pleasant on both desktop and mobile.
+   * [re-frame-firebase](https://github.com/deg/re-frame-firebase) - a re-frame-friendly
+     wrapper around Google's Firebase DB; using Firebase as the shared backend between
+     an SPA and a Chrome Extension, as well as an interface to Gooogle (and soon
+     Facebook) based authentication.
+   * Using augmented state machines to manage app state.
+   * Writing Chrome extensions in ClojureScript, using re-frame.
+   * Deploying dynamic SPA applications on GitHub.
+   * Including Google Ads
+   * Etc.
 
-1) It is a testbed for me to play with ideas for
-   [Sodium](https://github.com/deg/sodium), [Iron](https://github.com/deg/iron),
-   [re-frame-firebase](https://github.com/deg/re-frame-firebase), and my other utility
-   projects. Also, SPA deployment to github, linked projects, chrome extensions, etc.
+2) Continuing the work I did in the original JavaScript prototype of VuAgain. This is my
+   exploration of ways to curate information for personal use. I hope to continue to
+   expand it and play with new ideas in these directions.
 
-2) It is an exploration of ways to curate information for personal use, and play with
-   ideas I've been thinking about for a while.
 
-### Usage
+## Usage
 
-Currently, Trilystro is a tagged note-taking app. It lets your record a note about a URL
+Trilystro is a tagged note-taking app. It lets your record a note about a URL
 and mark it with tags. These notes can be private or public to the world.
-
-It shows off:
-
-- Using Sodium's Semantic-UI wrapper for a GUI that is pleasant on both desktop and mobile.
-- A Firebase backend, wrapped by re-frame-firebase
-- Chrome extensions, working with a re-frame-based project
-- Google-based authentication, powered by Firebase
-- Google ads, wrapped by Semantic-UI and Sodium
-- Using augmented finite state machines (FSMs) to manage state
-- Dividing a project into libraries
 
 A copy of Trilystro is usually running at http://trilystro.vuagain.com
 
+Trilysto also includes a Chrome Extension (not yet public on the play store, but coming soon) that:
+* Gives direct access to notes associated with the current browser tab
+* Enhances Google search results (and, soon, other pages) to hightlight URLs that have
+  notes attached.
+
+
+## Structure
 
 Subdirectories of this hold several independently compiled front-ends and libraries. For
 now, each is compiled independently and has its own README.md file.
+
+* client - the SPA
+* chromex - the chromex
+* trilib - common utilities and support

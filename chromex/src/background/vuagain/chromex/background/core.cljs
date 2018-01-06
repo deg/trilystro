@@ -125,7 +125,6 @@
 (defn run-client-message-loop!
   "Create async channel to receive messages from a client"
   [client]
-  (log "BACKGROUND: starting event loop for client:" (get-sender client))
   (add-client! client)
   (go-loop []
     (when-some [message (<! client)]
@@ -157,7 +156,6 @@
 (defn run-chrome-event-loop!
   "Listen for events from Chrome"
   [chrome-event-channel]
-  (log "BACKGROUND: starting main event loop...")
   (init-fb)
   (go-loop [event-num 1]
     (when-some [event (<! chrome-event-channel)]

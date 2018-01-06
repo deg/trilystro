@@ -10,14 +10,16 @@
             [oops.core :as oops]))
 
 
-;; [TODO] Create utility that wraps post-message! and clj->js. Expose both here and in popup
+;; [TODO] Create utility namespace with function that wraps post-message! and
+;;        clj->js. Expose both here and in popup.  Also move the rand-int call into
+;;        utility namespace. Also, checker for valid message (map? and "VuAgain")
 
 
 
-(defn match-vuid [doms vuid]
+(defn- match-vuid [doms vuid]
   (first (filter #(= vuid (oops/oget % "dataset.vuid")) doms)))
 
-(defn process-message! [message]
+(defn- process-message! [message]
   (if (and (map? message)
            (= (:app message) "VuAgain"))
     (case (:command message)
@@ -33,17 +35,13 @@
     (console :error "Received message from background in unknown format: " message)))
 
 (defn run-message-loop! [message-channel]
-  ;;(log "CONTENT SCRIPT: starting message loop...")
   (go-loop []
     (when-some [message (<! message-channel)]
       (process-message! (js->clj message :keywordize-keys true))
-      (recur))
-    ;;(log "CONTENT SCRIPT: leaving message loop")
-    ))
+      (recur))))
 
-; -- a simple page analysis  ------------------------------------------------------------------------------------------------
 
-(defn do-page-analysis! [background-port]
+(defn find-urls! [background-port]
   (let []
     (run! (fn [section]
             (let [url (.-href (sel1 section "h3 a"))
@@ -57,12 +55,10 @@
 
 (defn connect-to-background-page! []
   (let [background-port (runtime/connect)]
-    (post-message! background-port "hello from CONTENT SCRIPT!")
     (run-message-loop! background-port)
-    (do-page-analysis! background-port)))
+    (find-urls! background-port)))
 
 ; -- main entry point -------------------------------------------------------------------------------------------------------
 
 (defn init! []
-  (log "CONTENT SCRIPT: init")
   (connect-to-background-page!))

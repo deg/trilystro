@@ -377,7 +377,6 @@
  ;; +   [(re-frame/subscribe [:firebase/on-value {:path (all-shared-fb-path [:lystros])}])
  ;; +    (re-frame/subscribe [:firebase/on-value {:path (private-fb-path [:lystros])}])])
  (fn [_ _]
-   (console :log "PATHS: " (all-shared-fb-path [:lystros]) (private-fb-path [:lystros]))
    [(re-frame/subscribe [:firebase/on-value {:path (all-shared-fb-path [:lystros])}])
     (re-frame/subscribe [:firebase/on-value {:path (private-fb-path [:lystros])}])])
  (fn [[shared-lystros private-lystros] [_ {:keys [tags-mode tags url text tags-as-text? url-as-text?] :as options}] _]
