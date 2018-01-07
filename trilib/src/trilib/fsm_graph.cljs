@@ -37,7 +37,7 @@
 (defn- node-name
   "For some reason, fsmviz loses hyphens in node names"
   [key]
-  (str/replace (name key) #"-" "_"))
+  (keyword (str/replace (name key) #"-" "_")))
 
 
 (defn- graph-triple [type source edge sink]

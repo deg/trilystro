@@ -45,13 +45,13 @@
       on the tags adds or removes them from the current search. Clicking on the URL
       follows the link."]
     [:div {:class "about"}
-     "The export all and export current buttons at the bottom of the page generate
+     "The Export All and Export Current buttons at the bottom of the page generate
       an EDN representation of the Lystros. You can cut-n-paste to save externally."]
     [:div {:class "about"}
      "(Mostly for my own amusement/debugging), the following is the FSM navigated
      by the app."]
     (fsm-graph/render-graph (<sub [::fsm/page-graph]))
-    [:div {:class "credits"} "Copyright (c) 2017, David Goldfarb (deg@degel.com)"]
+    [:div {:class "credits"} "Copyright \u00A9 2017-8, David Goldfarb (deg@degel.com)"]
     [:div {:class "credits"}
      (let [{:keys [commit date]} (<sub [:git-commit])]
        (str "This version built from GIT commit: " commit " of " date))]]])
