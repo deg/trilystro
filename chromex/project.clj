@@ -1,4 +1,4 @@
-(defproject vuagain-chromex "0.3.0-SNAPSHOT"
+(defproject vuagain-chromex "0.2.1"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
@@ -15,7 +15,7 @@
                  [com.degel/iron "0.2.0-SNAPSHOT"]
                  [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]
                  [com.degel/sodium "0.10.0-SNAPSHOT"]
-                 [trilib "0.1.0-SNAPSHOT"]]
+                 [trilib "0.2.1-SNAPSHOT"]]
 
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-figwheel "0.5.14"]
