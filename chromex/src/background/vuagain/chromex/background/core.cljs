@@ -110,11 +110,10 @@
         "user"     (msg->client client (user-message))
         "check-url" (msg->client
                      client
-                     (let [{:keys [url callback-params]} message]
-                       {:command "checked-url"
-                        :callback-params callback-params
-                        :lystros (<sub [::fb/lystros-of-url url])}))
-        (error "Unhandled" (:command message) "message from" client-url ": " message))
+                     {:command "checked-url"
+                      :callback-params (:callback-params message)
+                      :lystros (<sub [::fb/lystros-of-url (:url message)])})
+        (error "Unhandled" (:command message) "message from" client-url": " message))
       (console :error
                "Received message from "
                client-url

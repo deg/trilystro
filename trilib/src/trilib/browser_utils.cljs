@@ -1,5 +1,5 @@
 ;;; Author: David Goldfarb (deg@degel.com)
-;;; Copyright (c) 2017, David Goldfarb
+;;; Copyright (c) 2017-8, David Goldfarb
 
 (ns trilib.browser-utils
   "Browser/chrome/closure utilities"
@@ -15,4 +15,3 @@
   (when debug?
     (enable-re-frisk!)
     (println "dev mode")))
-
