@@ -45,3 +45,18 @@ now, each is compiled independently and has its own README.md file.
 * client - the SPA
 * chromex - the chromex
 * trilib - common utilities and support
+
+## Build/release instructions (interim)
+
+Until we add some more scripting automation, the steps are manual and tedious:
+
+- Ensure that we are not using any -SNAPSHOT dependencies. Check, especially, the three
+  support libraries we are currently using: iron, sodium, and re-frame-firebase. Also
+  look at the three projects in here: client, chromex, and trilib.
+- Upgrade version numbers of the three projects to match the release number
+- Upgrade version numbers in the two manifest files, in chromex/resources/*/
+- Upgrade version number in popup window (in chromex/src/popup/vuagain/chromex/popup)
+- Check in all changes, and tag build _before_ building (so it is captured in about
+  info)
+- build and release chromex and client, per their instructions
+

@@ -1,4 +1,4 @@
-(defproject trilib "0.2.1-SNAPSHOT"
+(defproject trilib "0.3.0"
   :description "Trilystro common code"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -9,8 +9,8 @@
                  [lambdaisland/uri "1.1.0"]
                  [re-frame "0.10.3-alpha1"]
                  [re-frame-utils "0.1.0"]
-                 [com.degel/iron "0.2.0-SNAPSHOT"]
-                 [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]]
+                 [com.degel/iron "0.2.0"]
+                 [com.degel/re-frame-firebase "0.5.0"]]
   :plugins [[lein-cljsbuild "1.1.7"]]
   :cljsbuild
   {:builds

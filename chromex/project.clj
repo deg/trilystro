@@ -1,4 +1,4 @@
-(defproject vuagain-chromex "0.2.1"
+(defproject vuagain-chromex "0.3.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
@@ -12,10 +12,10 @@
                  [re-frame "0.10.2"]
                  [re-frame-utils "0.1.0"]
                  [reagent "0.7.0"]
-                 [com.degel/iron "0.2.0-SNAPSHOT"]
-                 [com.degel/re-frame-firebase "0.5.0-SNAPSHOT"]
-                 [com.degel/sodium "0.10.0-SNAPSHOT"]
-                 [trilib "0.2.1-SNAPSHOT"]]
+                 [com.degel/iron "0.2.0"]
+                 [com.degel/re-frame-firebase "0.5.0"]
+                 [com.degel/sodium "0.10.0"]
+                 [trilib "0.3.0"]]
 
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-figwheel "0.5.14"]
