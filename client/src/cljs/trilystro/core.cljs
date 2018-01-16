@@ -49,7 +49,7 @@
 (defn ^:export init []
   (re-frame/dispatch-sync [::initialize-db])
   (dev-setup)
-  (fb/init)
+  (fb/init :sandbox :production)
   (mount-root))
 
 

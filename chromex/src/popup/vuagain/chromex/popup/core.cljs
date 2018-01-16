@@ -73,6 +73,6 @@
   (re-frame/dispatch-sync [::initialize-db])
   (dev-setup)
   (>evt [:set-background-port (connect-to-background-page!)])
-  (fb/init)
+  (fb/init :sandbox :production)
   (set-current-tab)
   (mount-root))

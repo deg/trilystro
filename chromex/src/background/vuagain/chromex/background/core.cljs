@@ -31,13 +31,18 @@
 
 (declare set-user)
 
+;;; [TODO] Merge with trilib.firebase/init
 (defn init-fb
   "Initialize Firebase interface"
-  []
-  (firebase/init :firebase-app-info      firebase-app-info
-                 :get-user-sub           [::fb/user]
-                 :set-user-event         set-user
-                 :default-error-handler  firebase-error))
+  [& {:keys [sandbox]}]
+  (let [app-info (case sandbox
+                   :development fb/development-firebase-app-info
+                   :production fb/production-firebase-app-info
+                   (console :error "No Firebase database specified"))]
+    (firebase/init :firebase-app-info      app-info
+                   :get-user-sub           [::fb/user]
+                   :set-user-event         set-user
+                   :default-error-handler  firebase-error)))
 
 
 (defn google-sign-in
@@ -155,7 +160,7 @@
 (defn run-chrome-event-loop!
   "Listen for events from Chrome"
   [chrome-event-channel]
-  (init-fb)
+  (init-fb :sandbox :production)
   (go-loop [event-num 1]
     (when-some [event (<! chrome-event-channel)]
       (process-chrome-event event-num event)

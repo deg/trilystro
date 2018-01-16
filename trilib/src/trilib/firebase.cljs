@@ -28,24 +28,41 @@
 (s/def ::db-keys (s/keys :req [::user]))
 
 
-;;; From https://console.firebase.google.com/u/0/project/trilystro/overview - "Add Firebase to your web app"
-(defonce firebase-app-info
+;;; From https://console.firebase.google.com/u/0/project/trilystro/overview
+;;; - "Add Firebase to your web app".
+;;; Note that :storageBucket will be empty until you click on "Storage" in the dashboard
+;;; and let it initialize. See
+;;; https://stackoverflow.com/questions/37397041/how-do-i-get-storagebucket-in-firebase-to-generate
+
+(defonce development-firebase-app-info
   {:apiKey "AIzaSyDlGqaASOVO2nqFGG35GiUjOgFF2vvntyk"
    :authDomain "trilystro.firebaseapp.com"
    :databaseURL "https://trilystro.firebaseio.com"
    :storageBucket "trilystro.appspot.com"})
+
+(defonce production-firebase-app-info
+  {:apiKey "AIzaSyDBwGeqF7C2v5JE46AAAux3vPEmNWMVOJQ"
+   :authDomain "vuagain.firebaseapp.com"
+   :databaseURL "https://vuagain.firebaseio.com"
+   :storageBucket "vuagain.appspot.com"})
+
 
 ;;; Magic Firebase object that the server translates into a timestamp
 (defonce timestamp-marker
   (-> js/firebase .-database .-ServerValue .-TIMESTAMP))
 
 
-(defn init []
-  (re-frame/dispatch-sync [:trilib.fsm/goto :try-login])
-  (firebase/init :firebase-app-info      firebase-app-info
-                 :get-user-sub           [::user]
-                 :set-user-event         [::set-user]
-                 :default-error-handler  [:firebase-error]))
+(defn init [& {:keys [sandbox]}]
+  (console :log "SANDBOX: " sandbox)
+  (let [app-info (case sandbox
+                   :development development-firebase-app-info
+                   :production production-firebase-app-info
+                   (console :error "No Firebase database specified"))]
+    (re-frame/dispatch-sync [:trilib.fsm/goto :try-login])
+    (firebase/init :firebase-app-info      app-info
+                   :get-user-sub           [::user]
+                   :set-user-event         [::set-user]
+                   :default-error-handler  [:firebase-error])))
 
 (defn private-fb-path
   ([path]
@@ -65,11 +82,6 @@
   ([path uid]
    (when uid
      (into [:shared (first path) uid] (rest path)))))
-
-(defn public-fb-path [path]
-  (if-let [uid (<sub [::uid])]
-    (into [:public] path)))
-
 
 (sub2 ::user [::user])
 (sub2 ::uid  [::user :uid])
@@ -128,24 +140,12 @@
    (js/console.error (str "FIREBASE ERROR:\n" error))))
 
 
-(re-frame/reg-event-fx
- :db-write-public
- [db/check-spec-interceptor]
- (fn [{db :db} [_ {:keys [path value on-success on-failure] :as args}]]
-   (if-let [path (public-fb-path path)]
-     {:firebase/write (assoc args :path path)}
-
-     ;; [TODO] Need to use pending Iron generalization of :dispatch that takes a fn too.
-     ((if on-failure (re-utils/event->fn on-failure) js/alert)
-      (str "Can't write to Firebase, because not logged in:\n " path ": " value)))))
-
 (defn logged-in? [db]
   (some? (get-in db [::user :uid])))
 
 (defn fb-event [{:keys [db path value on-success on-failure access effect-type for-multi?] :as args}]
   (if (logged-in? db)
     (let [path ((case access
-                  :public public-fb-path
                   :shared my-shared-fb-path
                   :private private-fb-path
                   identity) path)

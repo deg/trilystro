@@ -1,13 +1,5 @@
 {
   "rules": {
-    "public": {
-      ".read": true,
-      "tags": {
-        "$tag_entry": {
-          ".write": " !data.exists()"
-        }
-      }
-    },
     "shared": {
       ".read": true,
       "lystros":      { "$uid": { ".write": "$uid === auth.uid" } },
