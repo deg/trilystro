@@ -2,12 +2,12 @@
   "rules": {
     "shared": {
       ".read": true,
-      "lystros":      { "$uid": { ".write": "$uid === auth.uid" } },
-      "user-details": { "$uid": { ".write": "$uid === auth.uid" } }
+      "lystros":       { "$uid": { ".write": "$uid === auth.uid" } },
+      "users-details": { "$uid": { ".write": "$uid === auth.uid" } }
     },
     "private": {
       "$uid": {
-        ".read": "$uid === auth.uid",
+        ".read":  "$uid === auth.uid",
         ".write": "$uid === auth.uid"
       }
     }

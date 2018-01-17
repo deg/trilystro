@@ -203,7 +203,7 @@
             [(<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
              (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
              (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
-             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}]) ;; [TODO][ch94] rename
+             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:users-details])}])
              ]]
         (null-op open-state)
         [main-panel]))]])
