@@ -34,7 +34,7 @@
    [:p "You can save two kinds of notes:"]
    [:ul
     [:li "Private notes are seen only by you"]
-    [:li "Public comments can be seen by everyone"]]])
+    [:li "Shared comments can be seen by everyone"]]])
 
 (defn logged-out-page []
   [:div
@@ -52,13 +52,13 @@
   (let [partial-tag-text (reagent/atom "")]
     (fn [url lystro-atom original-lystro]
       (when-not (nil? @lystro-atom)
-        (let [default-public? (<sub [::fb/user-settings [:default-public?] false])
-              original-public? (if (nil? (:public? original-lystro))
-                                 default-public?
-                                 (:public? original-lystro))
-              public? (if (nil? (:public? @lystro-atom))
-                        default-public?
-                        (:public? @lystro-atom))
+        (let [default-shared? (<sub [::fb/user-settings [:default-shared?] false])
+              original-shared? (if (nil? (:shared? original-lystro))
+                                 default-shared?
+                                 (:shared? original-lystro))
+              shared? (if (nil? (:shared? @lystro-atom))
+                        default-shared?
+                        (:shared? @lystro-atom))
               action (if (empty? original-lystro) "Add" "Edit")]
           [na/form {:class-name "spaPage", :id "vaForm"}
            [:div {:class "form-group"}
@@ -79,9 +79,9 @@
                         :on-change #(swap! lystro-atom assoc :text (-> % .-target .-value))}]]
             [nax/labelled-field
              :label "Visibility:"
-             :content [sa/Checkbox {:label "Public"
-                                    :checked public?
-                                    :on-change (na/value->atom-fn lystro-atom {:default false :assoc-path [:public?]})}]]
+             :content [sa/Checkbox {:label "Shared"
+                                    :checked shared?
+                                    :on-change (na/value->atom-fn lystro-atom {:default false :assoc-path [:shared?]})}]]
             (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
               [:span
                [na/form-button {:on-click #(js/window.close) :content "Cancel"}]
@@ -92,12 +92,12 @@
                                             (>evt [::fb/commit-lystro (assoc @lystro-atom
                                                                              :url (<sub [:url])
                                                                              :owner (<sub [::fb/uid])
-                                                                             :original-public? original-public?
-                                                                             :public? public?)
+                                                                             :original-shared? original-shared?
+                                                                             :shared? shared?)
                                                    :on-success #(js/window.close)]))
                                 :icon (if connected? "add" "wait")
                                 :content (if connected?
-                                           (str "Save " (if public? "public" "private"))
+                                           (str "Save " (if shared? "shared" "private"))
                                            "(offline)")
                                 :positive? true}]])]])))))
 
@@ -145,7 +145,7 @@
             [(<sub [:firebase/on-value {:path (fb/private-fb-path [:lystros])}])
              (<sub [:firebase/on-value {:path (fb/private-fb-path [:user-settings])}])
              (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:lystros])}])
-             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:user-details])}]) ;; [TODO][ch94] rename
+             (<sub [:firebase/on-value {:path (fb/all-shared-fb-path [:users-details])}])
              ]
 
             url (<sub [:url])

@@ -22,11 +22,11 @@
               edit? (<sub [::fsm/in-page? :modal-edit-lystro])
               lystro (when (or new? edit?)
                        (<sub [::fsm/page-param]))
-              original-public? (:original-public? lystro)
-              public-checked? (:public? lystro)
-              public? (if (nil? public-checked?)
-                        (<sub [::fb/user-settings [:default-public?] false])
-                        public-checked?)]
+              original-shared? (:original-shared? lystro)
+              shared-checked? (:shared? lystro)
+              shared? (if (nil? shared-checked?)
+                        (<sub [::fb/user-settings [:default-shared?] false])
+                        shared-checked?)]
           [modal/modal {:open? (or new? edit?)
                         :header (cond new? "Add Lystro"
                                       edit? "Edit Lystro"
@@ -54,9 +54,9 @@
                                      :on-change (na/value->event-fn [::fsm/update-page-param-val :text])}]]
             [nax/labelled-field
              :label "Visibility:"
-             :content [sa/Checkbox {:label "Public"
-                                    :default-checked public?
-                                    :on-change (na/value->event-fn [::fsm/update-page-param-val :public?] {:default false})}]]
+             :content [sa/Checkbox {:label "Shared"
+                                    :default-checked shared?
+                                    :on-change (na/value->event-fn [::fsm/update-page-param-val :shared?] {:default false})}]]
             (let [connected? (:firebase/connected? (<sub [:firebase/connection-state]))]
               [na/form-button {:disabled? (or (not (empty? @partial-tag-text))
                                               (empty? (:text lystro))
@@ -66,10 +66,10 @@
                                                 {:dispatch
                                                  [::fb/commit-lystro (assoc lystro
                                                                             :owner (<sub [::fb/uid])
-                                                                            :original-public? original-public?
-                                                                            :public? public?)]}])
+                                                                            :original-shared? original-shared?
+                                                                            :shared? shared?)]}])
                                :icon (if connected? "add" "wait")
                                :content (if connected?
-                                          (str "Save " (if public? "public" "private"))
+                                          (str "Save " (if shared? "shared" "private"))
                                           "(offline)")
                                :positive? true}])]])))))

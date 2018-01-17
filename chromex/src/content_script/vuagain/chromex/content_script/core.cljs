@@ -70,7 +70,7 @@
   ;; [TODO]
   ;; - Show creation date
   ;; - Show owner, if not me
-  ;; - Show visibility (private or public)
+  ;; - Show visibility (private or shared)
   ;; - Nicer handling of multiple Lystros on same URL
   ;; - Think about colors
   (let [text (str "VuAgain:\n" (str/join "\n" (map :text lystros)))]

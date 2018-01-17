@@ -87,11 +87,11 @@
 
 (defn lystro-results-panel
   "Render one Lystro"
-  [{:keys [tags text url owner public?] :as lystro}]
+  [{:keys [tags text url owner shared?] :as lystro}]
   (let [mine? (= owner (<sub [::fb/uid]))
-        lystro (assoc lystro :original-public? public?)]
+        lystro (assoc lystro :original-shared? shared?)]
     [na/segment {:secondary? (not mine?)
-                 :tertiary? (not public?)
+                 :tertiary? (not shared?)
                  :class-name "lystro-result"}
      (when mine? (mini-button "delete"
                               {:on-click #(>evt (modal/goto :modal-confirm-delete lystro))}))

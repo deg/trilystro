@@ -11,9 +11,9 @@
    [trilib.fsm :as fsm]
    [trilib.modal :as modal]))
 
-(defn export-lystro [{:keys [firebase-id public? owner text url tags]}]
+(defn export-lystro [{:keys [firebase-id shared? owner text url tags]}]
   {:uid firebase-id
-   :visibility (if public? "Shared" "Private")
+   :visibility (if shared? "Shared" "Private")
    :owner (<sub [::fb/user-pretty-name owner])
    :text text
    :url url

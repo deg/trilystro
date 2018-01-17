@@ -99,9 +99,7 @@
  (fn [{db :db} [_ user]]
    (into {:db (assoc db ::user user)}
          (when user
-           ;; [TODO][ch94] Should rename :user-details to :users-details in Firebase.
-           ;;    Requires a migration hack.
-           {:firebase/write {:path       (my-shared-fb-path [:user-details] (:uid user))
+           {:firebase/write {:path       (my-shared-fb-path [:users-details] (:uid user))
                              :value      (into {:timestamp timestamp-marker}
                                                (select-keys user [:display-name :email :photo-url]))
                              :on-success #(console :log "Logged in:" (:display-name user))
@@ -114,9 +112,7 @@
    (into {:db (assoc db ::user user)
           :dispatch [:trilib.fsm/goto (if user :login-confirmed :logout)]}
          (when user
-           ;; [TODO][ch94] Should rename :user-details to :users-details in Firebase.
-           ;;    Requires a migration hack.
-           {:firebase/write {:path       (my-shared-fb-path [:user-details] (:uid user))
+           {:firebase/write {:path       (my-shared-fb-path [:users-details] (:uid user))
                              :value      (into {:timestamp timestamp-marker}
                                                (select-keys user [:display-name :email :photo-url]))
                              :on-success #(console :log "Logged in:" (:display-name user))
@@ -188,8 +184,7 @@
 (re-frame/reg-sub
  ::users-details
  (fn [_ _]
-   ;; [TODO][ch94] Rename :user-details to :users-details
-   (re-frame/subscribe [:firebase/on-value {:path (all-shared-fb-path [:user-details])}]))
+   (re-frame/subscribe [:firebase/on-value {:path (all-shared-fb-path [:users-details])}]))
  (fn [details _]
    details))
 
@@ -212,20 +207,20 @@
 
 
 (defn lystro-commit-event [db
-                           {:keys [firebase-id tags url text owner public? original-public?] :as lystro}
+                           {:keys [firebase-id tags url text owner shared? original-shared?] :as lystro}
                            & {:keys [on-success]}]
   (let [exists? (some? firebase-id)
         changed-access? (and exists?
-                             (some? original-public?)
-                             (not (= original-public? public?)))]
+                             (some? original-shared?)
+                             (not (= original-shared? shared?)))]
     (fb-event {:db db
                :for-multi? false
                :effect-type (if exists? :firebase/write :firebase/push)
                :path (if exists? [:lystros firebase-id] [:lystros])
-               :access (if public? :shared :private)
+               :access (if shared? :shared :private)
                :on-success #(do
                               (when changed-access?
-                                ;; Private and public lystros are stored in different branches of the
+                                ;; Private and shared lystros are stored in different branches of the
                                 ;; Firebase tree. So, if the access has changed, we need to explicitly
                                 ;; delete the old one. To be safe, we only do so here, on success of
                                 ;; writing the new one.
@@ -237,37 +232,37 @@
                                 ;; https://stackoverflow.com/questions/42183179/firebase-atmonic-add-and-delete-entry
                                 ;; and
                                 ;; https://firebase.google.com/docs/database/web/read-and-write#save_data_as_transactions
-                                (>evt [::clear-lystro (assoc lystro :public? original-public?)]))
+                                (>evt [::clear-lystro (assoc lystro :shared? original-shared?)]))
                               (when on-success
                                 (on-success)))
                :value {:tags tags
                        :url (str url)
                        :text (str text)
                        :owner (str owner)
-                       :public? public?
+                       :shared? shared?
                        :timestamp timestamp-marker}})))
 
 (re-frame/reg-event-fx
  ::commit-lystro
  [db/check-spec-interceptor]
  (fn [{db :db} [_
-                {:keys [firebase-id tags url text owner public? original-public?] :as lystro}
+                {:keys [firebase-id tags url text owner shared? original-shared?] :as lystro}
                 & {:keys [on-success]}]]
    (assoc (lystro-commit-event db lystro :on-success on-success)
-          :dispatch [::commit-user-setting :default-public? public?])))
+          :dispatch [::commit-user-setting :default-shared? shared?])))
 
 
 (re-frame/reg-event-fx
  ::clear-lystro
  [(re-frame/inject-cofx ::inject/sub [::uid])
   db/check-spec-interceptor]
- (fn [{db :db uid ::uid} [_ {:keys [firebase-id owner public?]} :as lystro]]
+ (fn [{db :db uid ::uid} [_ {:keys [firebase-id owner shared?]} :as lystro]]
    (let [mine? (= owner uid)]
      (when mine?
        (fb-event {:for-multi? false
                   :effect-type :firebase/write
                   :db db
-                  :access (if public? :shared :private)
+                  :access (if shared? :shared :private)
                   :path [:lystros firebase-id]
                   :value nil})))))
 
