@@ -58,5 +58,6 @@ Until we add some more scripting automation, the steps are manual and tedious:
 - Upgrade version number in popup window (in chromex/src/popup/vuagain/chromex/popup)
 - Check in all changes, and tag build _before_ building (so it is captured in about
   info)
+- `lein install` Trilib
 - build and release chromex and client, per their instructions
 

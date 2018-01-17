@@ -58,10 +58,11 @@
                                  (:public? original-lystro))
               public? (if (nil? (:public? @lystro-atom))
                         default-public?
-                        (:public? @lystro-atom))]
+                        (:public? @lystro-atom))
+              action (if (empty? original-lystro) "Add" "Edit")]
           [na/form {:class-name "spaPage", :id "vaForm"}
            [:div {:class "form-group"}
-            [:div "Add Lystro for " [:b (<sub [:title])] ", from " [:em url]]
+            [:div (str action " Lystro for ") [:b (<sub [:title])] ", from " [:em url]]
             [nax/labelled-field
              :label "Tags:"
              :inline? true
