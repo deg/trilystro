@@ -1,4 +1,4 @@
-(defproject vuagain-chromex "0.3.0"
+(defproject vuagain-chromex "0.4.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.465"]
@@ -15,7 +15,7 @@
                  [com.degel/iron "0.2.0"]
                  [com.degel/re-frame-firebase "0.5.0"]
                  [com.degel/sodium "0.10.0"]
-                 [trilib "0.3.0"]]
+                 [trilib "0.4.0"]]
 
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-figwheel "0.5.14"]
