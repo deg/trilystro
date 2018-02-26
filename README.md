@@ -31,7 +31,9 @@ and mark it with tags. These notes can be private or public to the world.
 
 A copy of Trilystro is usually running at http://trilystro.vuagain.com
 
-Trilysto also includes a Chrome Extension (not yet public on the play store, but coming soon) that:
+Trilysto also includes rudimentary
+[Chrome Extension](https://chrome.google.com/webstore/detail/vuagain/dikihecbidmmfpjjkofpcfcpdfefnilf)
+that:
 * Gives direct access to notes associated with the current browser tab
 * Enhances Google search results (and, soon, other pages) to hightlight URLs that have
   notes attached.

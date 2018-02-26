@@ -1,7 +1,7 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(defproject trilystro "0.4.1"
+(defproject trilystro "0.5.0"
   :description "A toy app to explore Firebase"
   :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"
@@ -11,16 +11,16 @@
                  [cljs-ajax "0.7.3"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [compojure "1.6.0"]
-                 [day8.re-frame/http-fx "0.1.4"]
-                 [expound "0.3.4"]
-                 [garden "1.3.3"]
+                 [day8.re-frame/http-fx "0.1.5"]
+                 [expound "0.5.0"]
+                 [garden "1.3.4"]
                  [ns-tracker "0.3.1"]
-                 [re-frame "0.10.3-alpha1"]
+                 [re-frame "0.10.5"]
                  [re-frame-utils "0.1.0"]
                  [reagent "0.7.0"]
                  [ring "1.6.3"]
                  [secretary "1.2.3"]
-                 [yogthos/config "0.9"]
+                 [yogthos/config "1.1"]
                  [com.degel/re-frame-firebase "0.5.0"]
                  [com.degel/iron "0.2.0"]
                  [com.degel/sodium "0.10.0"]
@@ -54,7 +54,7 @@
 
   :profiles
   {:dev
-   {:dependencies [[binaryage/devtools "0.9.8"]
+   {:dependencies [[binaryage/devtools "0.9.9"]
                    [figwheel-sidecar "0.5.14"]
                    [com.cemerick/piggieback "0.2.2"]
                    [re-frisk "0.5.3"]

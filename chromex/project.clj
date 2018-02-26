@@ -1,15 +1,15 @@
-(defproject vuagain-chromex "0.4.1"
+(defproject vuagain-chromex "0.5.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
-                 [org.clojure/core.async "0.3.465"]
-                 [binaryage/chromex "0.5.14"]
+                 [org.clojure/core.async "0.4.474"]
+                 [binaryage/chromex "0.5.15"]
                  [binaryage/oops "0.5.8"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [environ "1.1.0"]
                  [figwheel "0.5.14"]
                  [hipo "0.5.2"]
                  [prismatic/dommy "1.1.0"]
-                 [re-frame "0.10.2"]
+                 [re-frame "0.10.5"]
                  [re-frame-utils "0.1.0"]
                  [reagent "0.7.0"]
                  [com.degel/iron "0.2.0"]
@@ -38,7 +38,7 @@
   :cljsbuild {:builds {}} ; prevent https://github.com/emezeske/lein-cljsbuild/issues/413
 
   :profiles {:unpacked
-             {:dependencies [[binaryage/devtools "0.9.8"]
+             {:dependencies [[binaryage/devtools "0.9.9"]
                              [re-frisk "0.5.3"]]
               :cljsbuild {:builds
                           {:background

@@ -3,7 +3,7 @@
   "name": "VuAgain",
   "short_name": "VuAgain",
   "description": "Add pages to VuAgain, and show in Google search",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "browser_action": {
     "default_title": "VuAgain this page",
     "default_popup": "popup.html",
@@ -18,7 +18,7 @@
              "38":  "images/icon/icon38-trans.png",
              "48":  "images/icon/icon48-trans.png",
              "128": "images/icon/icon128-trans.png"},
-  "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://apis.google.com https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",
   "content_scripts": [
     {
       "matches": [
