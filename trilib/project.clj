@@ -1,4 +1,4 @@
-(defproject trilib "0.5.0"
+(defproject trilib "0.6.0-SNAPSHOT"
   :description "Trilystro common code"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}

@@ -82,6 +82,16 @@ The above command assumes that you have [phantomjs](https://www.npmjs.com/packag
 
 ## Production Build
 
+Deploy to my GitHub repo:
+
+```
+(only first time): ./first-deploy.sh
+./deploy.sh
+```
+
+
+Or, older approach (which may have decayed):
+
 ```
 lein clean
 lein uberjar
@@ -104,14 +114,6 @@ Then deploy the application:
 ```
 git push heroku master
 ```
-
-
-Alternatively, and now preferred, deploy to my github repo:
-
-```
-./deploy.sh
-```
-
 
 To compile clojurescript to javascript:
 

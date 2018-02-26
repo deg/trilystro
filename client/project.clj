@@ -1,7 +1,7 @@
 ;;; Author: David Goldfarb (deg@degel.com)
 ;;; Copyright (c) 2017, David Goldfarb
 
-(defproject trilystro "0.5.0"
+(defproject trilystro "0.6.0-SNAPSHOT"
   :description "A toy app to explore Firebase"
   :url "https://github.com/deg/trilystro"
   :license {:name "Eclipse Public License"

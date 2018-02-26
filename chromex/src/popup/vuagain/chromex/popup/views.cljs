@@ -126,7 +126,7 @@
                  :on-click #(js/window.open "http://trilystro.vuagain.com")}]
      [:small
       [:p {:class "alignRight", :id "versionString"}
-       "VuAgain v0.5.0"]]]))
+       "VuAgain v0.6.0-SNAPSHOT"]]]))
 
 
 ;;; We want to keep the Firebase ":on" subscriptions active, so need to mount them in the
