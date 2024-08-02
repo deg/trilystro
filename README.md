@@ -29,7 +29,7 @@ Trilystro is an implementation of VuAgain written in ClojureScript and
 Trilystro is a tagged note-taking app. It lets your record a note about a URL
 and mark it with tags. These notes can be private or public to the world.
 
-A copy of Trilystro is usually running at http://trilystro.vuagain.com
+A copy of Trilystro is usually running at http://trilystro.degel.com
 
 Trilysto also includes rudimentary
 [Chrome Extension](https://chrome.google.com/webstore/detail/vuagain/dikihecbidmmfpjjkofpcfcpdfefnilf)
